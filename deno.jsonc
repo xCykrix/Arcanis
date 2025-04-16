@@ -2,12 +2,16 @@
   "name": "@arcanis/arcanis",
   "version": "0.0.1",
   // Imports
-  "imports": {},
+  "imports": {
+    "@optic": "jsr:@onjara/optic@2.0.3",
+    "@kvdex": "jsr:@olli/kvdex@3.3.0",
+  },
   "exports": {},
   "nodeModulesDir": "none",
   // Compiler Options
   "compilerOptions": {
     "lib": [
+      "deno.window",
       "deno.ns",
       "deno.worker",
       "deno.unstable",
