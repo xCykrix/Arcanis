@@ -1,0 +1,72 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@amethyst/arcanis-database@0.0.1": "0.0.1",
+    "jsr:@olli/kvdex@3.3.0": "3.3.0",
+    "jsr:@std/bytes@^1.0.4": "1.0.5",
+    "jsr:@std/collections@^1.0.9": "1.0.10",
+    "jsr:@std/ulid@1": "1.0.0",
+    "npm:@discordeno/rest@21.0.0-next.1c20b59": "21.0.0-next.1c20b59",
+    "npm:@drashland/drash@*": "3.0.0-beta.2"
+  },
+  "jsr": {
+    "@amethyst/arcanis-database@0.0.1": {
+      "integrity": "c5cbdb4950b7060837774c63d5f86250e21a4d7edf8840457e2b9290b63f22cd",
+      "dependencies": [
+        "jsr:@olli/kvdex"
+      ]
+    },
+    "@olli/kvdex@3.3.0": {
+      "integrity": "d27cbd0a5d8233c76493be7aa45d2099f97970e07c0f62529f184bacb1e68232",
+      "dependencies": [
+        "jsr:@std/bytes",
+        "jsr:@std/collections",
+        "jsr:@std/ulid"
+      ]
+    },
+    "@std/bytes@1.0.5": {
+      "integrity": "4465dd739d7963d964c809202ebea6d5c6b8e3829ef25c6a224290fbb8a1021e"
+    },
+    "@std/collections@1.0.10": {
+      "integrity": "903af106a3d92970d74e20f7ebff77d9658af9bef4403f1dc42a7801c0575899"
+    },
+    "@std/ulid@1.0.0": {
+      "integrity": "d41c3d27a907714413649fee864b7cde8d42ee68437d22b79d5de4f81d808780"
+    }
+  },
+  "npm": {
+    "@discordeno/rest@21.0.0-next.1c20b59": {
+      "integrity": "sha512-2CwCD72lUWxBoYBRKbYfSp9mSP7aIp2rEOURq7Goe7QtTliKT5avD2QrBBlko4VCxsTrbUwfwiyWW2jyHv7/VQ==",
+      "dependencies": [
+        "@discordeno/types",
+        "@discordeno/utils"
+      ]
+    },
+    "@discordeno/types@21.0.0-next.1c20b59": {
+      "integrity": "sha512-nOJVNQLmFiXiP3sN4r21pDZmXU/D+oSwdjYeAkfmUGgJkqYQ+anw51G80RdhixrU9CFkW8RtRbZFThWL8gXdzQ=="
+    },
+    "@discordeno/utils@21.0.0-next.1c20b59": {
+      "integrity": "sha512-lHRBwNTORuPXD2aiMrt0OI0Vy5fo129dsGb2oBwF/pONeCQQYLyV8i4E7Jd4YyOx3fBu+ozgpOB/GBCq37sF2Q==",
+      "dependencies": [
+        "@discordeno/types"
+      ]
+    },
+    "@drashland/drash@3.0.0-beta.2": {
+      "integrity": "sha512-cVPFPwk2dXojfe4TjdNTa9cVE49xHA3BlSEV+U4Svv8XhKPFrwCmIGYWCHKNRPMueLL1+hclgWUsDrfd9TqIEg=="
+    }
+  },
+  "redirects": {
+    "https://esm.sh/@drashland/drash/modules/chains/RequestChain/mod.native.js": "https://esm.sh/@drashland/drash@3.0.0-beta.2/modules/chains/RequestChain/mod.native.js"
+  },
+  "remote": {
+    "https://esm.sh/@drashland/drash@3.0.0-beta.2/denonext/modules/chains/RequestChain/mod.native.mjs": "f3c2c796734c6c1071533968326cc3c51bbeea4b4f1dd4bccfdbe27ac5f4e5c8",
+    "https://esm.sh/@drashland/drash@3.0.0-beta.2/modules/chains/RequestChain/mod.native.js": "198277c17493a34578a3653b4ffef34b03969d3e1ef8bf9d01f3db8916aabd6f"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@amethyst/arcanis-database@0.0.1",
+      "npm:@discordeno/rest@21.0.0-next.1c20b59",
+      "npm:@drashland/drash@*"
+    ]
+  }
+}

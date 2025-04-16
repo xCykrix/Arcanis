@@ -1,0 +1,56 @@
+{
+  "name": "Deno",
+  "image": "mcr.microsoft.com/devcontainers/base:bullseye",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/deno:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "files.hotExit": "onExitAndWindowClose",
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true,
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "[typescript]": {
+          "editor.defaultFormatter": "denoland.vscode-deno",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "always",
+            "source.removeUnusedImports": "always",
+            "source.sortImports": "always"
+          }
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": null
+        },
+        "[json]": {
+          "editor.defaultFormatter": "vscode.json-language-features"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "vscode.json-language-features"
+        },
+        "deno.enable": true,
+        "extensions.webWorker": true,
+        "extensions.ignoreRecommendations": true
+      },
+      "extensions": [
+        // Editor
+        "editorconfig.editorconfig",
+        // Utilities
+        "ms-azuretools.vscode-docker",
+        // Language
+        "justjavac.vscode-deno-extensionpack",
+        // IntelliCode
+        "VisualStudioExptTeam.vscodeintellicode",
+        "VisualStudioExptTeam.vscodeintellicode-completions",
+        "VisualStudioExptTeam.intellicode-api-usage-examples"
+      ]
+    }
+  },
+  "remoteUser": "root"
+}
