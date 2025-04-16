@@ -9,8 +9,8 @@ services:
       - 81:81
       - 443:443
     volumes:
-      - ./infrastructure.d/nginxd:/data
-      - ./infrastructure.d/letsencrypt:/etc/letsencrypt
+      - ../infrastructure.d/nginxd:/data
+      - ../infrastructure.d/letsencrypt:/etc/letsencrypt
   # Remote Configuration Database
   rconf:
     image: ghcr.io/denoland/denokv
@@ -21,7 +21,7 @@ services:
     environment:
       - DENO_KV_SQLITE_PATH=/d/.denokv.sqlite
     volumes:
-      - ./infrastructure.d/database/rconf:/d/
+      - ../infrastructure.d/database/rconf:/d/
     ports:
       - 4511:4512
   # Deno Production Database
@@ -34,7 +34,7 @@ services:
     environment:
       - DENO_KV_SQLITE_PATH=/d/.denokv.sqlite
     volumes:
-      - ./infrastructure.d/database/production:/d/
+      - ../infrastructure.d/database/production:/d/
     ports:
       - 4512:4512
   # Deno Stage Database
@@ -47,6 +47,6 @@ services:
     environment:
       - DENO_KV_SQLITE_PATH=/d/.denokv.sqlite
     volumes:
-      - ./infrastructure.d/database/stage:/d/
+      - ../infrastructure.d/database/stage:/d/
     ports:
       - 4513:4512
