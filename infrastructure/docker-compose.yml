@@ -1,7 +1,7 @@
-
 # Services for Docker Infrastructure
 services:
-  proxied:
+  # Manager for nginx.
+  nginxd:
     image: jc21/nginx-proxy-manager:latest
     restart: unless-stopped
     ports:
@@ -11,6 +11,7 @@ services:
     volumes:
       - ./workspace/proxied:/data
       - ./workspace/letsencrypt:/etc/letsencrypt
+  # Remote Configuration Database
   rconf:
     image: ghcr.io/denoland/denokv
     command: serve
@@ -23,7 +24,7 @@ services:
       - ./workspace/rconf:/workspace/
     ports:
       - 4511:4512
-  main:
+  production:
     image: ghcr.io/denoland/denokv
     command: serve
     restart: unless-stopped
@@ -32,10 +33,10 @@ services:
     environment:
       - DENO_KV_SQLITE_PATH=/workspace/.denokv.sqlite
     volumes:
-      - ./workspace/main:/workspace/
+      - ./workspace/production:/workspace/
     ports:
       - 4512:4512
-  staged:
+  staging:
     image: ghcr.io/denoland/denokv
     command: serve
     restart: unless-stopped
@@ -44,6 +45,6 @@ services:
     environment:
       - DENO_KV_SQLITE_PATH=/workspace/.denokv.sqlite
     volumes:
-      - ./workspace/staged:/workspace/
+      - ./workspace/staging:/workspace/
     ports:
       - 4513:4512
