@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@amethyst/discord-emoji@*": "2.5.3",
     "jsr:@olli/kvdex@3.3.0": "3.3.0",
     "jsr:@onjara/optic@2.0.3": "2.0.3",
     "jsr:@std/bytes@^1.0.4": "1.0.5",
@@ -9,9 +10,14 @@
     "jsr:@std/fmt@^1.0.2": "1.0.6",
     "jsr:@std/path@^1.0.6": "1.0.8",
     "jsr:@std/ulid@1": "1.0.0",
+    "npm:@discordeno/bot@next": "21.0.0-next.1c20b59",
+    "npm:dd-cache-proxy@2.6.2": "2.6.2_@discordeno+bot@21.0.0-next.1c20b59",
     "npm:zod@^3.24.0": "3.24.2"
   },
   "jsr": {
+    "@amethyst/discord-emoji@2.5.3": {
+      "integrity": "f3f8c07efb5c9e014bf65cd6afaef436aa8492c61c66d975fd1318c652fce6be"
+    },
     "@olli/kvdex@3.3.0": {
       "integrity": "d27cbd0a5d8233c76493be7aa45d2099f97970e07c0f62529f184bacb1e68232",
       "dependencies": [
@@ -49,6 +55,52 @@
     }
   },
   "npm": {
+    "@discordeno/bot@21.0.0-next.1c20b59": {
+      "integrity": "sha512-4ZBcyOaGZh0iQBGBKIgsQjGlfypcM9r5kCjm4UhRKEhUghkfn2oFM9pzTRrc1XkKjOrLHev/CrJCSP5iqSjPdg==",
+      "dependencies": [
+        "@discordeno/gateway",
+        "@discordeno/rest",
+        "@discordeno/types",
+        "@discordeno/utils"
+      ]
+    },
+    "@discordeno/gateway@21.0.0-next.1c20b59": {
+      "integrity": "sha512-dXY1j8/g1bwK3DTUfrBFi9gUia1rJNddC/wn8JktoL2D1Mto+HcaFDEBqibOC1oE7zV9d8UZiOivYKKbVQxaNA==",
+      "dependencies": [
+        "@discordeno/types",
+        "@discordeno/utils",
+        "fzstd",
+        "ws"
+      ]
+    },
+    "@discordeno/rest@21.0.0-next.1c20b59": {
+      "integrity": "sha512-2CwCD72lUWxBoYBRKbYfSp9mSP7aIp2rEOURq7Goe7QtTliKT5avD2QrBBlko4VCxsTrbUwfwiyWW2jyHv7/VQ==",
+      "dependencies": [
+        "@discordeno/types",
+        "@discordeno/utils"
+      ]
+    },
+    "@discordeno/types@21.0.0-next.1c20b59": {
+      "integrity": "sha512-nOJVNQLmFiXiP3sN4r21pDZmXU/D+oSwdjYeAkfmUGgJkqYQ+anw51G80RdhixrU9CFkW8RtRbZFThWL8gXdzQ=="
+    },
+    "@discordeno/utils@21.0.0-next.1c20b59": {
+      "integrity": "sha512-lHRBwNTORuPXD2aiMrt0OI0Vy5fo129dsGb2oBwF/pONeCQQYLyV8i4E7Jd4YyOx3fBu+ozgpOB/GBCq37sF2Q==",
+      "dependencies": [
+        "@discordeno/types"
+      ]
+    },
+    "dd-cache-proxy@2.6.2_@discordeno+bot@21.0.0-next.1c20b59": {
+      "integrity": "sha512-/12T0CYvpPvGXdkXHWuAsy1Ng7CFcvoKKkRLeUVg8pYB019p/Huq5cohG3oWKGQ0qEFPN+s1tqmMw3tuRNQuKQ==",
+      "dependencies": [
+        "@discordeno/bot"
+      ]
+    },
+    "fzstd@0.1.1": {
+      "integrity": "sha512-dkuVSOKKwh3eas5VkJy1AW1vFpet8TA/fGmVA5krThl8YcOVE/8ZIoEA1+U1vEn5ckxxhLirSdY837azmbaNHA=="
+    },
+    "ws@8.18.1": {
+      "integrity": "sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w=="
+    },
     "zod@3.24.2": {
       "integrity": "sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ=="
     }
@@ -62,8 +114,11 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@amethyst/discord-emoji@*",
       "jsr:@olli/kvdex@3.3.0",
-      "jsr:@onjara/optic@2.0.3"
+      "jsr:@onjara/optic@2.0.3",
+      "npm:@discordeno/bot@next",
+      "npm:dd-cache-proxy@2.6.2"
     ]
   }
 }

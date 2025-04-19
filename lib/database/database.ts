@@ -1,8 +1,13 @@
-import { collection, Database, kvdex } from '@kvdex';
-import { applicationModel } from './model/application.model.ts';
+import { collection, type Database, kvdex, type Model, model } from '@kvdex';
+import type { Application } from './model/application.model.ts';
+import type { ReactionModuleConfiguration, ReactionModuleForwardConfiguration } from './model/reaction.model.ts';
+
+function createModel<T = { type: string }>(): Model<T> {
+  return model();
+}
 
 const rconfStaticSchema = {
-  application: collection(applicationModel, {
+  application: collection(createModel<Application>(), {
     history: true,
     indices: {
       applicationId: 'primary',
@@ -12,7 +17,21 @@ const rconfStaticSchema = {
   }),
 };
 
-const appdStaticSchema = {};
+const appdStaticSchema = {
+  reactionModuleConfiguration: collection(createModel<ReactionModuleConfiguration>(), {
+    indices: {
+      guild: 'secondary',
+      channel: 'secondary',
+    },
+  }),
+  reactionModuleForwardConfiguration: collection(createModel<ReactionModuleForwardConfiguration>(), {
+    indices: {
+      guild: 'secondary',
+      from: 'secondary',
+      to: 'secondary',
+    },
+  }),
+};
 
 export class DatabaseConnector {
   static #rconf: Deno.Kv;
@@ -38,7 +57,7 @@ export class DatabaseConnector {
 
     // Initialize KV.
     this.#rconf = await Deno.openKv(rconf);
-    this.#appd = await Deno.openKv(rconf);
+    this.#appd = await Deno.openKv(appd);
 
     // Initialize Database Wrapper.
     this.rconf = kvdex({

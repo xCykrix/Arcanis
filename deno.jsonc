@@ -3,8 +3,13 @@
   "version": "0.0.1",
   // Imports
   "imports": {
+    // Core Library
+    "@discordeno": "npm:@discordeno/bot@next",
+    "@discordeno-cache": "npm:dd-cache-proxy@2.6.2",
+    // Libraries
     "@optic": "jsr:@onjara/optic@2.0.3",
     "@kvdex": "jsr:@olli/kvdex@3.3.0",
+    "@discord-emoji": "jsr:@amethyst/discord-emoji",
   },
   "exports": {},
   "nodeModulesDir": "none",

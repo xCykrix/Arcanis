@@ -1,6 +1,6 @@
 import { DatabaseConnector } from '../lib/database/database.ts';
 
-// deno run --env-file=./env/application.env --env-file=./env/infrastructure.env -A --unstable-kv ./script/upsertApplication.ts
+// deno run --env-file=.env -A --unstable-kv ./script/upsertApplication.ts
 const rconf = DatabaseConnector.rconf;
 
 // Prompts
