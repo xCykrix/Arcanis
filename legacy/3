@@ -1,0 +1,74 @@
+import { BotManager } from '../../../bot.ts';
+import { Constants } from '../../../struct/constants.ts';
+import { KvHelper } from '../../../util/helper/kv.ts';
+import { Initializable } from '../../../util/structure/initializable.ts';
+import type { AutoReactConfiguration, AutoReactExcludeConfiguration } from '../type/reaction.d.ts';
+
+export class ReactionMessageCreateEvent extends Initializable {
+  public override initialize(): Promise<void> | void {
+    BotManager.event.add('messageCreate', async (message) => {
+      if (message.applicationId === BotManager.bot.applicationId) return;
+
+      // Parse Media Type(s)
+      let type: 'text' | 'embed' | 'media' = 'text';
+      if ((message.attachments?.length ?? 0) !== 0) type = 'media';
+      if ((message.embeds?.length ?? 0) !== 0) type = 'embed';
+
+      // Generate Keys
+      const confAll = KvHelper.make({
+        table: 'auto-react',
+        guildId: message.guildId!.toString(),
+        bucket: 'options',
+        path: [message.channelId!.toString(), 'all', 'configuration'],
+      });
+      const excludeAll = KvHelper.make({
+        table: 'auto-react',
+        guildId: message.guildId!.toString(),
+        bucket: 'options',
+        path: [message.channelId!.toString(), 'all', 'exclude'],
+      });
+
+      // React to Type
+      const reactionAll = await Constants.conf!.get<AutoReactConfiguration>(confAll);
+      if (reactionAll.value !== null && reactionAll.value.reactions.length !== 0) {
+        const reactionAllExclude = await Constants.conf!.get<AutoReactExcludeConfiguration>(excludeAll);
+        let excluded = false;
+        if (reactionAllExclude.value?.members.includes(message.member?.id?.toString() ?? 'nil')) excluded = true;
+        for (const role of message.member?.roles ?? []) {
+          if (reactionAllExclude.value?.roles.includes(role.toString())) excluded = true;
+        }
+        if (!excluded) {
+          await BotManager.bot.helpers.addReactions(message.channelId, message.id, reactionAll.value?.reactions ?? []);
+        }
+      }
+
+      // Alternate Keys
+      const confAlt = KvHelper.make({
+        table: 'auto-react',
+        guildId: message.guildId!.toString(),
+        bucket: 'options',
+        path: [message.channelId!.toString(), type, 'configuration'],
+      });
+      const excludeAlt = KvHelper.make({
+        table: 'auto-react',
+        guildId: message.guildId!.toString(),
+        bucket: 'options',
+        path: [message.channelId!.toString(), type, 'exclude'],
+      });
+
+      // React to Secondary Type
+      const reactionRest = await Constants.conf!.get<AutoReactConfiguration>(confAlt);
+      if (reactionRest.value !== null && reactionRest.value.reactions.length !== 0) {
+        const reactionRestExclude = await Constants.conf!.get<AutoReactExcludeConfiguration>(excludeAlt);
+        let excluded = false;
+        if (reactionRestExclude.value?.members.includes(message.member?.id?.toString() ?? 'nil')) excluded = true;
+        for (const role of message.member?.roles ?? []) {
+          if (reactionRestExclude.value?.roles.includes(role.toString())) excluded = true;
+        }
+        if (!excluded) {
+          await BotManager.bot.helpers.addReactions(message.channelId, message.id, reactionRest.value?.reactions ?? []);
+        }
+      }
+    });
+  }
+}

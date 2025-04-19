@@ -1,0 +1,184 @@
+import { MessageComponentTypes, type SelectMenuDefaultValue } from '@discordeno';
+import { BotManager } from '../../../../bot.ts';
+import { Constants } from '../../../../struct/constants.ts';
+import { InteractionHelper } from '../../../../util/helper/interaction.ts';
+import { KvHelper } from '../../../../util/helper/kv.ts';
+import { PermissionHelper } from '../../../../util/helper/permission.ts';
+import { Initializable } from '../../../../util/structure/initializable.ts';
+import { EmojiValidator } from '../../../../util/validate/emoji.ts';
+import type { AutoReactExcludeConfiguration } from '../../type/reaction.d.ts';
+
+export class ReactionInteractionHandlerSubMessage extends Initializable {
+  public override initialize(): Promise<void> | void {
+    BotManager.event.add('interactionCreate', async (interaction) => {
+      if (!InteractionHelper.isContextApplicationCommand('reaction', interaction)) return;
+      const args = InteractionHelper.parseApplicationCommand<{
+        message?: {
+          set?: {
+            channel: typeof BotManager.bot.transformers.$inferredTypes.channel;
+            reactions: string;
+            type?: 'all' | 'text' | 'embed' | 'media';
+          };
+          remove?: {
+            channel: typeof BotManager.bot.transformers.$inferredTypes.channel;
+            type?: 'all' | 'text' | 'embed' | 'media';
+          };
+          exclude?: {
+            channel: typeof BotManager.bot.transformers.$inferredTypes.channel;
+            type?: 'all' | 'text' | 'embed' | 'media';
+          };
+        };
+      }>(interaction);
+      if (args.message === undefined) return;
+      await interaction.defer();
+
+      // Check Permissions
+      const member = await BotManager.bot.cache.members.get(interaction.user.id, interaction.member?.guildId!);
+      if (!await PermissionHelper.checkRolesForPermission(member!, member!.roles, ['MANAGE_MESSAGES'])) {
+        return InteractionHelper.unauthorized(interaction);
+      }
+
+      // Set Configuration
+      if (args.message?.set) {
+        const reactions = args.message.set.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
+
+        // Validate Reaction Count
+        if (reactions.length > 10 || reactions.length === 0) {
+          await interaction.respond({
+            embeds: InteractionHelper.makeErrorEmbed()
+              .setDescription('You must specify between 1 and 10 emojis.'),
+          });
+        }
+
+        // Validate Reactions
+        for (const reaction of reactions) {
+          if (!EmojiValidator.check(reaction)) {
+            await interaction.respond({
+              embeds: InteractionHelper.makeErrorEmbed()
+                .setDescription('Failed to validate an emoji.')
+                .addField('Invalid', reaction),
+            });
+            return;
+          }
+        }
+
+        // Check and Fail if 'All Messages' is already configured but a type was specified.
+        const baseKey = KvHelper.make({
+          table: 'auto-react',
+          guildId: args.message.set.channel.guildId!.toString(),
+          bucket: 'options',
+          path: [args.message.set.channel.id!.toString()],
+        });
+        const confAll = await Constants.conf!.get([...baseKey, 'all', 'configuration']);
+        const confText = await Constants.conf!.get([...baseKey, 'text', 'configuration']);
+        const confMedia = await Constants.conf!.get([...baseKey, 'media', 'configuration']);
+        const confEmbed = await Constants.conf!.get([...baseKey, 'embed', 'configuration']);
+        const hasConfAll = confAll.versionstamp !== null;
+        const hasConfAlt = confText.versionstamp !== null || confMedia.versionstamp !== null || confEmbed.versionstamp !== null;
+
+        if ((args.message.set.type !== 'all' && hasConfAll) || (args.message.set.type === 'all' && hasConfAlt)) {
+          await interaction.respond({
+            embeds: InteractionHelper.makeErrorEmbed()
+              .setDescription([
+                'All Messages and Specific Media Types are exclusive when configuring reactions.',
+                '',
+                'If using "All Messages", please remove all specific media type reactions first.',
+                'If using a specified media type, remove the "All Messages" reactions first.',
+              ].join('\n')),
+          });
+          return;
+        }
+
+        // Write to Database
+        await Constants.conf!.set(
+          KvHelper.make({
+            table: 'auto-react',
+            guildId: args.message.set.channel.guildId!.toString(),
+            bucket: 'options',
+            path: [args.message.set.channel.id!.toString(), args.message.set.type ?? 'all', 'configuration'],
+          }),
+          {
+            reactions,
+          },
+        );
+
+        // Respond to Interaction
+        await interaction.respond({
+          embeds: InteractionHelper.makeSuccessEmbed()
+            .setDescription('Reactions for the specific type have been set for the specified channel.')
+            .addField('Selected Channel', `<#${args.message.set.channel!.id}>`, true)
+            .addField('Type', `${args.message.set.type}`, true)
+            .addField('Reactions', reactions.join(' '), false),
+        });
+      }
+
+      // Exclude Configuration
+      if (args.message?.exclude) {
+        const key = KvHelper.make({
+          table: 'auto-react',
+          guildId: args.message.exclude.channel.guildId!.toString(),
+          bucket: 'options',
+          path: [args.message.exclude.channel.id!.toString(), args.message.exclude.type ?? 'all', 'exclude'],
+        });
+        const existing = await Constants.conf!.get<AutoReactExcludeConfiguration>(key);
+        const defaults: SelectMenuDefaultValue[] = [];
+
+        if (existing.value !== null) {
+          existing.value.roles.forEach((v) =>
+            defaults.push({
+              type: 'role',
+              id: BigInt(v),
+            })
+          );
+          existing.value.members.forEach((v) =>
+            defaults.push({
+              type: 'user',
+              id: BigInt(v),
+            })
+          );
+        }
+
+        await interaction.respond({
+          embeds: InteractionHelper.makeSuccessEmbed()
+            .setDescription('Please use the following drop down to exclude specific roles or users from reactions in the selected channel.')
+            .addField('Selected Channel', `<#${args.message.exclude.channel!.id}>`),
+          components: [
+            {
+              type: MessageComponentTypes.ActionRow,
+              components: [
+                {
+                  type: MessageComponentTypes.SelectMenuUsers,
+                  customId: KvHelper.wrap(key, interaction.user.id.toString()),
+                  placeholder: 'Make a Selection - Max 25',
+                  minValues: 0,
+                  maxValues: 25,
+                  defaultValues: defaults,
+                },
+              ],
+            },
+          ],
+        });
+      }
+
+      // Remove Configuration
+      if (args.message?.remove) {
+        const key = KvHelper.make({
+          table: 'auto-react',
+          guildId: args.message.remove.channel.guildId!.toString(),
+          bucket: 'options',
+          path: [args.message.remove.channel.id!.toString(), args.message.remove.type ?? 'all'],
+        });
+        const varg = Constants.conf!.list({ prefix: key });
+        for await (const v of varg) {
+          await Constants.conf!.delete(v.key);
+        }
+        await interaction.respond({
+          embeds: InteractionHelper.makeSuccessEmbed()
+            .setDescription('Reactions for the specific type have been removed from the specified channel.')
+            .addField('Selected Channel', `<#${args.message.remove.channel!.id}>`)
+            .setColor('#5a5a5a'),
+        });
+      }
+    });
+  }
+}
