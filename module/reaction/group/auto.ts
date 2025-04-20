@@ -1,9 +1,10 @@
-import { Collection, MessageComponentTypes, type SelectMenuDefaultValue } from '@discordeno';
+import { type Collection, MessageComponentTypes, type SelectMenuDefaultValue } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
 import { CommandComponentHandler } from '../../../lib/generic/componentHandler.ts';
 import { CommandGroupHandler } from '../../../lib/generic/groupHandler.ts';
 import { Emoji } from '../../../lib/util/validation/emoji.ts';
 import { Bootstrap } from '../../../mod.ts';
+import type { ReactionType } from '../share/reactionType.ts';
 
 export class ReactionModuleGroupAuto extends CommandGroupHandler {
   public override async initialize(): Promise<void> {
@@ -15,15 +16,15 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
           set?: {
             channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
             reactions: string;
-            type: 'all' | 'embed-only' | 'media-only' | 'url-only' | 'text-only';
+            type: ReactionType;
           };
           remove?: {
             channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
-            type: 'all' | 'embed-only' | 'media-only' | 'url-only' | 'text-only';
+            type: ReactionType;
           };
           exclude?: {
             channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
-            type: 'all' | 'embed-only' | 'media-only' | 'url-only' | 'text-only';
+            type: ReactionType;
           };
           list?: {
             channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;

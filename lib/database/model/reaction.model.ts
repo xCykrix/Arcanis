@@ -1,9 +1,11 @@
+import type { ReactionType } from '../../../module/reaction/share/reactionType.ts';
+
 /** The Reaction Module Model. */
 export type ReactionModuleConfiguration = {
   guild: string;
   channel: string;
   reaction: string[];
-  type: 'all' | 'embed-only' | 'media-only' | 'url-only' | 'text-only';
+  type: ReactionType;
   exclusion?: {
     user?: string[];
     role?: string[];

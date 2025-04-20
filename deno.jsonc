@@ -10,6 +10,7 @@
     "@optic": "jsr:@onjara/optic@2.0.3",
     "@kvdex": "jsr:@olli/kvdex@3.3.0",
     "@discord-emoji": "jsr:@amethyst/discord-emoji",
+    "@url-regex-safe": "npm:url-regex-safe"
   },
   "exports": {},
   "nodeModulesDir": "none",
