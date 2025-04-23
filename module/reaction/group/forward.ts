@@ -182,7 +182,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
           for (const v of value) {
             chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
           }
-          embeds.addField(`<#${key}>`, `${chunk.join('\n')}`);
+          embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
         }
         embeds.addField('Search Channel', `<#${args.forward.list.channel.id.toString()}>`);
 
@@ -271,7 +271,7 @@ class ReactionModuleComponentForward extends CommandComponentHandler {
         for (const v of value) {
           chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
         }
-        embeds.addField(`<#${key}>`, `${chunk.join('\n')}`);
+        embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
       }
       embeds.addField('Search Channel', `<#${chunks[2]}>`);
       embeds.setFooter(`Page: ${displayPage}`);
