@@ -166,18 +166,25 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
         // Build Embed
         const embeds = this.generator.result.generic()
           .setTitle('Auto Forward List')
-          .addField('Search Channel', `<#${args.forward.list.channel.id.toString()}>`, true)
           .setFooter(`Page: 1`);
-        const fields: [string, string, string][] = [];
+        const fields = new Map<string, Set<[string, string]>>();
 
         // Iterate Embeds from Pagination
         const currentPage = configurations.result.slice(0, 14);
-        const hasNextPage = configurations.result.slice(15, 29).length !== 0; //0 + (15 * 0), 15 + (15 * 0)
+        const hasNextPage = configurations.result.slice(15, 29).length !== 0;
+
         for (const configuration of currentPage) {
-          fields.push([`From: <#${configuration.value.fromChannelId}>`, `To: <#${configuration.value.toChannelId}>`, `Reaction: ${configuration.value.reaction}`]);
+          if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
+          fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
         }
-        const fieldsMapped = fields.map((v) => v.join(' '));
-        embeds.setDescription(fieldsMapped.join('\n'));
+        for (const [key, value] of fields.entries()) {
+          const chunk: string[] = [];
+          for (const v of value) {
+            chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
+          }
+          embeds.addField(`<#${key}>`, `${chunk.join('\n')}`);
+        }
+        embeds.addField('Search Channel', `<#${args.forward.list.channel.id.toString()}>`);
 
         // Respond
         await interaction.respond({
@@ -239,9 +246,8 @@ class ReactionModuleComponentForward extends CommandComponentHandler {
 
       // Build Embed
       const embeds = this.generator.result.generic()
-        .setTitle('Auto Forward List')
-        .addField('Search Channel', `<#${chunks[2]}>`, true);
-      const fields: [string, string, string][] = [];
+        .setTitle('Auto Forward List');
+      const fields = new Map<string, Set<[string, string]>>();
 
       // Iterate Embeds from Pagination
       if (instruction === 'page-next') {
@@ -257,10 +263,17 @@ class ReactionModuleComponentForward extends CommandComponentHandler {
       const hasNextPage = configurations.result.slice(15 + (indexPage * 15), 29 + (indexPage * 15)).length !== 0; //0 + (15 * 0), 15 + (15 * 0)
 
       for (const configuration of currentPage) {
-        fields.push([`From: <#${configuration.value.fromChannelId}>`, `To: <#${configuration.value.toChannelId}>`, `Reaction: ${configuration.value.reaction}`]);
+        if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
+        fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
       }
-      const fieldsMapped = fields.map((v) => v.join(' '));
-      embeds.setDescription(fieldsMapped.join('\n'));
+      for (const [key, value] of fields.entries()) {
+        const chunk: string[] = [];
+        for (const v of value) {
+          chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
+        }
+        embeds.addField(`<#${key}>`, `${chunk.join('\n')}`);
+      }
+      embeds.addField('Search Channel', `<#${chunks[2]}>`);
       embeds.setFooter(`Page: ${displayPage}`);
 
       // Respond
