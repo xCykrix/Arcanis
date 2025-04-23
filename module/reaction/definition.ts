@@ -201,7 +201,7 @@ export class ReactionModuleDefinition extends Initializable {
                 },
                 {
                   name: 'within',
-                  description: 'The maximum age of the message to be elible to forward, in minutes. Defaults to no limit.',
+                  description: 'The maximum age of the message to be elible to forward, in seconds. Defaults to no limit.',
                   type: ApplicationCommandOptionTypes.Integer,
                   required: true,
                   minValue: 1,
