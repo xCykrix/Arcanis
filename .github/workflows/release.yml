@@ -27,5 +27,5 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: 'Build Image'
         run: |
-          docker build . --tag ghcr.io/xCykrix/arcanis:latest
-          docker push ghcr.io/xCykrix/arcanis:latest
+          docker build . --tag ghcr.io/xcykrix/arcanis:latest
+          docker push ghcr.io/xcykrix/arcanis:latest
