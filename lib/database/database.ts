@@ -1,6 +1,7 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { Application } from './model/application.model.ts';
-import type { ReactionModuleConfiguration, ReactionModuleForwardConfiguration } from './model/reaction.model.ts';
+import type { ReactionModuleForwardConfiguration } from './model/forward.model.ts';
+import type { ReactionModuleConfiguration } from './model/reaction.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
   return model();

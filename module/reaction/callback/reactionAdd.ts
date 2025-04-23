@@ -1,6 +1,6 @@
 import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
-import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/reaction.model.ts';
+import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/forward.model.ts';
 import { Initializable } from '../../../lib/generic/initializable.ts';
 import { createIncidentEvent, optic } from '../../../lib/util/helper/optic.ts';
 import { Bootstrap } from '../../../mod.ts';

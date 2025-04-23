@@ -1,6 +1,6 @@
 import { ButtonStyles, MessageComponentTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
-import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/reaction.model.ts';
+import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/forward.model.ts';
 import { CommandComponentHandler } from '../../../lib/generic/componentHandler.ts';
 import { CommandGroupHandler } from '../../../lib/generic/groupHandler.ts';
 import { Emoji } from '../../../lib/util/validation/emoji.ts';
