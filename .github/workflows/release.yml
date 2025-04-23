@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v1
+      - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
       - name: 'Build Image'
         run: |
-          docker build . --tag ghcr.io/xCykrix/Aarcanis:latest
-          docker push ghcr.io/xCykrix/Arcanis:latest
+          docker build . --tag ghcr.io/xCykrix/arcanis:latest
+          docker push ghcr.io/xCykrix/arcanis:latest
