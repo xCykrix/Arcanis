@@ -20,22 +20,28 @@ const rconfStaticSchema = {
 const appdStaticSchema = {
   reactionModuleConfiguration: collection(createModel<ReactionModuleConfiguration>(), {
     indices: {
-      guild: 'secondary',
-      channel: 'secondary',
+      guid: 'primary',
+      guildId: 'secondary',
+      channelId: 'secondary',
     },
   }),
   reactionModuleForwardConfiguration: collection(createModel<ReactionModuleForwardConfiguration>(), {
     indices: {
-      guild: 'secondary',
-      from: 'secondary',
-      to: 'secondary',
+      guid: 'primary',
+      guildId: 'secondary',
+      fromChannelId: 'secondary',
+      toChannelId: 'secondary',
     },
   }),
 };
 
+/**
+ * DatabaseConnector for Remote Key Database.
+ */
 export class DatabaseConnector {
   static #rconf: Deno.Kv;
   static #appd: Deno.Kv;
+  public static persist: Deno.Kv;
   public static rconf: Database<typeof rconfStaticSchema>;
   public static appd: Database<typeof appdStaticSchema>;
 
@@ -50,6 +56,7 @@ export class DatabaseConnector {
     // Get Environment Variables.
     const rconf = Deno.env.get('RCONF');
     const appd = Deno.env.get('APPD');
+    const persist = Deno.env.get('PERSIST');
 
     // Verify Environment Variables.
     if (rconf === undefined) throw new Deno.errors.NotFound(`Environment variable 'RCONF' must be defined.`);
@@ -58,6 +65,7 @@ export class DatabaseConnector {
     // Initialize KV.
     this.#rconf = await Deno.openKv(rconf);
     this.#appd = await Deno.openKv(appd);
+    this.persist = await Deno.openKv(persist);
 
     // Initialize Database Wrapper.
     this.rconf = kvdex({
@@ -71,4 +79,5 @@ export class DatabaseConnector {
   }
 }
 
+/** Setup DatabaseConnector. */
 await DatabaseConnector['setup']();

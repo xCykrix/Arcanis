@@ -22,10 +22,10 @@ class ErrorResponseGenerator {
       .setTimestamp(new Date());
   }
 
-  public getUnsupportedChannel(type: 'Guild Channels' | 'Direct Messages'): InteractionCallbackData {
+  public getUnsupportedChannel(supported: 'Guild Channels' | 'Direct Messages'): InteractionCallbackData {
     return {
       embeds: this.generic()
-        .setDescription(`This interaction only supports ${type}.`),
+        .setDescription(`This interaction only supports ${supported}.`),
     };
   }
 

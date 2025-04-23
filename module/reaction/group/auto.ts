@@ -1,5 +1,6 @@
 import { type Collection, MessageComponentTypes, type SelectMenuDefaultValue } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
+import { makeGlobalReactionModuleReactionID } from '../../../lib/database/model/reaction.model.ts';
 import { CommandComponentHandler } from '../../../lib/generic/componentHandler.ts';
 import { CommandGroupHandler } from '../../../lib/generic/groupHandler.ts';
 import { Emoji } from '../../../lib/util/validation/emoji.ts';
@@ -52,9 +53,10 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
       // Handle State: args.auto.add
       if (args.auto.set !== undefined) {
-        // Validate Reactions
+        // Split Reaction List
         const reactions = args.auto.set.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
 
+        // Validate Lengths
         if (reactions.length === 0 || reactions.length >= 10) {
           await interaction.respond({
             embeds: this.generator.error.generic()
@@ -74,49 +76,47 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
           return;
         }
 
-        // Get Existing and Index
-        const configurations = await DatabaseConnector.appd.reactionModuleConfiguration.findBySecondaryIndex('channel', args.auto.set.channel.id.toString());
-        let hasAll = false;
-        let hasSpecific = false;
-        const types: string[] = [];
-        for await (const configuration of configurations.result) {
-          if (configuration.value.type === 'all') hasAll = true;
-          if (configuration.value.type !== 'all') hasSpecific = true;
-          types.push(configuration.value.type);
+        const fetchBySecondary = await DatabaseConnector.appd.reactionModuleConfiguration.findBySecondaryIndex('channelId', args.auto.set.channel.id.toString());
+        let hasConfigurationForAll = false;
+        let hasConfigurationForSpecific = false;
+        for (const fetched of fetchBySecondary.result) {
+          if (fetched.value.type === 'all') hasConfigurationForAll = true;
+          if (fetched.value.type !== 'all') hasConfigurationForSpecific = true;
         }
 
-        // Mutually Exclusive Types via Index
-        if (args.auto.set.type !== 'all' && hasAll) {
-          await interaction.respond({
-            embeds: this.generator.error.generic()
-              .setDescription(`Type '${args.auto.set.type}' is not compatible to 'All Messages'.`),
-          });
-          return;
-        }
-        if (args.auto.set.type === 'all' && hasSpecific) {
+        // Cross Comparisons.
+        if (args.auto.set.type === 'all' && hasConfigurationForSpecific) {
           await interaction.respond({
             embeds: this.generator.error.generic()
               .setDescription(`Type '${args.auto.set.type}' is not compatible to 'Message with' types.`),
           });
           return;
         }
-
-        // Write a Update or Insert to Database.
-        const document = configurations.result.filter((v) => v.value.type === args.auto!.set!.type)[0];
-        if (document !== undefined) {
-          await DatabaseConnector.appd.reactionModuleConfiguration.update(document.id, {
-            reaction: reactions,
-          }, {
-            strategy: 'merge-shallow',
+        if (args.auto.set.type !== 'all' && hasConfigurationForAll) {
+          await interaction.respond({
+            embeds: this.generator.error.generic()
+              .setDescription(`Type '${args.auto.set.type}' is not compatible to 'All Messages'.`),
           });
-        } else {
-          await DatabaseConnector.appd.reactionModuleConfiguration.add({
-            guild: args.auto.set.channel.guildId!.toString(),
-            channel: args.auto.set.channel.id.toString(),
+          return;
+        }
+
+        // Fetch the Absolute
+        const guid = makeGlobalReactionModuleReactionID(args.auto.set.channel.guildId!.toString(), args.auto.set.channel.id.toString(), args.auto.set.type);
+        await DatabaseConnector.appd.reactionModuleConfiguration.upsertByPrimaryIndex({
+          index: ['guid', guid],
+          update: {
+            reaction: reactions,
+          },
+          set: {
+            guid,
+            guildId: args.auto.set.channel.guildId!.toString(),
+            channelId: args.auto.set.channel.id.toString(),
             reaction: reactions,
             type: args.auto.set.type,
-          });
-        }
+          },
+        }, {
+          strategy: 'merge-shallow',
+        });
 
         // Respond
         await interaction.respond({
@@ -131,12 +131,15 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
       // Handle State: args.auto.remove
       if (args.auto.remove !== undefined) {
-        const configurations = await DatabaseConnector.appd.reactionModuleConfiguration.findBySecondaryIndex('channel', args.auto.remove.channel.id.toString(), {
-          filter: (v) => v.value.type === args.auto!.remove!.type,
-        });
+        // Fetch the Absolute
+        const guid = makeGlobalReactionModuleReactionID(args.auto.remove.channel.guildId!.toString(), args.auto.remove.channel.id.toString(), args.auto.remove.type);
+        const fetchByPrimary = await DatabaseConnector.appd.reactionModuleConfiguration.findByPrimaryIndex(
+          'guid',
+          guid,
+        );
 
         // Exist Check
-        if (configurations.result.length === 0) {
+        if (fetchByPrimary === null || fetchByPrimary.versionstamp === undefined) {
           await interaction.respond({
             embeds: this.generator.error.generic()
               .setDescription('Unknown Auto Reaction Configuration. Please check the channel and type is correct.'),
@@ -144,10 +147,8 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
           return;
         }
 
-        // Deletion
-        for (const configuration of configurations.result) {
-          await DatabaseConnector.appd.reactionModuleConfiguration.delete(configuration.id);
-        }
+        // Delete
+        await DatabaseConnector.appd.reactionModuleConfiguration.delete(fetchByPrimary.id);
 
         // Respond
         await interaction.respond({
@@ -161,12 +162,15 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
       // Handle State: args.auto.exclude
       if (args.auto.exclude) {
-        const configurations = await DatabaseConnector.appd.reactionModuleConfiguration.findBySecondaryIndex('channel', args.auto.exclude.channel.id.toString(), {
-          filter: (v) => v.value.type === args.auto!.exclude!.type,
-        });
+        // Fetch the Absolute
+        const guid = makeGlobalReactionModuleReactionID(args.auto.exclude.channel.guildId!.toString(), args.auto.exclude.channel.id.toString(), args.auto.exclude.type);
+        const fetchByPrimary = await DatabaseConnector.appd.reactionModuleConfiguration.findByPrimaryIndex(
+          'guid',
+          guid,
+        );
 
         // Exists Check
-        if (configurations.result.length === 0) {
+        if (fetchByPrimary === null || fetchByPrimary.versionstamp === undefined) {
           await interaction.respond({
             embeds: this.generator.error.generic()
               .setDescription('Unknown Auto Reaction Configuration. Please check the channel and type is correct.'),
@@ -177,13 +181,13 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         // Load Defaults
         const defaultRole: SelectMenuDefaultValue[] = [];
         const defaultUser: SelectMenuDefaultValue[] = [];
-        configurations.result[0].value?.exclusion?.role?.forEach((v) =>
+        fetchByPrimary.value.exclusion?.role?.forEach((v) =>
           defaultRole.push({
             type: 'role',
             id: BigInt(v),
           })
         );
-        configurations.result[0].value?.exclusion?.user?.forEach((v) =>
+        fetchByPrimary.value?.exclusion?.user?.forEach((v) =>
           defaultUser.push({
             type: 'user',
             id: BigInt(v),
@@ -202,7 +206,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
               components: [
                 {
                   type: MessageComponentTypes.SelectMenuUsers,
-                  customId: `${configurations.result[0].id}/user/${interaction.user.id}`,
+                  customId: `reactionModuleExclude/${fetchByPrimary.id}/user/${interaction.user.id}`,
                   placeholder: 'Select up to 25 Users',
                   minValues: 0,
                   maxValues: 25,
@@ -215,7 +219,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
               components: [
                 {
                   type: MessageComponentTypes.SelectMenuRoles,
-                  customId: `${configurations.result[0].id}/role/${interaction.user.id}`,
+                  customId: `reactionModuleExclude/${fetchByPrimary.id}/role/${interaction.user.id}`,
                   placeholder: 'Select up to 25 Roles',
                   minValues: 0,
                   maxValues: 25,
@@ -230,7 +234,10 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
       // Handle State: args.auto.list
       if (args.auto.list) {
-        const configurations = await DatabaseConnector.appd.reactionModuleConfiguration.findBySecondaryIndex('channel', args.auto.list.channel.id.toString());
+        // Fetch by Secondary
+        const configurations = await DatabaseConnector.appd.reactionModuleConfiguration.findBySecondaryIndex('guildId', args.auto.list.channel.guildId!.toString(), {
+          filter: (v) => v.value.channelId === args.auto!.list!.channel.id.toString(),
+        });
 
         // Exists Check
         if (configurations.result.length === 0) {
@@ -241,9 +248,12 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
           return;
         }
 
+        // Build Embed
         const embeds = this.generator.result.generic()
+          .setTitle('Auto Reaction List')
           .addField('Channel', `<#${args.auto.list.channel.id}>`, true);
 
+        // Create Lookup Index
         const lookup = {
           'all': 'All Messages',
           'embed-only': 'Messages with Embed',
@@ -269,20 +279,28 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 class ReactionModuleComponentAuto extends CommandComponentHandler {
   public override initialize(): Promise<void> | void {
     Bootstrap.event.add('interactionCreate', async (interaction) => {
-      if (!this.expect(interaction)) return;
+      if (!this.expect('reactionModuleExclude', interaction)) return;
       await interaction.deferEdit();
       const chunks = interaction.data!.customId!.split('/');
 
       // Check User
-      if (interaction.user.id.toString() !== chunks[2]) {
-        // Check Expiration
-        if (this.checkIfExpired(interaction.message?.timestamp ?? 0, 600)) {
-          await interaction.edit({
-            embeds: this.generator.error.generic()
-              .setDescription('Request has expired. Please use the original command again.'),
-          });
-          return;
-        }
+      if (interaction.user.id.toString() !== chunks[3]) {
+        await interaction.respond({
+          embeds: this.generator.error.generic()
+            .setDescription('This component can only be used by the original user of this message.'),
+        }, {
+          isPrivate: true,
+        });
+        return;
+      }
+
+      // Check Expiration
+      if (this.checkIfExpired(interaction.message?.timestamp ?? 0, 600)) {
+        await interaction.edit({
+          embeds: this.generator.error.generic()
+            .setDescription('Request has expired. Please use the original command again.'),
+        });
+        return;
       }
 
       // Resolve Data
@@ -294,7 +312,7 @@ class ReactionModuleComponentAuto extends CommandComponentHandler {
       const members = resolved?.members?.map((v) => v.id.toString()) ?? null;
 
       // Get Database
-      const configuration = await DatabaseConnector.appd.reactionModuleConfiguration.find(chunks[0]);
+      const configuration = await DatabaseConnector.appd.reactionModuleConfiguration.find(chunks[1]);
       if (configuration === null) {
         await interaction.edit({
           embeds: this.generator.error.generic()
@@ -303,7 +321,8 @@ class ReactionModuleComponentAuto extends CommandComponentHandler {
         return;
       }
 
-      await DatabaseConnector.appd.reactionModuleConfiguration.update(chunks[0], {
+      // Update Database
+      await DatabaseConnector.appd.reactionModuleConfiguration.update(chunks[1], {
         exclusion: {
           user: members ?? configuration.value.exclusion?.user ?? [],
           role: roles ?? configuration.value.exclusion?.role ?? [],
@@ -312,11 +331,12 @@ class ReactionModuleComponentAuto extends CommandComponentHandler {
         strategy: 'merge-shallow',
       });
 
-      const updated = await DatabaseConnector.appd.reactionModuleConfiguration.find(chunks[0]);
+      // Get Updated and Respond
+      const updated = await DatabaseConnector.appd.reactionModuleConfiguration.find(chunks[1]);
       await interaction.respond({
         embeds: this.generator.result.generic()
           .setDescription('Exclusions have been updated.')
-          .addField('Channel', `<#${configuration.value.channel}>`, true)
+          .addField('Channel', `<#${configuration.value.channelId}>`, true)
           .addField('Users', ((updated?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
           .addField('Roles', ((updated?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
       });

@@ -11,6 +11,7 @@
     "jsr:@std/path@^1.0.6": "1.0.8",
     "jsr:@std/ulid@1": "1.0.0",
     "npm:@discordeno/bot@next": "21.0.0-next.1c20b59",
+    "npm:@types/node@*": "22.12.0",
     "npm:dd-cache-proxy@2.6.2": "2.6.2_@discordeno+bot@21.0.0-next.1c20b59",
     "npm:url-regex-safe@*": "4.0.0",
     "npm:zod@^3.24.0": "3.24.2"
@@ -90,6 +91,12 @@
         "@discordeno/types"
       ]
     },
+    "@types/node@22.12.0": {
+      "integrity": "sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
     "dd-cache-proxy@2.6.2_@discordeno+bot@21.0.0-next.1c20b59": {
       "integrity": "sha512-/12T0CYvpPvGXdkXHWuAsy1Ng7CFcvoKKkRLeUVg8pYB019p/Huq5cohG3oWKGQ0qEFPN+s1tqmMw3tuRNQuKQ==",
       "dependencies": [
@@ -104,6 +111,9 @@
     },
     "tlds@1.256.0": {
       "integrity": "sha512-ZmyVB9DAw+FFTmLElGYJgdZFsKLYd/I59Bg9NHkCGPwAbVZNRilFWDMAdX8UG+bHuv7kfursd5XGqo/9wi26lA=="
+    },
+    "undici-types@6.20.0": {
+      "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
     },
     "url-regex-safe@4.0.0": {
       "integrity": "sha512-BrnFCWKNFrFnRzKD66NtJqQepfJrUHNPvPxE5y5NSAhXBb4OlobQjt7907Jm4ItPiXaeX+dDWMkcnOd4jR9N8A==",

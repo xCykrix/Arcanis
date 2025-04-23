@@ -1,5 +1,0 @@
-# Services for Application Hosting
-services:
-  deployment:
-    build: .
-    restart: on-failure:3

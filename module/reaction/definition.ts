@@ -244,7 +244,7 @@ export class ReactionModuleDefinition extends Initializable {
               options: [
                 {
                   name: 'channel',
-                  description: 'A channel to search.',
+                  description: 'A channel to search. Supports to and from forwarding.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
                   required: false,
