@@ -1,5 +1,5 @@
 import type { Bootstrap } from '../../mod.ts';
-import { asyncInterceptor, createIncidentEvent } from '../logging/optic.ts';
+import { asyncInterceptor } from '../logging/optic.ts';
 
 export type EventParameters<T extends keyof typeof Bootstrap.bot.events> = Parameters<NonNullable<typeof Bootstrap.bot.events[T]>>;
 
@@ -22,9 +22,6 @@ export class EventManager {
           asyncInterceptor(key, async (...args) => {
             await callback(...args);
           }, ...args);
-          callback(...args).catch((e: Error) => {
-            createIncidentEvent(crypto.randomUUID(), `Unhandled EventManager Exception in '${key}'.`, e);
-          });
         }
       };
     }

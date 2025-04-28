@@ -46,7 +46,7 @@ export class Bootstrap {
     await (new PinModule()).initialize();
 
     // Connect to Discord Gateway.
-    if (connect) this.bot.start();
+    if (connect) await this.bot.start();
   }
 }
 
