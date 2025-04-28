@@ -3,8 +3,8 @@ import { ConsoleStream } from '@optic/consoleStream';
 import { every, FileStream, of } from '@optic/fileStream';
 import { JsonFormatter, TokenReplacer } from '@optic/formatters';
 import { Level, Logger } from '@optic/logger';
-import { Bootstrap } from '../../../mod.ts';
-import { isWebhookValid } from '../guard/webhook.ts';
+import { Bootstrap } from '../../mod.ts';
+import { isWebhookValid } from '../util/guard/webhook.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()
@@ -47,7 +47,7 @@ export const optic: Logger & InjectToOptic = new Logger()
 optic.fatal = optic.error;
 
 export async function createIncidentEvent(incidentId: string, message: string, error?: Error): Promise<void> {
-  const alertWebhookValid = await isWebhookValid(Deno.env.get('ALERT_WEBHOOK_ID')!, true);
+  const alertWebhookValid = await isWebhookValid(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, true);
   if (!alertWebhookValid) {
     optic.warn('Alert Webhook does not exist. Unable to fetch from API. Please investigate.');
   }
@@ -61,7 +61,7 @@ export async function createIncidentEvent(incidentId: string, message: string, e
     Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {
       embeds: new EmbedsBuilder()
         .setTitle('Incident Report')
-        .addField('Application', Bootstrap.bot.applicationId.toString())
+        .addField('Application', `${Bootstrap.bot.applicationId.toString()}`)
         .addField('ID', incidentId)
         .addField('Message', message)
         .addField('Error', error?.message ?? 'Refer to Service Log'),
@@ -71,26 +71,16 @@ export async function createIncidentEvent(incidentId: string, message: string, e
   }
 }
 
-// /** */
-// let lockout = false;
-// export async function consume(identifier: string, error: Error): Promise<void> {
-//   if (lockout) {
-//     optic.warn('Failed to dispatch Webhook Alert. Webhook lockout was triggered and a restart is required.', identifier);
-//     return;
-//   }
-//   const id = Deno.env.get('ALERT_WEBHOOK_ID');
-//   const token = Deno.env.get('ALERT_WEBHOOK_TOKEN');
-//   if (id === undefined || token === undefined) {
-//     optic.warn(`Webhook ID '${id}' (or token) failed to resolve and triggered a lockout.`, identifier);
-//     lockout = true;
-//     return;
-//   }
-//   const webhook = await Bootstrap.bot.helpers.getWebhook(id).catch(() => null);
-//   if (webhook === null) {
-//     optic.warn(`Webhook ID '${id}' failed to resolve and triggered a lockout.`, identifier)
-//     lockout = true;
-//     return;
-//   }
-//   console.info(webhook);
-
-// }
+export function asyncInterceptor(id: string, callback: (...args: unknown[]) => Promise<void> | void, ...args: unknown[]): void {
+  try {
+    callback(...args)?.catch((e: Error) => {
+      createIncidentEvent(crypto.randomUUID(), `Unhandled Exception in '${id}'.`, e);
+    });
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      createIncidentEvent(crypto.randomUUID(), `Unhandled Exception in '${id}'.`, e);
+    } else {
+      optic.warn(`Unhandled Exception(?) in '${id}'. Caught to thrown non-error instanceof.`, e);
+    }
+  }
+}

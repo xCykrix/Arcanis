@@ -1,7 +1,7 @@
-import { Bootstrap } from '../../mod.ts';
-import { createIncidentEvent, optic } from '../util/helper/optic.ts';
+import { Bootstrap } from '../mod.ts';
+import { createIncidentEvent, optic } from './logging/optic.ts';
 
-export function loadRequiredEvents(): void {
+export function defaults(): void {
   // Native Startup
   Bootstrap.event.add('ready', async (packet) => {
     const botUser: typeof Bootstrap.bot.transformers.$inferredTypes.user = packet.user;

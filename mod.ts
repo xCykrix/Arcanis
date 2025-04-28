@@ -2,51 +2,55 @@ import type { CreateApplicationCommand } from '@discordeno';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
 import { DatabaseConnector } from './lib/database/database.ts';
 import type { Application } from './lib/database/model/application.model.ts';
+import { defaults } from './lib/defaults.ts';
+import { optic } from './lib/logging/optic.ts';
 import { EventManager } from './lib/manager/event.ts';
-import { loadRequiredEvents } from './lib/native/loadRequiredEvents.ts';
-import { optic } from './lib/util/helper/optic.ts';
+import PinModule from './module/pin/module.ts';
 import ReactionModule from './module/reaction/module.ts';
 
 export class Bootstrap {
+  // Internal Registers
   static #application: Application | null = null;
+
+  /** The Interaction Catalyst Index. */
   public static interaction = new Set<CreateApplicationCommand>();
+
+  /** The Internal CacheBot Application. */
   public static bot: CacheBotType;
+
+  /** The Event Manager Registration Module. */
   public static event: EventManager;
 
   /** Main Boostrap Entrypoint. */
-  private static async boot(): Promise<void> {
-    const application = (await this.getApplicationConfiguration())!;
-    optic.info(`Application ID: ${application?.applicationId} / ${application!.publicKey}`);
+  private static async boot(connect: boolean = true): Promise<void> {
+    // Fetch Data from Remote Configuration Server
+    if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPLICATION_ID' is undefined.`);
+    this.#application = (await DatabaseConnector.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
+
+    // Check Remote Configuration Server Response
+    if (this.#application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);
+
+    // Post Status
+    optic.info(`Application ID: ${this.#application?.applicationId} / ${this.#application.publicKey}`);
 
     // Initialize Bot Application
-    this.bot = createBotWithToken(application.token);
+    this.bot = createBotWithToken(this.#application.token);
     this.bot.logger = optic as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
 
     // Setup Event Manager and Load Default Events
     this.event = new EventManager(this.bot);
-    loadRequiredEvents();
+    defaults();
 
     // Register Module
     await (new ReactionModule()).initialize();
+    await (new PinModule()).initialize();
 
-    // Connect
-    this.bot.start();
-  }
-
-  /**
-   * Fetch the Application from the Remote Configuration Database.
-   *
-   * @returns A {@link Application}.
-   */
-  private static async getApplicationConfiguration(): Promise<Application | null> {
-    if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment variable 'APPLICATION_ID' must be defined.`);
-    if (this.#application) return this.#application;
-    const application = await DatabaseConnector.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!);
-    if (application === null || application.value === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' was not found in rconf. Please validate.`);
-    return application.value;
+    // Connect to Discord Gateway.
+    if (connect) this.bot.start();
   }
 }
 
+// Initialize Application on Primary Entrypoint Interaction.
 if (import.meta.main) {
-  Bootstrap['boot']();
+  Bootstrap['boot'](true);
 }

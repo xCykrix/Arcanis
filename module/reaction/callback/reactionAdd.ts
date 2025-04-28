@@ -1,12 +1,13 @@
 import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
 import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/forward.model.ts';
-import { Initializable } from '../../../lib/generic/initializable.ts';
-import { createIncidentEvent, optic } from '../../../lib/util/helper/optic.ts';
+import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
+import { createIncidentEvent, optic } from '../../../lib/logging/optic.ts';
 import { Bootstrap } from '../../../mod.ts';
 
-export class ReactionModuleReactionAddForwarder extends Initializable {
-  public override initialize(): Promise<void> | void {
+export class ReactionAddEvent extends AsyncInitializable {
+  // deno-lint-ignore require-await
+  public override async initialize(): Promise<void> {
     Bootstrap.event.add('reactionAdd', async (reaction) => {
       if (reaction.guildId === undefined) return;
       if (reaction.user?.bot) return;
@@ -54,6 +55,18 @@ export class ReactionModuleReactionAddForwarder extends Initializable {
       // Parse Media Type
       let type: 'text' | 'embed' = 'text';
       if ((message.embeds?.length ?? 0) !== 0) type = 'embed';
+
+      // Recheck Lock
+      const relock = await DatabaseConnector.persist.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
+      if (relock.versionstamp !== null) {
+        optic.debug(`M${reaction.messageId} from C${reaction.channelId} in G${reaction.guildId} was triggered but is persistence cached as race condition guard.`);
+        return;
+      }
+
+      // Write to Lock Cache
+      await DatabaseConnector.persist.set([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId], true, {
+        expireIn: fetchByPrimary.value.within * 1000,
+      });
 
       // Dispatch
       switch (type) {
@@ -124,11 +137,6 @@ export class ReactionModuleReactionAddForwarder extends Initializable {
           break;
         }
       }
-
-      // Write to Lock Cache
-      await DatabaseConnector.persist.set([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId], true, {
-        expireIn: fetchByPrimary.value.within * 1000,
-      });
     });
   }
 }

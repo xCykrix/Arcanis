@@ -1,12 +1,13 @@
 import * as urlRegexSafe from '@url-regex-safe';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
 import { makeGlobalReactionModuleReactionID } from '../../../lib/database/model/reaction.model.ts';
-import { Initializable } from '../../../lib/generic/initializable.ts';
+import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../../mod.ts';
-import type { ReactionType } from '../share/reactionType.ts';
+import type { ReactionType } from '../share/types.ts';
 
-export class ReactionModuleMessageCreateReaction extends Initializable {
-  public override initialize(): Promise<void> | void {
+export class MessageCreateEvent extends AsyncInitializable {
+  // deno-lint-ignore require-await
+  public override async initialize(): Promise<void> {
     Bootstrap.event.add('messageCreate', async (message) => {
       if (message.guildId === undefined) return;
       if (message.applicationId === Bootstrap.bot.applicationId) return;

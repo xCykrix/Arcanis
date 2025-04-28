@@ -1,13 +1,9 @@
 import { commandOptionsParser, InteractionTypes } from '@discordeno';
 import type { Bootstrap } from '../../mod.ts';
-import { PermissionsHelper } from '../util/helper/permissions.ts';
-import { ResponseGeneratorHelper } from '../util/helper/response.ts';
-import { Initializable } from './initializable.ts';
+import { AsyncInitializable } from './initializable.ts';
 
-export abstract class CommandGroupHandler extends Initializable {
-  protected generator: ResponseGeneratorHelper = new ResponseGeneratorHelper();
-  protected permissions: PermissionsHelper = new PermissionsHelper();
-
+/** Abstraction Layer for Interaction Subcommand Groups. */
+export abstract class CommandGroupHandler extends AsyncInitializable {
   /** Expect a Interaction Command of Specified Name. */
   public expect(name: string, interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction, allowBotUser = false): boolean {
     if (interaction.type !== InteractionTypes.ApplicationCommand) return false;

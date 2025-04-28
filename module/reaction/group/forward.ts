@@ -1,14 +1,15 @@
 import { ButtonStyles, MessageComponentTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
 import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/forward.model.ts';
-import { CommandComponentHandler } from '../../../lib/generic/componentHandler.ts';
 import { CommandGroupHandler } from '../../../lib/generic/groupHandler.ts';
+import { ComponentHandler } from '../../../lib/util/builder/components.ts';
+import { Permissions } from '../../../lib/util/helper/permissions.ts';
+import { Responses } from '../../../lib/util/helper/responses.ts';
 import { Emoji } from '../../../lib/util/validation/emoji.ts';
 import { Bootstrap } from '../../../mod.ts';
 
-export class ReactionModuleGroupForward extends CommandGroupHandler {
+export class ForwardCommandGroup extends CommandGroupHandler {
   public override async initialize(): Promise<void> {
-    await (new ReactionModuleComponentForward()).initialize();
     Bootstrap.event.add('interactionCreate', async (interaction) => {
       if (!this.expect('reaction', interaction)) return;
       const args = this.parse<{
@@ -36,14 +37,18 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
 
       // Unsupported Channel
       if (interaction.channel.guildId === undefined) {
-        await interaction.respond(this.generator.error.getUnsupportedChannel('Guild Channels'));
+        await interaction.respond({
+          embeds: Responses.error.makeUnsupportedChannel('Guild Channels'),
+        });
         return;
       }
 
       // Check Permissions
       if (interaction.member?.id !== 100737000973275136n) {
-        if (!this.permissions.role.has(interaction.member?.roles ?? [], 'MANAGE_MESSAGES')) {
-          await interaction.respond(this.generator.error.getPermissionDenied('MANAGE_MESSAGES'));
+        if (!Permissions.role.hasPermission(interaction.member?.roles ?? [], 'MANAGE_MESSAGES')) {
+          await interaction.respond({
+            embeds: Responses.error.makePermissionDenied('MANAGE_MESSAGES'),
+          });
           return;
         }
       }
@@ -55,7 +60,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
         // Validate Emoji
         if (!Emoji.validate(reaction)) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Invalid Emoji Data in Reaction List.')
               .addField('Data', reaction),
           });
@@ -66,7 +71,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
         const fromRecordCount = await DatabaseConnector.appd.reactionModuleForwardConfiguration.countBySecondaryIndex('fromChannelId', args.forward.add.from.toString());
         if (fromRecordCount >= 10) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('You may only create up to 10 forwarders in a source (from) channel.'),
           });
           return;
@@ -98,7 +103,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
 
         // Respond
         await interaction.respond({
-          embeds: this.generator.result.generic()
+          embeds: Responses.success.make()
             .setDescription('Forwarding has been set for the specified channel.')
             .addField('From Channel', `<#${args.forward.add.from!.id}>`, false)
             .addField('To Channel', `<#${args.forward.add.to!.id}>`, false)
@@ -114,7 +119,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
 
         if (!Emoji.validate(reaction)) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Invalid Emoji Data in Reaction List.')
               .addField('Data', reaction),
           });
@@ -128,7 +133,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
         // Exists Check
         if (fetchByPrimary === null || fetchByPrimary.versionstamp === undefined) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Unknown Reaction Forwarder Configuration. Please check the channel and reaction is correct.'),
           });
           return;
@@ -139,7 +144,7 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
 
         // Respond
         await interaction.respond({
-          embeds: this.generator.result.generic()
+          embeds: Responses.success.make()
             .setDescription('Removed Reaction Forwarder Configuration')
             .addField('From', `<#${args.forward.remove.from.id}>`, false)
             .addField('To', `<#${fetchByPrimary.value.toChannelId}>`, false)
@@ -157,14 +162,14 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
         // Exists Check
         if (configurations.result.length === 0) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
-              .setDescription('No Reaction Forwarder Configurations found. Please check the channel is correct and try again.'),
+            embeds: Responses.error.make()
+              .setDescription('No Reaction Forwarder configurations found. Please check the channel is correct and try again.'),
           });
           return;
         }
 
         // Build Embed
-        const embeds = this.generator.result.generic()
+        const embeds = Responses.success.make()
           .setTitle('Auto Forward List')
           .setFooter(`Page: 1`);
         const fields = new Map<string, Set<[string, string]>>();
@@ -195,14 +200,24 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
               components: [
                 {
                   type: MessageComponentTypes.Button,
-                  customId: `reactionForwardModule/${args.forward.list.channel.guildId!.toString()}/${args.forward.list.channel.id.toString()}/0/page-prev/${interaction.user.id}`,
+                  customId: ComponentHandler.makeCustomId('reaction-forward-module', interaction.user.id.toString(), [
+                    args.forward.list.channel.guildId!.toString(),
+                    args.forward.list.channel.id.toString(),
+                    '0',
+                    'previous',
+                  ]),
                   style: ButtonStyles.Secondary,
                   label: 'Previous',
                   disabled: true,
                 },
                 {
                   type: MessageComponentTypes.Button,
-                  customId: `reactionForwardModule/${args.forward.list.channel.guildId!.toString()}/${args.forward.list.channel.id.toString()}/0/page-next/${interaction.user.id}`,
+                  customId: ComponentHandler.makeCustomId('reaction-forward-module', interaction.user.id.toString(), [
+                    args.forward.list.channel.guildId!.toString(),
+                    args.forward.list.channel.id.toString(),
+                    '0',
+                    'next',
+                  ]),
                   style: ButtonStyles.Secondary,
                   label: 'Next',
                   disabled: !hasNextPage,
@@ -213,48 +228,38 @@ export class ReactionModuleGroupForward extends CommandGroupHandler {
         });
       }
     });
-  }
-}
 
-class ReactionModuleComponentForward extends CommandComponentHandler {
-  public override initialize(): Promise<void> | void {
-    Bootstrap.event.add('interactionCreate', async (interaction) => {
-      if (!this.expect('reactionForwardModule', interaction)) return;
+    ComponentHandler.builder().expectation({
+      header: 'reaction-forward-module',
+      allowApplicationUser: false,
+      allowBotUser: false,
+      requireAuthor: true,
+      within: 300,
+    }).handle(async (interaction) => {
       await interaction.deferEdit();
-      const chunks = interaction.data!.customId!.split('/');
-
-      // Check User
-      if (interaction.user.id.toString() !== chunks[5]) {
-        await interaction.respond({
-          embeds: this.generator.error.generic()
-            .setDescription('This component can only be used by the original user of this message.'),
-        }, {
-          isPrivate: true,
-        });
-        return;
-      }
+      const packet = ComponentHandler.unmakeCustomId(interaction.data!.customId!).packet;
 
       // Parse Variables
-      let indexPage = parseInt(chunks[3])!;
+      let indexPage = parseInt(packet[2])!;
       let displayPage = indexPage + 1;
-      const instruction = chunks[4];
+      const instruction = packet[3];
 
       // Fetch by Secondary
-      const configurations = await DatabaseConnector.appd.reactionModuleForwardConfiguration.findBySecondaryIndex('guildId', chunks[1], {
-        filter: (v) => v.value.fromChannelId === chunks[2] || v.value.toChannelId === chunks[2],
+      const configurations = await DatabaseConnector.appd.reactionModuleForwardConfiguration.findBySecondaryIndex('guildId', packet[0], {
+        filter: (v) => v.value.fromChannelId === packet[1] || v.value.toChannelId === packet[1],
       });
 
       // Build Embed
-      const embeds = this.generator.result.generic()
+      const embeds = Responses.success.make()
         .setTitle('Auto Forward List');
       const fields = new Map<string, Set<[string, string]>>();
 
       // Iterate Embeds from Pagination
-      if (instruction === 'page-next') {
+      if (instruction === 'next') {
         indexPage = indexPage + 1;
         displayPage = displayPage + 1;
       }
-      if (indexPage >= 1 && instruction === 'page-prev') {
+      if (indexPage >= 1 && instruction === 'previous') {
         indexPage = indexPage - 1;
         displayPage = displayPage - 1;
       }
@@ -262,10 +267,13 @@ class ReactionModuleComponentForward extends CommandComponentHandler {
       const currentPage = configurations.result.slice(0 + (indexPage * 15), 14 + (indexPage * 15));
       const hasNextPage = configurations.result.slice(15 + (indexPage * 15), 29 + (indexPage * 15)).length !== 0; //0 + (15 * 0), 15 + (15 * 0)
 
+      // Parse Configuration for Pagination
       for (const configuration of currentPage) {
         if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
         fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
       }
+
+      // Paginate
       for (const [key, value] of fields.entries()) {
         const chunk: string[] = [];
         for (const v of value) {
@@ -273,7 +281,9 @@ class ReactionModuleComponentForward extends CommandComponentHandler {
         }
         embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
       }
-      embeds.addField('Search Channel', `<#${chunks[2]}>`);
+
+      // Final & Extra Fields
+      embeds.addField('Search Channel', `<#${packet[1]}>`);
       embeds.setFooter(`Page: ${displayPage}`);
 
       // Respond
@@ -285,16 +295,26 @@ class ReactionModuleComponentForward extends CommandComponentHandler {
             components: [
               {
                 type: MessageComponentTypes.Button,
-                customId: `reactionForwardModule/${chunks[1]}/${chunks[2]}/${indexPage}/page-prev/${interaction.user.id}`,
+                customId: ComponentHandler.makeCustomId('reaction-forward-module', interaction.user.id.toString(), [
+                  packet[0],
+                  packet[1],
+                  `${indexPage}`,
+                  'previous',
+                ]),
                 style: ButtonStyles.Secondary,
                 label: 'Previous',
                 disabled: !hasPreviousPage,
               },
               {
                 type: MessageComponentTypes.Button,
-                customId: `reactionForwardModule/${chunks[1]}/${chunks[2]}/${indexPage}/page-next/${interaction.user.id}`,
+                customId: ComponentHandler.makeCustomId('reaction-forward-module', interaction.user.id.toString(), [
+                  packet[0],
+                  packet[1],
+                  `${indexPage}`,
+                  'next',
+                ]),
                 style: ButtonStyles.Secondary,
-                label: 'Next',
+                label: 'Previous',
                 disabled: !hasNextPage,
               },
             ],

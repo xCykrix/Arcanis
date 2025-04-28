@@ -1,12 +1,9 @@
 import type { PermissionStrings } from '@discordeno';
 import { Bootstrap } from '../../../mod.ts';
 
-export class PermissionsHelper {
-  public role = new RolePermissionHelper();
-}
-
+/** A PermissionHelper  */
 class RolePermissionHelper {
-  public async has(roleId: bigint | bigint[], permission: PermissionStrings): Promise<boolean> {
+  public async hasPermission(roleId: bigint | bigint[], permission: PermissionStrings): Promise<boolean> {
     if (!Array.isArray(roleId)) roleId = [roleId];
     let found = false;
     for (const id of roleId) {
@@ -19,4 +16,8 @@ class RolePermissionHelper {
     }
     return found;
   }
+}
+
+export class Permissions {
+  public static role = new RolePermissionHelper();
 }

@@ -1,6 +1,6 @@
 import { type Bot, createBot, DesiredPropertiesBehavior, GatewayIntents } from '@discordeno';
 import { createProxyCache } from '@discordeno-cache';
-import { type BotDesiredProperties, desiredProperties } from './interface/desiredProperties.ts';
+import { type BotDesiredProperties, desiredProperties } from './desiredProperties.ts';
 
 /**
  * Creates the CacheBot Wrapper.

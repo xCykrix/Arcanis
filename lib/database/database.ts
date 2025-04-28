@@ -1,12 +1,14 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { Application } from './model/application.model.ts';
 import type { ReactionModuleForwardConfiguration } from './model/forward.model.ts';
+import type { PinModuleConfiguration } from './model/pin.model.ts';
 import type { ReactionModuleConfiguration } from './model/reaction.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
   return model();
 }
 
+/** rconfStaticSchema */
 const rconfStaticSchema = {
   application: collection(createModel<Application>(), {
     history: true,
@@ -18,7 +20,13 @@ const rconfStaticSchema = {
   }),
 };
 
+/** appdStaticSchema */
 const appdStaticSchema = {
+  pinModuleConfiguration: collection(createModel<PinModuleConfiguration>(), {
+    indices: {
+      guid: 'primary',
+    },
+  }),
   reactionModuleConfiguration: collection(createModel<ReactionModuleConfiguration>(), {
     indices: {
       guid: 'primary',
@@ -60,8 +68,9 @@ export class DatabaseConnector {
     const persist = Deno.env.get('PERSIST');
 
     // Verify Environment Variables.
-    if (rconf === undefined) throw new Deno.errors.NotFound(`Environment variable 'RCONF' must be defined.`);
-    if (appd === undefined) throw new Deno.errors.NotFound(`Environment variable 'APPD' must be defined.`);
+    if (rconf === undefined) throw new Deno.errors.NotFound(`Environment Variable 'RCONF' is undefined.`);
+    if (appd === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPD' is undefined.`);
+    if (persist === undefined) throw new Deno.errors.NotFound(`Environment Variable 'PERSIST' is undefined.`);
 
     // Initialize KV.
     this.#rconf = await Deno.openKv(rconf);

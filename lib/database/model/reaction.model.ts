@@ -1,4 +1,4 @@
-import type { ReactionType } from '../../../module/reaction/share/reactionType.ts';
+import type { ReactionType } from '../../../module/reaction/share/types.ts';
 
 /** The Reaction Module Model. */
 export type ReactionModuleConfiguration = {

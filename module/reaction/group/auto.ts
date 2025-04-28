@@ -1,15 +1,16 @@
 import { type Collection, MessageComponentTypes, type SelectMenuDefaultValue } from '@discordeno';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
 import { makeGlobalReactionModuleReactionID } from '../../../lib/database/model/reaction.model.ts';
-import { CommandComponentHandler } from '../../../lib/generic/componentHandler.ts';
 import { CommandGroupHandler } from '../../../lib/generic/groupHandler.ts';
+import { ComponentHandler } from '../../../lib/util/builder/components.ts';
+import { Permissions } from '../../../lib/util/helper/permissions.ts';
+import { Responses } from '../../../lib/util/helper/responses.ts';
 import { Emoji } from '../../../lib/util/validation/emoji.ts';
 import { Bootstrap } from '../../../mod.ts';
-import type { ReactionType } from '../share/reactionType.ts';
+import type { ReactionType } from '../share/types.ts';
 
-export class ReactionModuleGroupAuto extends CommandGroupHandler {
+export class AutoCommandGroup extends CommandGroupHandler {
   public override async initialize(): Promise<void> {
-    await (new ReactionModuleComponentAuto()).initialize();
     Bootstrap.event.add('interactionCreate', async (interaction) => {
       if (!this.expect('reaction', interaction)) return;
       const args = this.parse<{
@@ -39,14 +40,18 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
       // Unsupported Channel
       if (interaction.channel.guildId === undefined) {
-        await interaction.respond(this.generator.error.getUnsupportedChannel('Guild Channels'));
+        await interaction.respond({
+          embeds: Responses.error.makeUnsupportedChannel('Guild Channels'),
+        });
         return;
       }
 
       // Check Permissions
       if (interaction.member?.id !== 100737000973275136n) {
-        if (!this.permissions.role.has(interaction.member?.roles ?? [], 'MANAGE_MESSAGES')) {
-          await interaction.respond(this.generator.error.getPermissionDenied('MANAGE_MESSAGES'));
+        if (!Permissions.role.hasPermission(interaction.member?.roles ?? [], 'MANAGE_MESSAGES')) {
+          await interaction.respond({
+            embeds: Responses.error.makePermissionDenied('MANAGE_MESSAGES'),
+          });
           return;
         }
       }
@@ -59,7 +64,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         // Validate Lengths
         if (reactions.length === 0 || reactions.length >= 10) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Invalid List of Reactions. You must specify between 1 and 10 Emojis to react.'),
           });
           return;
@@ -69,7 +74,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         for (const reaction of reactions) {
           if (Emoji.validate(reaction)) continue;
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Invalid Emoji Data in Reaction List.')
               .addField('Data', reaction),
           });
@@ -87,14 +92,14 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         // Cross Comparisons.
         if (args.auto.set.type === 'all' && hasConfigurationForSpecific) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription(`Type '${args.auto.set.type}' is not compatible to 'Message with' types.`),
           });
           return;
         }
         if (args.auto.set.type !== 'all' && hasConfigurationForAll) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription(`Type '${args.auto.set.type}' is not compatible to 'All Messages'.`),
           });
           return;
@@ -120,7 +125,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
         // Respond
         await interaction.respond({
-          embeds: this.generator.result.generic()
+          embeds: Responses.success.make()
             .setDescription('Applied Auto Reaction Configuration')
             .addField('Channel', `<#${args.auto.set.channel.id}>`, true)
             .addField('Type', args.auto.set.type, true)
@@ -141,7 +146,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         // Exist Check
         if (fetchByPrimary === null || fetchByPrimary.versionstamp === undefined) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Unknown Auto Reaction Configuration. Please check the channel and type is correct.'),
           });
           return;
@@ -152,7 +157,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
         // Respond
         await interaction.respond({
-          embeds: this.generator.result.generic()
+          embeds: Responses.success.make()
             .setDescription('Removed Auto Reaction Configuration')
             .addField('Channel', `<#${args.auto.remove.channel.id}>`, true)
             .addField('Type', args.auto.remove.type, true),
@@ -172,7 +177,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         // Exists Check
         if (fetchByPrimary === null || fetchByPrimary.versionstamp === undefined) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('Unknown Auto Reaction Configuration. Please check the channel and type is correct.'),
           });
           return;
@@ -196,7 +201,7 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
 
         // Send Component Message
         await interaction.respond({
-          embeds: this.generator.result.generic()
+          embeds: Responses.success.make()
             .setDescription('Please use the following drop-down to exclude up to 25 users and roles from a reaction type in the specified channel.')
             .addField('Channel', `<#${args.auto.exclude.channel.id}>`, true)
             .addField('Type', args.auto.exclude.type, true),
@@ -206,7 +211,10 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
               components: [
                 {
                   type: MessageComponentTypes.SelectMenuUsers,
-                  customId: `reactionModuleExclude/${fetchByPrimary.id}/user/${interaction.user.id}`,
+                  customId: ComponentHandler.makeCustomId('reaction-auto-exclude', interaction.user.id.toString(), [
+                    `${fetchByPrimary.id}`,
+                    'user',
+                  ]),
                   placeholder: 'Select up to 25 Users',
                   minValues: 0,
                   maxValues: 25,
@@ -219,7 +227,10 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
               components: [
                 {
                   type: MessageComponentTypes.SelectMenuRoles,
-                  customId: `reactionModuleExclude/${fetchByPrimary.id}/role/${interaction.user.id}`,
+                  customId: ComponentHandler.makeCustomId('reaction-auto-exclude', interaction.user.id.toString(), [
+                    `${fetchByPrimary.id}`,
+                    'role',
+                  ]),
                   placeholder: 'Select up to 25 Roles',
                   minValues: 0,
                   maxValues: 25,
@@ -242,14 +253,14 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         // Exists Check
         if (configurations.result.length === 0) {
           await interaction.respond({
-            embeds: this.generator.error.generic()
+            embeds: Responses.error.make()
               .setDescription('No Auto Reaction Configurations found. Please check the channel is correct and try again.'),
           });
           return;
         }
 
         // Build Embed
-        const embeds = this.generator.result.generic()
+        const embeds = Responses.success.make()
           .setTitle('Auto Reaction List')
           .addField('Channel', `<#${args.auto.list.channel.id}>`, true);
 
@@ -273,35 +284,16 @@ export class ReactionModuleGroupAuto extends CommandGroupHandler {
         });
       }
     });
-  }
-}
 
-class ReactionModuleComponentAuto extends CommandComponentHandler {
-  public override initialize(): Promise<void> | void {
-    Bootstrap.event.add('interactionCreate', async (interaction) => {
-      if (!this.expect('reactionModuleExclude', interaction)) return;
+    ComponentHandler.builder().expectation({
+      header: 'reaction-auto-exclude',
+      allowApplicationUser: false,
+      allowBotUser: false,
+      requireAuthor: true,
+      within: 1800,
+    }).handle(async (interaction) => {
       await interaction.deferEdit();
-      const chunks = interaction.data!.customId!.split('/');
-
-      // Check User
-      if (interaction.user.id.toString() !== chunks[3]) {
-        await interaction.respond({
-          embeds: this.generator.error.generic()
-            .setDescription('This component can only be used by the original user of this message.'),
-        }, {
-          isPrivate: true,
-        });
-        return;
-      }
-
-      // Check Expiration
-      if (this.checkIfExpired(interaction.message?.timestamp ?? 0, 600)) {
-        await interaction.edit({
-          embeds: this.generator.error.generic()
-            .setDescription('Request has expired. Please use the original command again.'),
-        });
-        return;
-      }
+      const packet = ComponentHandler.unmakeCustomId(interaction.data!.customId!).packet;
 
       // Resolve Data
       const resolved = interaction.data!.resolved! as {
@@ -312,17 +304,17 @@ class ReactionModuleComponentAuto extends CommandComponentHandler {
       const members = resolved?.members?.map((v) => v.id.toString()) ?? null;
 
       // Get Database
-      const configuration = await DatabaseConnector.appd.reactionModuleConfiguration.find(chunks[1]);
+      const configuration = await DatabaseConnector.appd.reactionModuleConfiguration.find(packet[0]);
       if (configuration === null) {
         await interaction.edit({
-          embeds: this.generator.error.generic()
+          embeds: Responses.error.make()
             .setDescription('This Auto Reaction Configuration no longer exists. Please use the original command again.'),
         });
         return;
       }
 
       // Update Database
-      await DatabaseConnector.appd.reactionModuleConfiguration.update(chunks[1], {
+      await DatabaseConnector.appd.reactionModuleConfiguration.update(packet[0], {
         exclusion: {
           user: members ?? configuration.value.exclusion?.user ?? [],
           role: roles ?? configuration.value.exclusion?.role ?? [],
@@ -332,9 +324,9 @@ class ReactionModuleComponentAuto extends CommandComponentHandler {
       });
 
       // Get Updated and Respond
-      const updated = await DatabaseConnector.appd.reactionModuleConfiguration.find(chunks[1]);
+      const updated = await DatabaseConnector.appd.reactionModuleConfiguration.find(packet[0]);
       await interaction.respond({
-        embeds: this.generator.result.generic()
+        embeds: Responses.success.make()
           .setDescription('Exclusions have been updated.')
           .addField('Channel', `<#${configuration.value.channelId}>`, true)
           .addField('Users', ((updated?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')

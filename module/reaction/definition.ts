@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionTypes, ChannelTypes } from '@discordeno';
-import { Initializable } from '../../lib/generic/initializable.ts';
+import { AsyncInitializable } from '../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../mod.ts';
 
-export class ReactionModuleDefinition extends Initializable {
-  public override initialize(): Promise<void> | void {
+export class Definition extends AsyncInitializable {
+  // deno-lint-ignore require-await
+  public override async initialize(): Promise<void> {
     Bootstrap.interaction.add({
       name: 'reaction',
       description: 'Reaction Management Module',
@@ -15,14 +16,14 @@ export class ReactionModuleDefinition extends Initializable {
           options: [
             {
               name: 'set',
-              description: 'Set auto reactions for a channel for the specified type..',
+              description: 'Set auto reactions for a channel for the specified type.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'channel',
                   description: 'The channel to apply this auto reaction.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
@@ -70,7 +71,7 @@ export class ReactionModuleDefinition extends Initializable {
                   name: 'channel',
                   description: 'The channel to apply this auto reaction.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
@@ -112,7 +113,7 @@ export class ReactionModuleDefinition extends Initializable {
                   name: 'channel',
                   description: 'The channel to specify this action for.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
@@ -154,7 +155,7 @@ export class ReactionModuleDefinition extends Initializable {
                   name: 'channel',
                   description: 'A channel to search.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
               ],
@@ -175,14 +176,14 @@ export class ReactionModuleDefinition extends Initializable {
                   name: 'from',
                   description: 'The channel to monitor for reactions.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'to',
                   description: 'The channel to send messages to.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
@@ -226,7 +227,7 @@ export class ReactionModuleDefinition extends Initializable {
                   name: 'from',
                   description: 'The channel to specify this action for.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
@@ -246,7 +247,7 @@ export class ReactionModuleDefinition extends Initializable {
                   name: 'channel',
                   description: 'A channel to search. Supports to and from forwarding.',
                   type: ApplicationCommandOptionTypes.Channel,
-                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement, ChannelTypes.GuildMedia],
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: false,
                 },
               ],
