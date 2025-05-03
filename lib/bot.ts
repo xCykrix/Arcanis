@@ -8,21 +8,21 @@ import { type BotDesiredProperties, desiredProperties } from './desiredPropertie
  * @param bot The Internal Bot
  * @returns A {@link CacheBotType}.
  */
-const getProxyCacheBot = (bot: Bot<BotDesiredProperties>) =>
-  createProxyCache<BotDesiredProperties, DesiredPropertiesBehavior.RemoveKey, Bot<BotDesiredProperties, DesiredPropertiesBehavior.RemoveKey>>(bot, {
+const getProxyCacheBot = (bot: Bot<BotDesiredProperties, DesiredPropertiesBehavior.ChangeType>) =>
+  createProxyCache<BotDesiredProperties, DesiredPropertiesBehavior.ChangeType, Bot<BotDesiredProperties, DesiredPropertiesBehavior.ChangeType>>(bot, {
     cacheInMemory: {
       user: true,
       guild: true,
-      member: true,
       role: true,
       channel: true,
-      default: false,
+      member: true,
+      default: true,
     },
     cacheOutsideMemory: {
       default: false,
     },
     sweeper: {
-      interval: 300 * 1000,
+      interval: 5 * 60 * 1000,
       filter: {
         user: (user) => {
           if (user.id === bot.id) return false;
@@ -47,16 +47,17 @@ export type CacheBotType = ReturnType<typeof getProxyCacheBot>;
  */
 export function createBotWithToken(token: string): CacheBotType {
   return getProxyCacheBot(
-    createBot<BotDesiredProperties>({
+    createBot<BotDesiredProperties, DesiredPropertiesBehavior.ChangeType>({
       token,
       intents: GatewayIntents.Guilds |
+        GatewayIntents.GuildModeration |
         GatewayIntents.GuildMembers |
         GatewayIntents.GuildIntegrations |
         GatewayIntents.GuildWebhooks |
         GatewayIntents.GuildMessages |
         GatewayIntents.GuildMessageReactions |
         GatewayIntents.MessageContent,
-      desiredPropertiesBehavior: DesiredPropertiesBehavior.RemoveKey,
+      desiredPropertiesBehavior: DesiredPropertiesBehavior.ChangeType,
       desiredProperties: desiredProperties,
     }),
   );

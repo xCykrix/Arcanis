@@ -1,7 +1,9 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
-import type { Application } from './model/application.model.ts';
+import type { Component } from './model/component.model.ts';
 import type { ReactionModuleForwardConfiguration } from './model/forward.model.ts';
+import { Lock } from './model/persistd/lock.ts';
 import type { PinModuleConfiguration } from './model/pin.model.ts';
+import type { Application } from './model/rconf/application.model.ts';
 import type { ReactionModuleConfiguration } from './model/reaction.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
@@ -22,24 +24,38 @@ const rconfStaticSchema = {
 
 /** appdStaticSchema */
 const appdStaticSchema = {
-  pinModuleConfiguration: collection(createModel<PinModuleConfiguration>(), {
+  component: collection(createModel<Component>(), {
+    indices: {
+      callbackId: 'primary',
+    },
+  }),
+  forward: collection(createModel<ReactionModuleForwardConfiguration>(), {
+    indices: {
+      guid: 'primary',
+      guildId: 'secondary',
+      fromChannelId: 'secondary',
+      toChannelId: 'secondary',
+    },
+  }),
+  pin: collection(createModel<PinModuleConfiguration>(), {
     indices: {
       guid: 'primary',
     },
   }),
-  reactionModuleConfiguration: collection(createModel<ReactionModuleConfiguration>(), {
+  reaction: collection(createModel<ReactionModuleConfiguration>(), {
     indices: {
       guid: 'primary',
       guildId: 'secondary',
       channelId: 'secondary',
     },
   }),
-  reactionModuleForwardConfiguration: collection(createModel<ReactionModuleForwardConfiguration>(), {
+};
+
+/** persistdStaticSchema */
+const persistdStaticSchema = {
+  locks: collection(createModel<Lock>(), {
     indices: {
       guid: 'primary',
-      guildId: 'secondary',
-      fromChannelId: 'secondary',
-      toChannelId: 'secondary',
     },
   }),
 };
@@ -50,9 +66,10 @@ const appdStaticSchema = {
 export class DatabaseConnector {
   static #rconf: Deno.Kv;
   static #appd: Deno.Kv;
-  public static persist: Deno.Kv;
+  static #persistd: Deno.Kv;
   public static rconf: Database<typeof rconfStaticSchema>;
   public static appd: Database<typeof appdStaticSchema>;
+  public static persistd: Database<typeof persistdStaticSchema>;
 
   /**
    * Initialize the Database Connectors.
@@ -75,7 +92,7 @@ export class DatabaseConnector {
     // Initialize KV.
     this.#rconf = await Deno.openKv(rconf);
     this.#appd = await Deno.openKv(appd);
-    this.persist = await Deno.openKv(persist);
+    this.#persistd = await Deno.openKv(persist);
 
     // Initialize Database Wrapper.
     this.rconf = kvdex({
@@ -85,6 +102,10 @@ export class DatabaseConnector {
     this.appd = kvdex({
       kv: this.#appd,
       schema: appdStaticSchema,
+    });
+    this.persistd = kvdex({
+      kv: this.#persistd,
+      schema: persistdStaticSchema,
     });
   }
 }

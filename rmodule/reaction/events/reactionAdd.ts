@@ -15,7 +15,7 @@ export class ReactionAddEvent extends AsyncInitializable {
 
       // Check for Configuration
       const guid = makeGlobalReactionModuleForwardID(reaction.guildId.toString(), reaction.channelId.toString(), reaction.emoji.name);
-      const fetchByPrimary = await DatabaseConnector.appd.reactionModuleForwardConfiguration.findByPrimaryIndex('guid', guid);
+      const fetchByPrimary = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
 
       // Ensure Exists
       if (fetchByPrimary?.versionstamp === undefined) {
@@ -23,7 +23,7 @@ export class ReactionAddEvent extends AsyncInitializable {
       }
 
       // Check Locking Cache
-      const locks = await DatabaseConnector.persist.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
+      const locks = await DatabaseConnector.persistd.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
       if (locks.versionstamp !== null) {
         optic.debug(`M${reaction.messageId} from C${reaction.channelId} in G${reaction.guildId} was triggered but is persistence cached.`);
         return;
@@ -57,14 +57,14 @@ export class ReactionAddEvent extends AsyncInitializable {
       if ((message.embeds?.length ?? 0) !== 0) type = 'embed';
 
       // Recheck Lock
-      const relock = await DatabaseConnector.persist.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
+      const relock = await DatabaseConnector.persistd.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
       if (relock.versionstamp !== null) {
         optic.debug(`M${reaction.messageId} from C${reaction.channelId} in G${reaction.guildId} was triggered but is persistence cached as race condition guard.`);
         return;
       }
 
       // Write to Lock Cache
-      await DatabaseConnector.persist.set([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId], true, {
+      await DatabaseConnector.persistd.set([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId], true, {
         expireIn: fetchByPrimary.value.within * 1000,
       });
 

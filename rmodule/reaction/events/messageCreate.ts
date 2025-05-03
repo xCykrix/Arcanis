@@ -1,9 +1,8 @@
 import * as urlRegexSafe from '@url-regex-safe';
 import { DatabaseConnector } from '../../../lib/database/database.ts';
-import { makeGlobalReactionModuleReactionID } from '../../../lib/database/model/reaction.model.ts';
+import { makeGlobalReactionModuleReactionID, ReactionType } from '../../../lib/database/model/reaction.model.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../../mod.ts';
-import type { ReactionType } from '../share/types.ts';
 
 export class MessageCreateEvent extends AsyncInitializable {
   // deno-lint-ignore require-await
@@ -19,12 +18,12 @@ export class MessageCreateEvent extends AsyncInitializable {
       if ((message.embeds?.length ?? 0) !== 0) type = 'embed-only';
 
       // Fetch Database and Abort if Not Configured
-      let fetchByPrimary = await DatabaseConnector.appd.reactionModuleConfiguration.findByPrimaryIndex(
+      let fetchByPrimary = await DatabaseConnector.appd.reaction.findByPrimaryIndex(
         'guid',
         makeGlobalReactionModuleReactionID(message.guildId!.toString(), message.channelId.toString(), type),
       );
       if (fetchByPrimary === null) {
-        fetchByPrimary = await DatabaseConnector.appd.reactionModuleConfiguration.findByPrimaryIndex(
+        fetchByPrimary = await DatabaseConnector.appd.reaction.findByPrimaryIndex(
           'guid',
           makeGlobalReactionModuleReactionID(message.guildId!.toString(), message.channelId.toString(), 'all'),
         );

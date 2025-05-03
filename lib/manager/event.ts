@@ -1,5 +1,5 @@
 import type { Bootstrap } from '../../mod.ts';
-import { asyncInterceptor } from '../logging/optic.ts';
+import { asyncInterceptor } from '../util/optic.ts';
 
 export type EventParameters<T extends keyof typeof Bootstrap.bot.events> = Parameters<NonNullable<typeof Bootstrap.bot.events[T]>>;
 

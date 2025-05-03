@@ -1,5 +1,5 @@
 import { Bootstrap } from '../mod.ts';
-import { createIncidentEvent, optic } from './logging/optic.ts';
+import { createIncidentEvent, optic } from './util/optic.ts';
 
 export function defaults(): void {
   // Native Startup
@@ -10,6 +10,8 @@ export function defaults(): void {
     // Upsert Guild Commands
     await Bootstrap.bot.helpers.upsertGlobalApplicationCommands([]);
     for (const guild of packet.guilds) {
+      // const channel = await Bootstrap.bot.helpers.getGuild(guild);
+      // await Bootstrap.bot.helpers.getChannel();
       await Bootstrap.bot.helpers.upsertGuildApplicationCommands(guild, Bootstrap.interaction.values().toArray()).catch((e) => {
         createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGlobalApplicationCommands.', e);
       });

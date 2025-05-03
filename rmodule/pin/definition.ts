@@ -27,20 +27,20 @@ export class Definition extends AsyncInitializable {
                   required: true,
                 },
                 {
-                  name: 'mode',
-                  description: 'The mode to apply to the Sticky Pin.',
-                  type: ApplicationCommandOptionTypes.String,
+                  name: 'minutes',
+                  description: 'How often the message will move to the bottom regardless of messages sent.',
+                  type: ApplicationCommandOptionTypes.Number,
                   required: false,
-                  choices: [
-                    {
-                      name: 'Within 5 Messages or 15-30 Minutes (Slow)',
-                      value: 'slow',
-                    },
-                    {
-                      name: 'Within 3 Messages or 5-10 Minutes (Fast)',
-                      value: 'fast',
-                    },
-                  ],
+                  minValue: 5,
+                  maxValue: 1440,
+                },
+                {
+                  name: 'messages',
+                  description: 'How many messages may be sent before the message will move to the bottom regardless of time.',
+                  type: ApplicationCommandOptionTypes.Number,
+                  required: false,
+                  minValue: 3,
+                  maxValue: 255,
                 },
               ],
             },

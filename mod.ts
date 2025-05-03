@@ -1,13 +1,13 @@
 import type { CreateApplicationCommand } from '@discordeno';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
 import { DatabaseConnector } from './lib/database/database.ts';
-import type { Application } from './lib/database/model/application.model.ts';
+import type { Application } from './lib/database/model/rconf/application.model.ts';
 import { defaults } from './lib/defaults.ts';
-import { optic } from './lib/logging/optic.ts';
 import { EventManager } from './lib/manager/event.ts';
-import PinModule from './module/pin/module.ts';
-import ReactionModule from './module/reaction/module.ts';
+import { Loader } from './lib/util/loader.ts';
+import { optic } from './lib/util/optic.ts';
 
+/** Boostrap Class */
 export class Bootstrap {
   // Internal Registers
   static #application: Application | null = null;
@@ -41,9 +41,7 @@ export class Bootstrap {
     this.event = new EventManager(this.bot);
     defaults();
 
-    // Register Module
-    await (new ReactionModule()).initialize();
-    await (new PinModule()).initialize();
+    await Loader.load();
 
     // Connect to Discord Gateway.
     if (connect) await this.bot.start();

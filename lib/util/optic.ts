@@ -8,7 +8,7 @@ import { isWebhookValid } from '../util/guard/webhook.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()
-  .withMinLogLevel(Level.Debug)
+  .withMinLogLevel(Level.Trace)
   .withFormat(
     new TokenReplacer()
       .withFormat('{dateTime} {level} {msg} {metadata}')
@@ -22,7 +22,7 @@ const consoleStream = new ConsoleStream()
 /** File Streaming */
 await Deno.mkdir(new URL('./optical/', Deno.mainModule), { recursive: true });
 const fileStream = new FileStream('./optical/optic.txt')
-  .withMinLogLevel(Level.Warn)
+  .withMinLogLevel(Level.Trace)
   .withFormat(
     new JsonFormatter()
       .withPrettyPrintIndentation(2)
@@ -83,4 +83,9 @@ export function asyncInterceptor(id: string, callback: (...args: unknown[]) => P
       optic.warn(`Unhandled Exception(?) in '${id}'. Caught to thrown non-error instanceof.`, e);
     }
   }
+}
+
+export function intercept<T>(instance: T): T {
+  optic.debug(JSON.stringify(instance, null, 2));
+  return instance;
 }

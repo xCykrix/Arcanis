@@ -2,17 +2,19 @@
   "version": "4",
   "specifiers": {
     "jsr:@amethyst/discord-emoji@*": "2.5.3",
-    "jsr:@olli/kvdex@3.3.0": "3.3.0",
+    "jsr:@olli/kvdex@3.4.0": "3.4.0",
     "jsr:@onjara/optic@2.0.3": "2.0.3",
     "jsr:@std/bytes@^1.0.4": "1.0.5",
     "jsr:@std/cli@1.0.12": "1.0.12",
-    "jsr:@std/collections@^1.0.9": "1.0.10",
-    "jsr:@std/fmt@^1.0.2": "1.0.6",
-    "jsr:@std/path@^1.0.6": "1.0.8",
+    "jsr:@std/collections@^1.0.9": "1.0.11",
+    "jsr:@std/fmt@^1.0.2": "1.0.7",
+    "jsr:@std/fs@1.0.17": "1.0.17",
+    "jsr:@std/path@^1.0.6": "1.0.9",
+    "jsr:@std/path@^1.0.9": "1.0.9",
     "jsr:@std/ulid@1": "1.0.0",
     "npm:@discordeno/bot@next": "21.0.0-next.1c20b59",
     "npm:@types/node@*": "22.12.0",
-    "npm:dd-cache-proxy@2.6.2": "2.6.2_@discordeno+bot@21.0.0-next.1c20b59",
+    "npm:dd-cache-proxy@2.6.3": "2.6.3_@discordeno+bot@21.0.0-next.1c20b59",
     "npm:url-regex-safe@*": "4.0.0",
     "npm:zod@^3.24.0": "3.24.2"
   },
@@ -20,8 +22,8 @@
     "@amethyst/discord-emoji@2.5.3": {
       "integrity": "f3f8c07efb5c9e014bf65cd6afaef436aa8492c61c66d975fd1318c652fce6be"
     },
-    "@olli/kvdex@3.3.0": {
-      "integrity": "d27cbd0a5d8233c76493be7aa45d2099f97970e07c0f62529f184bacb1e68232",
+    "@olli/kvdex@3.4.0": {
+      "integrity": "007b1dca50a20f7d036d186fb24875ce2eb19d9c0b3a32878edc1d0e8181aa9a",
       "dependencies": [
         "jsr:@std/bytes",
         "jsr:@std/cli",
@@ -34,7 +36,7 @@
       "integrity": "b4bf8cae0820a3c3f362ba4d78939237fcfa23e3087bbd3f9fd3c883839820f1",
       "dependencies": [
         "jsr:@std/fmt",
-        "jsr:@std/path"
+        "jsr:@std/path@^1.0.6"
       ]
     },
     "@std/bytes@1.0.5": {
@@ -43,14 +45,26 @@
     "@std/cli@1.0.12": {
       "integrity": "e5cfb7814d189da174ecd7a34fbbd63f3513e24a1b307feb2fcd5da47a070d90"
     },
-    "@std/collections@1.0.10": {
-      "integrity": "903af106a3d92970d74e20f7ebff77d9658af9bef4403f1dc42a7801c0575899"
+    "@std/collections@1.0.11": {
+      "integrity": "2f62cf9587484b1fff364f6c3e1f83478eea53dbb6faed6ffeda92ddb6b172f0"
     },
     "@std/fmt@1.0.6": {
       "integrity": "a2c56a69a2369876ddb3ad6a500bb6501b5bad47bb3ea16bfb0c18974d2661fc"
     },
+    "@std/fmt@1.0.7": {
+      "integrity": "2a727c043d8df62cd0b819b3fb709b64dd622e42c3b1bb817ea7e6cc606360fb"
+    },
+    "@std/fs@1.0.17": {
+      "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b",
+      "dependencies": [
+        "jsr:@std/path@^1.0.9"
+      ]
+    },
     "@std/path@1.0.8": {
       "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    },
+    "@std/path@1.0.9": {
+      "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
     },
     "@std/ulid@1.0.0": {
       "integrity": "d41c3d27a907714413649fee864b7cde8d42ee68437d22b79d5de4f81d808780"
@@ -97,8 +111,8 @@
         "undici-types"
       ]
     },
-    "dd-cache-proxy@2.6.2_@discordeno+bot@21.0.0-next.1c20b59": {
-      "integrity": "sha512-/12T0CYvpPvGXdkXHWuAsy1Ng7CFcvoKKkRLeUVg8pYB019p/Huq5cohG3oWKGQ0qEFPN+s1tqmMw3tuRNQuKQ==",
+    "dd-cache-proxy@2.6.3_@discordeno+bot@21.0.0-next.1c20b59": {
+      "integrity": "sha512-PSnsHqlDNl/qMBzr+zyGrQ7bgeTAuwUQeqWOYXXa0MCCEUMJCE7RJfKmwqiu0LN7oXEovcG3mLSIXQdXLJM7Kg==",
       "dependencies": [
         "@discordeno/bot"
       ]
@@ -134,15 +148,17 @@
   },
   "remote": {
     "https://esm.sh/@drashland/drash@3.0.0-beta.2/denonext/modules/chains/RequestChain/mod.native.mjs": "f3c2c796734c6c1071533968326cc3c51bbeea4b4f1dd4bccfdbe27ac5f4e5c8",
-    "https://esm.sh/@drashland/drash@3.0.0-beta.2/modules/chains/RequestChain/mod.native.js": "198277c17493a34578a3653b4ffef34b03969d3e1ef8bf9d01f3db8916aabd6f"
+    "https://esm.sh/@drashland/drash@3.0.0-beta.2/modules/chains/RequestChain/mod.native.js": "198277c17493a34578a3653b4ffef34b03969d3e1ef8bf9d01f3db8916aabd6f",
+    "https://raw.githubusercontent.com/AwesomeStickz/dd-cache-proxy/refs/heads/main/index.ts": "991689fc03d75ccce9ad7f254289324d27bbc551727da64978add6bc5372af75"
   },
   "workspace": {
     "dependencies": [
       "jsr:@amethyst/discord-emoji@*",
-      "jsr:@olli/kvdex@3.3.0",
+      "jsr:@olli/kvdex@3.4.0",
       "jsr:@onjara/optic@2.0.3",
+      "jsr:@std/fs@1.0.17",
       "npm:@discordeno/bot@next",
-      "npm:dd-cache-proxy@2.6.2",
+      "npm:dd-cache-proxy@2.6.3",
       "npm:url-regex-safe@*"
     ]
   }

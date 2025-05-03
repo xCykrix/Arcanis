@@ -1,8 +1,6 @@
-import type { ReactionType } from '../../../module/reaction/share/types.ts';
-
 /** The Reaction Module Model. */
 export type ReactionModuleConfiguration = {
-  guid: GlobalReactionModuleReactionID;
+  guid: string;
   guildId: string;
   channelId: string;
   reaction: string[];
@@ -13,10 +11,6 @@ export type ReactionModuleConfiguration = {
   };
 };
 
-/** The Global Reaction Module Identifier. */
-type GlobalReactionModuleReactionID = `${string}/${string}/${ReactionType}`;
+/** The Reaction Type Indicator. */
+export type ReactionType = 'all' | 'embed-only' | 'media-only' | 'url-only' | 'text-only';
 
-/** Make a Global Reaction Module Identifier. */
-export function makeGlobalReactionModuleReactionID(guildId: string, channelId: string, type: ReactionType): GlobalReactionModuleReactionID {
-  return `${guildId}/${channelId}/${type}`;
-}

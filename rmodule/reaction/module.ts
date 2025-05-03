@@ -1,7 +1,7 @@
 import { AsyncInitializable } from '../../lib/generic/initializable.ts';
-import { MessageCreateEvent } from './callback/messageCreate.ts';
-import { ReactionAddEvent } from './callback/reactionAdd.ts';
 import { Definition } from './definition.ts';
+import { MessageCreateEvent } from './events/messageCreate.ts';
+import { ReactionAddEvent } from './events/reactionAdd.ts';
 import { AutoCommandGroup } from './group/auto.ts';
 import { ForwardCommandGroup } from './group/forward.ts';
 

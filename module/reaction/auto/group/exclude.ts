@@ -1,0 +1,214 @@
+import { ChannelTypes, type Collection, MessageComponentTypes, type SelectMenuDefaultValue } from '@discordeno';
+import { DatabaseConnector } from '../../../../lib/database/database.ts';
+import { GUID } from '../../../../lib/database/guid.ts';
+import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { ComponentHandler } from '../../../../lib/util/builder/components.ts';
+import { GroupHandler } from '../../../../lib/util/builder/group.ts';
+import { Responses } from '../../../../lib/util/helper/responses.ts';
+import type { Bootstrap } from '../../../../mod.ts';
+import type { AutoGroup } from '../definition/definition.ts';
+
+export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
+  public override async initialize(): Promise<void> {
+    const userCallback = ComponentHandler.builder({
+      moduleId: 'reaction.callback.user',
+      allowApplicationUser: false,
+      allowBotUser: false,
+      requireAuthor: true,
+      within: 300,
+    }).handle(async (interaction, self) => {
+      await interaction.deferEdit();
+      const { constants } = (await self.getCallbackId(interaction.data!.customId!))!;
+
+      // Resolve Data
+      const resolved = interaction.data!.resolved! as {
+        members?: Collection<bigint, typeof Bootstrap.bot.transformers.$inferredTypes.member>;
+      };
+      const members = resolved?.members?.map((v) => v.id.toString()) ?? null;
+
+      // Get Database
+      const configuration = await DatabaseConnector.appd.reaction.find(constants[0]);
+      if (configuration === null) {
+        await interaction.edit({
+          embeds: Responses.error.make()
+            .setDescription('Unable to find the specified Auto Reaction Task. Please check the Channel and Type specified.'),
+        });
+        return;
+      }
+
+      // Update Database
+      await DatabaseConnector.appd.reaction.update(constants[0], {
+        exclusion: {
+          user: (members === null ? [] : members) ?? configuration.value.exclusion?.user ?? [],
+          role: configuration.value.exclusion?.role ?? [],
+        },
+      }, {
+        strategy: 'merge-shallow',
+      });
+
+      // Get Updated and Respond
+      const updated = await DatabaseConnector.appd.reaction.find(constants[0]);
+      await interaction.respond({
+        embeds: Responses.success.make()
+          .setDescription('Auto Reaction Exclusions Updated')
+          .addField('Channel', `<#${configuration.value.channelId}>`, true)
+          .addField('Users', ((updated?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
+          .addField('Roles', ((updated?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
+      });
+      return;
+    });
+    userCallback.build();
+
+    const roleCallback = ComponentHandler.builder({
+      moduleId: 'reaction.callback.role',
+      allowApplicationUser: false,
+      allowBotUser: false,
+      requireAuthor: true,
+      within: 300,
+    }).handle(async (interaction, self) => {
+      await interaction.deferEdit();
+      const { constants } = (await self.getCallbackId(interaction.data!.customId!))!;
+
+      // Resolve Data
+      const resolved = interaction.data!.resolved! as {
+        roles?: Collection<bigint, typeof Bootstrap.bot.transformers.$inferredTypes.role>;
+      };
+      const roles = resolved?.roles?.map((v) => v.id.toString()) ?? null;
+
+      // Get Database
+      const configuration = await DatabaseConnector.appd.reaction.find(constants[0]);
+      if (configuration === null) {
+        await interaction.edit({
+          embeds: Responses.error.make()
+            .setDescription('Unable to find the specified Auto Reaction Task. Please check the Channel and Type specified.'),
+        });
+        return;
+      }
+
+      // Update Database
+      await DatabaseConnector.appd.reaction.update(constants[0], {
+        exclusion: {
+          user: configuration.value.exclusion?.user ?? [],
+          role: (roles === null ? [] : roles) ?? configuration.value.exclusion?.role ?? [],
+        },
+      }, {
+        strategy: 'merge-shallow',
+      });
+
+      // Get Updated and Respond
+      const updated = await DatabaseConnector.appd.reaction.find(constants[0]);
+      await interaction.respond({
+        embeds: Responses.success.make()
+          .setDescription('Auto Reaction Exclusions Updated')
+          .addField('Channel', `<#${configuration.value.channelId}>`, true)
+          .addField('Users', ((updated?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
+          .addField('Roles', ((updated?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
+      });
+      return;
+    });
+    roleCallback.build();
+
+    GroupHandler.builder<AutoGroup>({
+      interaction: 'reaction',
+      requireGuild: true,
+      supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+      userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
+      userRequiredChannelPermissions: [],
+      applicationRequiredGuildPermissions: [],
+      applicationRequiredChannelPermissions: [],
+    })
+      // deno-lint-ignore require-await
+      .inhibitor(async ({ args }) => {
+        return args.auto?.exclude === undefined;
+      })
+      .handle(async ({ interaction, args }) => {
+        // Defer for Main Processing
+        await interaction.defer();
+
+        // Fetch Appd Reaction by Primary
+        const guid = GUID.makeVersion1GUID({
+          module: 'reaction.auto',
+          guildId: args.auto!.exclude!.channel!.guildId!.toString(),
+          channelId: args.auto!.exclude!.channel!.id!.toString(),
+          data: [
+            args.auto!.exclude!.type!,
+          ],
+        });
+
+        // Check Exists
+        const appdReactionByPrimary = await DatabaseConnector.appd.reaction.findByPrimaryIndex('guid', guid);
+        if (appdReactionByPrimary?.versionstamp === undefined) {
+          await interaction.respond({
+            embeds: Responses.error.make()
+              .setDescription('Unable to find the specified Auto Reaction Task. Please check the Channel and Type specified.'),
+          });
+          return;
+        }
+
+        // Load Defaults
+        const defaultRole: SelectMenuDefaultValue[] = [];
+        const defaultUser: SelectMenuDefaultValue[] = [];
+        appdReactionByPrimary.value.exclusion?.role?.forEach((v) =>
+          defaultRole.push({
+            type: 'role',
+            id: BigInt(v),
+          })
+        );
+        appdReactionByPrimary.value?.exclusion?.user?.forEach((v) =>
+          defaultUser.push({
+            type: 'user',
+            id: BigInt(v),
+          })
+        );
+
+        // Respond
+        await interaction.respond({
+          embeds: Responses.success.make()
+            .setDescription('Please use the following')
+            .addField('Channel', `<#${args.auto!.exclude!.channel.id}>`, true)
+            .addField('Type', args.auto!.exclude!.type, true),
+          components: [
+            {
+              type: MessageComponentTypes.ActionRow,
+              components: [
+                {
+                  type: MessageComponentTypes.SelectMenuUsers,
+                  customId: await userCallback.makeId({
+                    userId: interaction.user.id.toString(),
+                    constants: [
+                      `${appdReactionByPrimary.id}`,
+                      'user',
+                    ],
+                  }),
+                  placeholder: 'Select up to 25 Users',
+                  minValues: 0,
+                  maxValues: 25,
+                  defaultValues: defaultUser,
+                },
+              ],
+            },
+            {
+              type: MessageComponentTypes.ActionRow,
+              components: [
+                {
+                  type: MessageComponentTypes.SelectMenuRoles,
+                  customId: await roleCallback.makeId({
+                    userId: interaction.user.id.toString(),
+                    constants: [
+                      `${appdReactionByPrimary.id}`,
+                      'role',
+                    ],
+                  }),
+                  placeholder: 'Select up to 25 Roles',
+                  minValues: 0,
+                  maxValues: 25,
+                  defaultValues: defaultRole,
+                },
+              ],
+            },
+          ],
+        });
+      }).build();
+  }
+}

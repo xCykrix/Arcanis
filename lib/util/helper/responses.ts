@@ -1,4 +1,4 @@
-import { EmbedsBuilder, type PermissionStrings } from '@discordeno';
+import { type ChannelTypes, EmbedsBuilder, type PermissionStrings } from '@discordeno';
 
 /**
  * A Successful Response Generator for EmbedsBuilder.
@@ -36,9 +36,9 @@ class ErrorResponseGenerator {
    * @param supported The Channel Type that SHOULD be used.
    * @returns EmbedsBuilder
    */
-  public makeUnsupportedChannel(supported: 'Guild Channels' | 'Direct Messages'): EmbedsBuilder {
+  public makeUnsupportedChannel(supported: ChannelTypes[]): EmbedsBuilder {
     return this.make()
-      .setDescription(`This interaction only supports ${supported}.`);
+      .setDescription(`This interaction does not support this type of channel. Supports: ${supported.join(' ')}`);
   }
 
   /**
@@ -46,9 +46,10 @@ class ErrorResponseGenerator {
    * @param permission The required {@link PermissionStrings}.
    * @returns EmbedsBuilder
    */
-  public makePermissionDenied(permission: PermissionStrings): EmbedsBuilder {
+  public makePermissionDenied(permissions: PermissionStrings[]): EmbedsBuilder {
     return this.make()
-      .setDescription(`Unauthorized Request. Permission '${permission.toString()}' is required.`);
+      .setDescription(`Unable to process this request. I am not authorized with the required permissions for this Channel.`)
+      .addField('Permissions', permissions.join('\n'));
   }
 }
 

@@ -1,5 +1,5 @@
 import { Bootstrap } from '../../../mod.ts';
-import { createIncidentEvent, optic } from '../../logging/optic.ts';
+import { createIncidentEvent, optic } from '../../util/optic.ts';
 
 const resolver = new Set<string>();
 
