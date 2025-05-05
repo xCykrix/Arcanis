@@ -106,6 +106,7 @@ export default class extends AsyncInitializable {
         ],
       });
     });
+    listCallback.build();
 
     GroupHandler.builder<Required<ReactionForwardList>>({
       interaction: 'reaction',

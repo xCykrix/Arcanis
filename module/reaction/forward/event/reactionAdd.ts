@@ -1,4 +1,4 @@
-import { avatarUrl, ButtonStyles, DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
+import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
