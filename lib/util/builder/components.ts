@@ -85,8 +85,6 @@ export class ComponentHandler {
     if (interaction.data === undefined) return false;
     if (interaction.data.customId === undefined) return false;
     if (!interaction.data.customId.includes(this.#expectations?.moduleId ?? 'ffffffff')) return false;
-    if (!this.#expectations?.allowApplicationUser && interaction.user.id === Bootstrap.bot.applicationId) return false;
-    if (!this.#expectations?.allowBotUser && interaction.user.bot) return false;
 
     // Get Callback and Validate
     const callback = await this.getCallbackId(interaction.data.customId);
@@ -120,10 +118,6 @@ export class ComponentHandler {
 export interface Expectations {
   /** The filtering module identifier. Unique to each module. */
   moduleId: string;
-  /** If the bot application can create this interaction. */
-  allowApplicationUser: boolean;
-  /** If a bot can create this interaction. */
-  allowBotUser: boolean;
   /** If only the original user can perform this interaction. */
   requireAuthor: boolean;
   /** The time, within seconds, that you must respond with this component (Message Only). */

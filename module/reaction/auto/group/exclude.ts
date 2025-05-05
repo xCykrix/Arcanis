@@ -6,15 +6,13 @@ import { ComponentHandler } from '../../../../lib/util/builder/components.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { Bootstrap } from '../../../../mod.ts';
-import type { AutoGroup } from '../definition/definition.ts';
+import type { ReactionAutoExclude } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     const userCallback = ComponentHandler.builder({
       moduleId: 'reaction.callback.user',
-      allowApplicationUser: false,
-      allowBotUser: false,
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
@@ -62,8 +60,6 @@ export default class extends AsyncInitializable {
 
     const roleCallback = ComponentHandler.builder({
       moduleId: 'reaction.callback.role',
-      allowApplicationUser: false,
-      allowBotUser: false,
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
@@ -109,7 +105,7 @@ export default class extends AsyncInitializable {
     });
     roleCallback.build();
 
-    GroupHandler.builder<AutoGroup>({
+    GroupHandler.builder<ReactionAutoExclude>({
       interaction: 'reaction',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
@@ -123,16 +119,18 @@ export default class extends AsyncInitializable {
         return args.auto?.exclude === undefined;
       })
       .handle(async ({ interaction, args }) => {
+        const exclude = args.auto!.exclude!;
+
         // Defer for Main Processing
         await interaction.defer();
 
         // Fetch Appd Reaction by Primary
         const guid = GUID.makeVersion1GUID({
           module: 'reaction.auto',
-          guildId: args.auto!.exclude!.channel!.guildId!.toString(),
-          channelId: args.auto!.exclude!.channel!.id!.toString(),
+          guildId: exclude.channel!.guildId!.toString(),
+          channelId: exclude.channel!.id!.toString(),
           data: [
-            args.auto!.exclude!.type!,
+            exclude.type!,
           ],
         });
 
@@ -166,8 +164,8 @@ export default class extends AsyncInitializable {
         await interaction.respond({
           embeds: Responses.success.make()
             .setDescription('Please use the following')
-            .addField('Channel', `<#${args.auto!.exclude!.channel.id}>`, true)
-            .addField('Type', args.auto!.exclude!.type, true),
+            .addField('Channel', `<#${exclude.channel.id}>`, true)
+            .addField('Type', exclude.type, true),
           components: [
             {
               type: MessageComponentTypes.ActionRow,

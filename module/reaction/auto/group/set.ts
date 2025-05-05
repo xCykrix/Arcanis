@@ -6,12 +6,12 @@ import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { hasChannelPermissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Emoji } from '../../../../lib/util/validation/emoji.ts';
-import type { AutoGroup } from '../definition/definition.ts';
+import type { ReactionAutoSet } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<AutoGroup>({
+    GroupHandler.builder<ReactionAutoSet>({
       interaction: 'reaction',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
@@ -25,8 +25,10 @@ export default class extends AsyncInitializable {
         return args.auto?.set === undefined;
       })
       .handle(async ({ interaction, args, guild, botMember }) => {
+        const set = args.auto!.set!;
+
         // Parse Reactions
-        const reaction = args.auto!.set!.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
+        const reaction = set.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
 
         // Check Payload of Reactions
         if (reaction.length === 0 || reaction.length > 10) {
@@ -50,9 +52,9 @@ export default class extends AsyncInitializable {
 
         // Permission Guard (Target Channel) - Bot Permissions
         const botPermissions: PermissionStrings[] = ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY'];
-        if (!hasChannelPermissions(guild!, args.auto!.set!.channel!.id, botMember!, botPermissions)) {
+        if (!hasChannelPermissions(guild!, set.channel!.id, botMember!, botPermissions)) {
           await interaction.respond({
-            embeds: Responses.error.makePermissionDenied(botPermissions),
+            embeds: Responses.error.makeBotPermissionDenied(botPermissions),
           }, { isPrivate: true });
           return;
         }
@@ -61,7 +63,7 @@ export default class extends AsyncInitializable {
         await interaction.defer();
 
         // Fetch Appd Reaction by Secondaries
-        const appdReactionBySecondary = await DatabaseConnector.appd.reaction.findBySecondaryIndex('channelId', args.auto!.set!.channel.id.toString());
+        const appdReactionBySecondary = await DatabaseConnector.appd.reaction.findBySecondaryIndex('channelId', set.channel.id.toString());
         let hasConfigurationForAll = false;
         let hasConfigurationForSpecific = false;
         for (const fetched of appdReactionBySecondary.result) {
@@ -70,17 +72,17 @@ export default class extends AsyncInitializable {
         }
 
         // Cross Comparisons
-        if (args.auto!.set!.type === 'all' && hasConfigurationForSpecific) {
+        if (set.type === 'all' && hasConfigurationForSpecific) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription(`Type '${args.auto!.set!.type}' is not compatible to 'Message with' types.`),
+              .setDescription(`Type '${set.type}' is not compatible to 'Message with' types.`),
           });
           return;
         }
-        if (args.auto!.set!.type !== 'all' && hasConfigurationForAll) {
+        if (set.type !== 'all' && hasConfigurationForAll) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription(`Type '${args.auto!.set!.type}' is not compatible to 'All Messages'.`),
+              .setDescription(`Type '${set.type}' is not compatible to 'All Messages'.`),
           });
           return;
         }
@@ -88,10 +90,10 @@ export default class extends AsyncInitializable {
         // Upsert the Appd Reaction by Primary
         const guid = GUID.makeVersion1GUID({
           module: 'reaction.auto',
-          guildId: args.auto!.set!.channel!.guildId!.toString(),
-          channelId: args.auto!.set!.channel!.id!.toString(),
+          guildId: set.channel!.guildId!.toString(),
+          channelId: set.channel!.id!.toString(),
           data: [
-            args.auto!.set!.type!,
+            set.type!,
           ],
         });
         await DatabaseConnector.appd.reaction.upsertByPrimaryIndex({
@@ -101,10 +103,10 @@ export default class extends AsyncInitializable {
           },
           set: {
             guid,
-            guildId: args.auto!.set!.channel.guildId!.toString(),
-            channelId: args.auto!.set!.channel.id.toString(),
+            guildId: set.channel.guildId!.toString(),
+            channelId: set.channel.id.toString(),
             reaction,
-            type: args.auto!.set!.type,
+            type: set.type,
           },
         }, {
           strategy: 'merge-shallow',
@@ -114,8 +116,8 @@ export default class extends AsyncInitializable {
         await interaction.respond({
           embeds: Responses.success.make()
             .setDescription('Auto React Task Updated')
-            .addField('Channel', `<#${args.auto!.set!.channel.id}>`, true)
-            .addField('Type', args.auto!.set!.type, true)
+            .addField('Channel', `<#${set.channel.id}>`, true)
+            .addField('Type', set.type, true)
             .addField('Reactions', reaction.join(' '), false),
         });
       }).build();

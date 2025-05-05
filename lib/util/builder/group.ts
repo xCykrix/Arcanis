@@ -24,6 +24,7 @@ interface HandlePassthroughType<Context> {
 export class GroupHandler<Context> {
   #initialized = false;
   #assurances: Assurances | null = null;
+  // deno-lint-ignore require-await
   #inbibitor: (passthrough: FilterPassthroughType<Context>) => Promise<boolean> = async () => true;
   #handle: (passthrough: HandlePassthroughType<Context>) => Promise<void> = async () => {};
 

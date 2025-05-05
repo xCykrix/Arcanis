@@ -46,7 +46,7 @@ class ErrorResponseGenerator {
    * @param permission The required {@link PermissionStrings}.
    * @returns EmbedsBuilder
    */
-  public makePermissionDenied(permissions: PermissionStrings[]): EmbedsBuilder {
+  public makeBotPermissionDenied(permissions: PermissionStrings[]): EmbedsBuilder {
     return this.make()
       .setDescription(`Unable to process this request. I am not authorized with the required permissions for this Channel.`)
       .addField('Permissions', permissions.join('\n'));

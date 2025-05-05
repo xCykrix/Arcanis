@@ -1,31 +1,43 @@
-import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
-import { DatabaseConnector } from '../../../lib/database/database.ts';
-import { makeGlobalReactionModuleForwardID } from '../../../lib/database/model/forward.model.ts';
-import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
-import { createIncidentEvent, optic } from '../../../lib/logging/optic.ts';
-import { Bootstrap } from '../../../mod.ts';
+import { avatarUrl, ButtonStyles, DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
+import { DatabaseConnector } from '../../../../lib/database/database.ts';
+import { GUID } from '../../../../lib/database/guid.ts';
+import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { createIncidentEvent, optic } from '../../../../lib/util/optic.ts';
+import { Emoji } from '../../../../lib/util/validation/emoji.ts';
+import { Bootstrap } from '../../../../mod.ts';
 
-export class ReactionAddEvent extends AsyncInitializable {
+export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     Bootstrap.event.add('reactionAdd', async (reaction) => {
       if (reaction.guildId === undefined) return;
-      if (reaction.user?.bot) return;
       if (reaction.emoji.name === undefined) return;
 
-      // Check for Configuration
-      const guid = makeGlobalReactionModuleForwardID(reaction.guildId.toString(), reaction.channelId.toString(), reaction.emoji.name);
-      const fetchByPrimary = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
+      // Parse Reactions
+      if (!Emoji.validate(reaction.emoji.name)) return;
 
-      // Ensure Exists
-      if (fetchByPrimary?.versionstamp === undefined) {
-        return;
-      }
+      // Make GUID
+      const guid = GUID.makeVersion1GUID({
+        module: 'reaction.forward',
+        guildId: reaction.guildId.toString(),
+        channelId: reaction.channelId.toString(),
+        data: [
+          reaction.emoji.name,
+        ],
+      });
+      const fetch = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
+
+      // Exists
+      if (fetch?.versionstamp === undefined) return;
 
       // Check Locking Cache
-      const locks = await DatabaseConnector.persistd.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
-      if (locks.versionstamp !== null) {
-        optic.debug(`M${reaction.messageId} from C${reaction.channelId} in G${reaction.guildId} was triggered but is persistence cached.`);
+      const guidLock = GUID.makeVersion1GUID({
+        module: 'reaction.forward',
+        messageId: reaction.messageId.toString(),
+      });
+      const locks = await DatabaseConnector.persistd.locks.findByPrimaryIndex('guid', guidLock);
+      if (locks?.versionstamp !== undefined) {
+        optic.debug(`M:${reaction.messageId} Persistence Lock Triggered.`);
         return;
       }
 
@@ -36,19 +48,20 @@ export class ReactionAddEvent extends AsyncInitializable {
       });
       if (message === null) return;
 
+      // Check Age of Message
+      if (message.timestamp < (Date.now() - (fetch.value.within * 1000))) {
+        optic.debug(`M:${reaction.messageId} Expired.`);
+        return;
+      }
+
       // Counters
       const reactionFromMessage = message.reactions?.filter((v) => v.emoji.name === reaction.emoji.name)[0];
       if (reactionFromMessage === undefined) return;
 
       // Check Count
       const count = reactionFromMessage.count - (reactionFromMessage.me ? 1 : 0);
-      if (count < fetchByPrimary.value.threshold) {
-        optic.debug(`M${reaction.messageId} from C${reaction.channelId} in G${reaction.guildId} was handled but did not trigger the threshold configured.`);
-        return;
-      }
-
-      // Check Age of Message
-      if (message.timestamp < (Date.now() - (fetchByPrimary.value.within * 1000))) {
+      if (count < fetch.value.threshold) {
+        optic.debug(`M:${reaction.messageId} DNM Threshold.`);
         return;
       }
 
@@ -57,23 +70,38 @@ export class ReactionAddEvent extends AsyncInitializable {
       if ((message.embeds?.length ?? 0) !== 0) type = 'embed';
 
       // Recheck Lock
-      const relock = await DatabaseConnector.persistd.get([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId]);
-      if (relock.versionstamp !== null) {
-        optic.debug(`M${reaction.messageId} from C${reaction.channelId} in G${reaction.guildId} was triggered but is persistence cached as race condition guard.`);
+      const relocks = await DatabaseConnector.persistd.locks.findByPrimaryIndex('guid', guidLock);
+      if (relocks?.versionstamp !== undefined) {
+        optic.debug(`M:${reaction.messageId} Persistence Lock Trigger (Race).`);
         return;
       }
 
-      // Write to Lock Cache
-      await DatabaseConnector.persistd.set([Bootstrap.bot.applicationId, reaction.guildId, reaction.channelId, reaction.messageId], true, {
-        expireIn: fetchByPrimary.value.within * 1000,
+      // Write Lock
+      const commit = await DatabaseConnector.persistd.locks.upsertByPrimaryIndex({
+        index: ['guid', guidLock],
+        update: {
+          locked: true,
+          lockedAt: Date.now(),
+        },
+        set: {
+          guid: guidLock,
+          locked: true,
+          lockedAt: Date.now(),
+        },
+      }, {
+        expireIn: fetch.value.within * 1000,
       });
+      if (commit.ok === false) {
+        optic.debug(`M:${reaction.messageId} Failed to commit to lock cache via upsert.`);
+        return;
+      }
 
       // Dispatch
       switch (type) {
         case 'embed': {
           // Send with Text and Embed
-          await Bootstrap.bot.helpers.sendMessage(BigInt(fetchByPrimary.value.toChannelId), {
-            content: fetchByPrimary.value.alert,
+          await Bootstrap.bot.helpers.sendMessage(BigInt(fetch.value.toChannelId), {
+            content: fetch.value.alert,
             embeds: new EmbedsBuilder(...message.embeds as DiscordEmbed[] ?? []),
             components: [
               {
@@ -114,8 +142,8 @@ export class ReactionAddEvent extends AsyncInitializable {
           }
 
           // Send with Attachments
-          await Bootstrap.bot.helpers.sendMessage(BigInt(fetchByPrimary.value.toChannelId), {
-            content: fetchByPrimary.value.alert,
+          await Bootstrap.bot.helpers.sendMessage(BigInt(fetch.value.toChannelId), {
+            content: fetch.value.alert,
             embeds,
             components: [
               {

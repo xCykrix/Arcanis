@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionTypes, ChannelTypes } from '@discordeno';
-import type { ReactionType } from '../../../../lib/database/model/reaction.model.ts';
-import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
-import { Bootstrap } from '../../../../mod.ts';
+import type { ReactionType } from '../../lib/database/model/reaction.model.ts';
+import { AsyncInitializable } from '../../lib/generic/initializable.ts';
+import { Bootstrap } from '../../mod.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
@@ -260,24 +260,70 @@ export default class extends AsyncInitializable {
   }
 }
 
-export type AutoGroup = {
+export type ReactionAutoSet = {
   auto?: {
     set?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       reactions: string;
       type: ReactionType;
     };
+  };
+};
+
+export type ReactionAutoRemove = {
+  auto?: {
     remove?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       type: ReactionType;
     };
+  };
+};
+
+export type ReactionAutoExclude = {
+  auto?: {
     exclude?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       type: ReactionType;
     };
+  };
+};
+
+export type ReactionAutoList = {
+  auto?: {
     list?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       request?: 'reactions' | 'exclude' | 'both';
+      page?: number;
+    };
+  };
+};
+
+export type ReactionForwardAdd = {
+  forward?: {
+    add?: {
+      from: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
+      to: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
+      reaction: string;
+      threshold: number;
+      within: number;
+      alert?: string;
+    };
+  };
+};
+
+export type ReactionForwardRemove = {
+  forward?: {
+    remove?: {
+      from: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
+      reaction: string;
+    };
+  };
+};
+
+export type ReactionForwardList = {
+  forward?: {
+    list?: {
+      channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       page?: number;
     };
   };
