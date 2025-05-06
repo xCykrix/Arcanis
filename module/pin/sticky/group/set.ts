@@ -128,6 +128,14 @@ export default class extends AsyncInitializable {
           return;
         }
 
+        // Fetch Database Entry
+        const guid = GUID.makeVersion1GUID({
+          module: 'pin.sticky',
+          guildId: set.channel.guildId!.toString(),
+          channelId: set.channel.id.toString(),
+        });
+        const fetchByPrimary = await DatabaseConnector.appd.pin.findByPrimaryIndex('guid', guid);
+
         // Upsert the Appd Reaction by Primary
         await interaction.respond({
           customId: await modal.makeId({
@@ -151,7 +159,8 @@ export default class extends AsyncInitializable {
                   style: TextStyles.Paragraph,
                   minLength: 1,
                   maxLength: 2000,
-                  placeholder: 'Type your message you want pinned here! Supports Markdown.',
+                  placeholder: 'Type your message you want pinned here! Supports Markdown, but Discord does not render it here. Submit to preview.',
+                  value: fetchByPrimary?.value?.message,
                   required: true,
                 },
               ],
