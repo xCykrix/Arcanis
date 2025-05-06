@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, InputTextComponent, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -57,11 +57,56 @@ export default class extends AsyncInitializable {
     });
     preview.build();
 
+    const returnToModal = ComponentHandler.builder({
+      moduleId: 'pin.stick.callback.returnToModal',
+      requireAuthor: true,
+      within: 300,
+    }).handle(async (interaction, self) => {
+      const { constants } = (await self.getCallbackId(interaction.data!.customId!))!;
+
+      // Upsert the Appd Reaction by Primary
+      await interaction.respond({
+        customId: await modal.makeId({
+          userId: interaction.user.id.toString(),
+          constants: [
+            constants[0]!,
+            constants[1]!,
+            constants[2]!,
+            constants[3]!,
+          ],
+        }),
+        title: 'Set Sticky Message',
+        components: [
+          {
+            type: MessageComponentTypes.ActionRow,
+            components: [
+              {
+                type: MessageComponentTypes.InputText,
+                customId: 'text',
+                label: 'Message Content',
+                style: TextStyles.Paragraph,
+                minLength: 1,
+                maxLength: 2000,
+                placeholder: 'Type your message you want pinned here! Markdown supported.',
+                value: constants[4],
+                required: true,
+              },
+            ],
+          },
+        ],
+      }, {
+        isPrivate: true,
+      });
+    });
+    returnToModal.build();
+
     const modal = ComponentHandler.builder({
       moduleId: 'pin.sticky.callback.modal',
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
+      await interaction.deferEdit();
+
       const components = ComponentHandler.parseModal<{
         text: string;
       }>(interaction.data!.components as MessageComponent[]);
@@ -93,6 +138,18 @@ export default class extends AsyncInitializable {
                 }),
                 style: ButtonStyles.Primary,
                 label: 'Accept Preview',
+              },
+              {
+                type: MessageComponentTypes.Button,
+                customId: await returnToModal.makeId({
+                  userId: interaction.user.id.toString(),
+                  constants: [
+                    ...constants,
+                    components.text ?? '',
+                  ],
+                }),
+                style: ButtonStyles.Primary,
+                label: 'Return to Editor',
               },
             ],
           },
@@ -136,7 +193,22 @@ export default class extends AsyncInitializable {
         });
         const fetchByPrimary = await DatabaseConnector.appd.pin.findByPrimaryIndex('guid', guid);
 
-        // Upsert the Appd Reaction by Primary
+        const inputTextComponent: InputTextComponent = {
+          type: MessageComponentTypes.InputText,
+          customId: 'text',
+          label: 'Message Content',
+          style: TextStyles.Paragraph,
+          minLength: 1,
+          maxLength: 2000,
+          placeholder: 'Type your message you want pinned here! Markdown supported.',
+          required: true,
+        };
+        if (fetchByPrimary?.value.message !== undefined) {
+          inputTextComponent.value = fetchByPrimary.value.message;
+          inputTextComponent.placeholder = undefined;
+        }
+
+        // Respond Modal
         await interaction.respond({
           customId: await modal.makeId({
             userId: interaction.user.id.toString(),
@@ -152,17 +224,7 @@ export default class extends AsyncInitializable {
             {
               type: MessageComponentTypes.ActionRow,
               components: [
-                {
-                  type: MessageComponentTypes.InputText,
-                  customId: 'text',
-                  label: 'Message Content',
-                  style: TextStyles.Paragraph,
-                  minLength: 1,
-                  maxLength: 2000,
-                  placeholder: 'Type your message you want pinned here! Supports Markdown, but Discord does not render it here. Submit to preview.',
-                  value: fetchByPrimary?.value?.message,
-                  required: true,
-                },
+                inputTextComponent,
               ],
             },
           ],
