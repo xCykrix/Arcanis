@@ -28,10 +28,10 @@ export default class extends AsyncInitializable {
         await interaction.defer();
 
         // Fetch Appd Reaction by Secondaries
-        const appdReactionBySecondary = await DatabaseConnector.appd.reaction.findBySecondaryIndex('channelId', list.channel.id.toString());
+        const fetchBySecondary = await DatabaseConnector.appd.reaction.findBySecondaryIndex('channelId', list.channel.id.toString());
 
         // Exists
-        if (appdReactionBySecondary.result.length === 0) {
+        if (fetchBySecondary.result.length === 0) {
           await interaction.respond({
             embeds: Responses.error.make()
               .setDescription('Unable to find Auto Reaction Task(s). Please check the Channel specified.'),
@@ -54,7 +54,7 @@ export default class extends AsyncInitializable {
         };
 
         // Consolidate
-        for (const configuration of appdReactionBySecondary.result) {
+        for (const configuration of fetchBySecondary.result) {
           embeds.addField(`Type: ${lookup[configuration.value.type]}`, `${configuration.value.reaction.join(' ')} | ${configuration.value.exclusion?.user?.length ?? 0} User(s) and ${configuration.value.exclusion?.role?.length ?? 0} Role(s) Excluded`, false);
         }
 

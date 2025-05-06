@@ -40,7 +40,6 @@ export default class extends AsyncInitializable {
       ) ?? (
         await DatabaseConnector.appd.reaction.findByPrimaryIndex('guid', guidFallback)
       );
-      console.info(guid, guidFallback, fetchByPrimary);
       if (fetchByPrimary?.versionstamp === undefined) return;
 
       // Check Exclusions

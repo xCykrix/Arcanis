@@ -23,7 +23,7 @@ export default class extends AsyncInitializable {
       const instruction = constants[3];
 
       // Fetch by Secondary
-      const configurations = await DatabaseConnector.appd.forward.findBySecondaryIndex('guildId', constants[0], {
+      const fetchBySecondary = await DatabaseConnector.appd.forward.findBySecondaryIndex('guildId', constants[0], {
         filter: (v) => v.value.fromChannelId === constants[1] || v.value.toChannelId === constants[1],
       });
 
@@ -42,8 +42,8 @@ export default class extends AsyncInitializable {
         displayPage = displayPage - 1;
       }
       const hasPreviousPage = indexPage >= 1 ? true : false;
-      const currentPage = configurations.result.slice(0 + (indexPage * 15), 14 + (indexPage * 15));
-      const hasNextPage = configurations.result.slice(15 + (indexPage * 15), 29 + (indexPage * 15)).length !== 0; //0 + (15 * 0), 15 + (15 * 0)
+      const currentPage = fetchBySecondary.result.slice(0 + (indexPage * 15), 14 + (indexPage * 15));
+      const hasNextPage = fetchBySecondary.result.slice(15 + (indexPage * 15), 29 + (indexPage * 15)).length !== 0; //0 + (15 * 0), 15 + (15 * 0)
 
       // Parse Configuration for Pagination
       for (const configuration of currentPage) {
@@ -128,12 +128,12 @@ export default class extends AsyncInitializable {
         await interaction.defer(true);
 
         // Fetch
-        const fetch = await DatabaseConnector.appd.forward.findBySecondaryIndex('guildId', list.channel.guildId!.toString(), {
+        const fetchBySecondary = await DatabaseConnector.appd.forward.findBySecondaryIndex('guildId', list.channel.guildId!.toString(), {
           filter: (v) => v.value.fromChannelId === args.forward!.list!.channel.id.toString() || v.value.toChannelId === args.forward!.list!.channel.id.toString(),
         });
 
         // Exist Check
-        if (fetch.result.length === 0) {
+        if (fetchBySecondary.result.length === 0) {
           await interaction.respond({
             embeds: Responses.error.make()
               .setDescription('No Reaction Forwarder configurations found. Please check the channel is correct and try again.'),
@@ -148,8 +148,8 @@ export default class extends AsyncInitializable {
         const fields = new Map<string, Set<[string, string]>>();
 
         // Iterate Embeds from Pagination
-        const currentPage = fetch.result.slice(0, 14);
-        const hasNextPage = fetch.result.slice(15, 29).length !== 0;
+        const currentPage = fetchBySecondary.result.slice(0, 14);
+        const hasNextPage = fetchBySecondary.result.slice(15, 29).length !== 0;
 
         for (const configuration of currentPage) {
           if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());

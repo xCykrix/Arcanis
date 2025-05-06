@@ -63,10 +63,10 @@ export default class extends AsyncInitializable {
         await interaction.defer();
 
         // Fetch Appd Reaction by Secondaries
-        const appdReactionBySecondary = await DatabaseConnector.appd.reaction.findBySecondaryIndex('channelId', set.channel.id.toString());
+        const fetchBySecondary = await DatabaseConnector.appd.reaction.findBySecondaryIndex('channelId', set.channel.id.toString());
         let hasConfigurationForAll = false;
         let hasConfigurationForSpecific = false;
-        for (const fetched of appdReactionBySecondary.result) {
+        for (const fetched of fetchBySecondary.result) {
           if (fetched.value.type === 'all') hasConfigurationForAll = true;
           if (fetched.value.type !== 'all') hasConfigurationForSpecific = true;
         }

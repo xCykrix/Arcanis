@@ -40,8 +40,8 @@ export default class extends AsyncInitializable {
         }
 
         // Verify Limit
-        const count = await DatabaseConnector.appd.forward.countBySecondaryIndex('fromChannelId', remove.from.id.toString());
-        if (count >= 10) {
+        const fetchBySecondary = await DatabaseConnector.appd.forward.countBySecondaryIndex('fromChannelId', remove.from.id.toString());
+        if (fetchBySecondary >= 10) {
           await interaction.respond({
             embeds: Responses.error.make()
               .setDescription('You may only create up to 10 forwarders in a source (from) channel.'),
@@ -58,10 +58,10 @@ export default class extends AsyncInitializable {
             remove.reaction,
           ],
         });
-        const fetch = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
+        const fetchByPrimary = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
 
         // Exist Check
-        if (fetch?.versionstamp === undefined) {
+        if (fetchByPrimary?.versionstamp === undefined) {
           await interaction.respond({
             embeds: Responses.error.make()
               .setDescription('Unknown Reaction Forwarder Configuration. Please check the channel and reaction is correct.'),
@@ -77,7 +77,7 @@ export default class extends AsyncInitializable {
           embeds: Responses.success.make()
             .setDescription('Forwarding has been set for the specified channel.')
             .addField('From Channel', `<#${remove.from.id}>`, false)
-            .addField('To Channel', `<#${fetch.value.toChannelId}>`, false)
+            .addField('To Channel', `<#${fetchByPrimary.value.toChannelId}>`, false)
             .addField('Reaction', `${remove.reaction}`, false),
         });
       }).build();

@@ -37,10 +37,10 @@ export default class extends AsyncInitializable {
             remove.type!,
           ],
         });
-        const fetch = await DatabaseConnector.appd.reaction.findByPrimaryIndex('guid', guid);
+        const fetchByPrimary = await DatabaseConnector.appd.reaction.findByPrimaryIndex('guid', guid);
 
         // Exists
-        if (fetch?.versionstamp === undefined) {
+        if (fetchByPrimary?.versionstamp === undefined) {
           await interaction.respond({
             embeds: Responses.error.make()
               .setDescription('Unable to find the specified Auto Reaction Task. Please check the Channel and Type specified.'),

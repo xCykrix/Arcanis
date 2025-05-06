@@ -58,6 +58,17 @@ const persistdStaticSchema = {
       guid: 'primary',
     },
   }),
+  counter: collection(
+    createModel<{
+      guid: string;
+      counter: number;
+    }>(),
+    {
+      indices: {
+        guid: 'primary',
+      },
+    },
+  ),
 };
 
 /**

@@ -5,8 +5,9 @@ export type PinModuleConfiguration = {
   guildId: string;
   channelId: string;
   message: string;
-  messages?: number;
-  minutes?: number;
+  every?: number;
+  within?: number;
   // Stateful Controls
   lastMessageId?: string;
+  lastMessageAt?: number;
 };

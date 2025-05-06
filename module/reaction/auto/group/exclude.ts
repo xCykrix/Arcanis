@@ -26,8 +26,8 @@ export default class extends AsyncInitializable {
       const members = resolved?.members?.map((v) => v.id.toString()) ?? null;
 
       // Get Database
-      const configuration = await DatabaseConnector.appd.reaction.find(constants[0]);
-      if (configuration === null) {
+      const fetchById = await DatabaseConnector.appd.reaction.find(constants[0]);
+      if (fetchById === null) {
         await interaction.edit({
           embeds: Responses.error.make()
             .setDescription('Unable to find the specified Auto Reaction Task. Please check the Channel and Type specified.'),
@@ -38,21 +38,21 @@ export default class extends AsyncInitializable {
       // Update Database
       await DatabaseConnector.appd.reaction.update(constants[0], {
         exclusion: {
-          user: (members === null ? [] : members) ?? configuration.value.exclusion?.user ?? [],
-          role: configuration.value.exclusion?.role ?? [],
+          user: (members === null ? [] : members) ?? fetchById.value.exclusion?.user ?? [],
+          role: fetchById.value.exclusion?.role ?? [],
         },
       }, {
         strategy: 'merge-shallow',
       });
 
       // Get Updated and Respond
-      const updated = await DatabaseConnector.appd.reaction.find(constants[0]);
+      const fetchUpdatedById = await DatabaseConnector.appd.reaction.find(constants[0]);
       await interaction.respond({
         embeds: Responses.success.make()
           .setDescription('Auto Reaction Exclusions Updated')
-          .addField('Channel', `<#${configuration.value.channelId}>`, true)
-          .addField('Users', ((updated?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
-          .addField('Roles', ((updated?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
+          .addField('Channel', `<#${fetchById.value.channelId}>`, true)
+          .addField('Users', ((fetchUpdatedById?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (fetchUpdatedById?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
+          .addField('Roles', ((fetchUpdatedById?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (fetchUpdatedById?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
       });
       return;
     });
@@ -73,8 +73,8 @@ export default class extends AsyncInitializable {
       const roles = resolved?.roles?.map((v) => v.id.toString()) ?? null;
 
       // Get Database
-      const configuration = await DatabaseConnector.appd.reaction.find(constants[0]);
-      if (configuration === null) {
+      const fetchById = await DatabaseConnector.appd.reaction.find(constants[0]);
+      if (fetchById === null) {
         await interaction.edit({
           embeds: Responses.error.make()
             .setDescription('Unable to find the specified Auto Reaction Task. Please check the Channel and Type specified.'),
@@ -85,21 +85,21 @@ export default class extends AsyncInitializable {
       // Update Database
       await DatabaseConnector.appd.reaction.update(constants[0], {
         exclusion: {
-          user: configuration.value.exclusion?.user ?? [],
-          role: (roles === null ? [] : roles) ?? configuration.value.exclusion?.role ?? [],
+          user: fetchById.value.exclusion?.user ?? [],
+          role: (roles === null ? [] : roles) ?? fetchById.value.exclusion?.role ?? [],
         },
       }, {
         strategy: 'merge-shallow',
       });
 
       // Get Updated and Respond
-      const updated = await DatabaseConnector.appd.reaction.find(constants[0]);
+      const fetchUpdatedById = await DatabaseConnector.appd.reaction.find(constants[0]);
       await interaction.respond({
         embeds: Responses.success.make()
           .setDescription('Auto Reaction Exclusions Updated')
-          .addField('Channel', `<#${configuration.value.channelId}>`, true)
-          .addField('Users', ((updated?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
-          .addField('Roles', ((updated?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (updated?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
+          .addField('Channel', `<#${fetchById.value.channelId}>`, true)
+          .addField('Users', ((fetchUpdatedById?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (fetchUpdatedById?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
+          .addField('Roles', ((fetchUpdatedById?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (fetchUpdatedById?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
       });
       return;
     });

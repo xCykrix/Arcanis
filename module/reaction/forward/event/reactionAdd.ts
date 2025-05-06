@@ -2,7 +2,7 @@ import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageCompo
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
-import { createIncidentEvent, optic } from '../../../../lib/util/optic.ts';
+import { createIncidentEvent } from '../../../../lib/util/optic.ts';
 import { Emoji } from '../../../../lib/util/validation/emoji.ts';
 import { Bootstrap } from '../../../../mod.ts';
 
@@ -25,19 +25,18 @@ export default class extends AsyncInitializable {
           reaction.emoji.name,
         ],
       });
-      const fetch = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
+      const fetchByPrimary = await DatabaseConnector.appd.forward.findByPrimaryIndex('guid', guid);
 
       // Exists
-      if (fetch?.versionstamp === undefined) return;
+      if (fetchByPrimary?.versionstamp === undefined) return;
 
       // Check Locking Cache
       const guidLock = GUID.makeVersion1GUID({
         module: 'reaction.forward',
         messageId: reaction.messageId.toString(),
       });
-      const locks = await DatabaseConnector.persistd.locks.findByPrimaryIndex('guid', guidLock);
-      if (locks?.versionstamp !== undefined) {
-        optic.debug(`M:${reaction.messageId} Persistence Lock Triggered.`);
+      const fetchLock = await DatabaseConnector.persistd.locks.findByPrimaryIndex('guid', guidLock);
+      if (fetchLock?.versionstamp !== undefined) {
         return;
       }
 
@@ -49,8 +48,7 @@ export default class extends AsyncInitializable {
       if (message === null) return;
 
       // Check Age of Message
-      if (message.timestamp < (Date.now() - (fetch.value.within * 1000))) {
-        optic.debug(`M:${reaction.messageId} Expired.`);
+      if (message.timestamp < (Date.now() - (fetchByPrimary.value.within * 1000))) {
         return;
       }
 
@@ -60,8 +58,7 @@ export default class extends AsyncInitializable {
 
       // Check Count
       const count = reactionFromMessage.count - (reactionFromMessage.me ? 1 : 0);
-      if (count < fetch.value.threshold) {
-        optic.debug(`M:${reaction.messageId} DNM Threshold.`);
+      if (count < fetchByPrimary.value.threshold) {
         return;
       }
 
@@ -70,9 +67,8 @@ export default class extends AsyncInitializable {
       if ((message.embeds?.length ?? 0) !== 0) type = 'embed';
 
       // Recheck Lock
-      const relocks = await DatabaseConnector.persistd.locks.findByPrimaryIndex('guid', guidLock);
-      if (relocks?.versionstamp !== undefined) {
-        optic.debug(`M:${reaction.messageId} Persistence Lock Trigger (Race).`);
+      const fetchLockDoubleCheck = await DatabaseConnector.persistd.locks.findByPrimaryIndex('guid', guidLock);
+      if (fetchLockDoubleCheck?.versionstamp !== undefined) {
         return;
       }
 
@@ -89,10 +85,9 @@ export default class extends AsyncInitializable {
           lockedAt: Date.now(),
         },
       }, {
-        expireIn: fetch.value.within * 1000,
+        expireIn: fetchByPrimary.value.within * 1000,
       });
       if (commit.ok === false) {
-        optic.debug(`M:${reaction.messageId} Failed to commit to lock cache via upsert.`);
         return;
       }
 
@@ -100,8 +95,8 @@ export default class extends AsyncInitializable {
       switch (type) {
         case 'embed': {
           // Send with Text and Embed
-          await Bootstrap.bot.helpers.sendMessage(BigInt(fetch.value.toChannelId), {
-            content: fetch.value.alert,
+          await Bootstrap.bot.helpers.sendMessage(BigInt(fetchByPrimary.value.toChannelId), {
+            content: fetchByPrimary.value.alert,
             embeds: new EmbedsBuilder(...message.embeds as DiscordEmbed[] ?? []),
             components: [
               {
@@ -142,8 +137,8 @@ export default class extends AsyncInitializable {
           }
 
           // Send with Attachments
-          await Bootstrap.bot.helpers.sendMessage(BigInt(fetch.value.toChannelId), {
-            content: fetch.value.alert,
+          await Bootstrap.bot.helpers.sendMessage(BigInt(fetchByPrimary.value.toChannelId), {
+            content: fetchByPrimary.value.alert,
             embeds,
             components: [
               {

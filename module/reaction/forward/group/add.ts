@@ -50,8 +50,8 @@ export default class extends AsyncInitializable {
         }
 
         // Verify Limit
-        const count = await DatabaseConnector.appd.forward.countBySecondaryIndex('fromChannelId', add.from.id.toString());
-        if (count >= 10) {
+        const fetchBySecondary = await DatabaseConnector.appd.forward.countBySecondaryIndex('fromChannelId', add.from.id.toString());
+        if (fetchBySecondary >= 10) {
           await interaction.respond({
             embeds: Responses.error.make()
               .setDescription('You may only create up to 10 forwarders in a source (from) channel.'),
