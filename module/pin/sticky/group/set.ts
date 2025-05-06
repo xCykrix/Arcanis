@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';

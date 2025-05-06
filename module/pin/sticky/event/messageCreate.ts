@@ -1,4 +1,4 @@
-import { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
+import type { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -8,6 +8,7 @@ import { PinStickyMessageLogic } from '../logic/pinStickyMessageLogic.ts';
 export default class extends AsyncInitializable {
   private database = DatabaseConnector.persistd['kv'] as Deno.Kv;
 
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     Bootstrap.event.add('messageCreate', async (message) => {
       if (message.guildId === undefined) return;

@@ -54,8 +54,8 @@ export default class extends AsyncInitializable {
         };
 
         // Consolidate
-        for (const configuration of fetchBySecondary.result) {
-          embeds.addField(`Type: ${lookup[configuration.value.type]}`, `${configuration.value.reaction.join(' ')} | ${configuration.value.exclusion?.user?.length ?? 0} User(s) and ${configuration.value.exclusion?.role?.length ?? 0} Role(s) Excluded`, false);
+        for (const result of fetchBySecondary.result) {
+          embeds.addField(`Type: ${lookup[result.value.type]}`, `${result.value.reaction.join(' ')} | ${result.value.exclusion?.user?.length ?? 0} User(s) and ${result.value.exclusion?.role?.length ?? 0} Role(s) Excluded. React to Self: ${result.value.self ?? false}`, false);
         }
 
         // Respond

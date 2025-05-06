@@ -42,6 +42,9 @@ export default class extends AsyncInitializable {
       );
       if (fetchByPrimary?.versionstamp === undefined) return;
 
+      // Check Filter Bot
+      if (message.author.id === Bootstrap.bot.id && !(fetchByPrimary.value.self ?? false)) return;
+
       // Check Exclusions
       if (fetchByPrimary.value.exclusion) {
         if (fetchByPrimary.value.exclusion.user?.includes(message.author.id.toString())) return;

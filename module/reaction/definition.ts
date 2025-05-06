@@ -34,6 +34,12 @@ export default class extends AsyncInitializable {
                   required: true,
                 },
                 {
+                  name: 'self',
+                  description: 'If this auto reaction will apply to the bot.',
+                  type: ApplicationCommandOptionTypes.Boolean,
+                  required: true,
+                },
+                {
                   name: 'type',
                   description: 'The type filters to apply to this auto reaction.',
                   type: ApplicationCommandOptionTypes.String,
@@ -266,6 +272,7 @@ export type ReactionAutoSet = {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       reactions: string;
       type: ReactionType;
+      self: boolean;
     };
   };
 };

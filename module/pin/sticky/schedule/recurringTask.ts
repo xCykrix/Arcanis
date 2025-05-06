@@ -4,6 +4,7 @@ import { Bootstrap } from '../../../../mod.ts';
 import { PinStickyMessageLogic } from '../logic/pinStickyMessageLogic.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     setInterval(async () => {
       const iterations = Math.ceil(await DatabaseConnector.appd.pin.count() / 20);

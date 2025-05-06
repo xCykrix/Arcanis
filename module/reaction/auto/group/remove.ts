@@ -55,7 +55,7 @@ export default class extends AsyncInitializable {
         await interaction.respond({
           embeds: Responses.success.make()
             .setDescription('Auto React Task Removed')
-            .addField('Channel', `<#${args.auto!.remove!.channel.id}>`, true)
+            .addField('Channel', `<#${remove.channel.id}>`, true)
             .addField('Type', remove.type, true),
         });
       }).build();

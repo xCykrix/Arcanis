@@ -100,6 +100,7 @@ export default class extends AsyncInitializable {
           index: ['guid', guid],
           update: {
             reaction,
+            self: set.self ?? false,
           },
           set: {
             guid,
@@ -107,6 +108,7 @@ export default class extends AsyncInitializable {
             channelId: set.channel.id.toString(),
             reaction,
             type: set.type,
+            self: set.self ?? false,
           },
         }, {
           strategy: 'merge-shallow',

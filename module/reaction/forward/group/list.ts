@@ -129,7 +129,7 @@ export default class extends AsyncInitializable {
 
         // Fetch
         const fetchBySecondary = await DatabaseConnector.appd.forward.findBySecondaryIndex('guildId', list.channel.guildId!.toString(), {
-          filter: (v) => v.value.fromChannelId === args.forward!.list!.channel.id.toString() || v.value.toChannelId === args.forward!.list!.channel.id.toString(),
+          filter: (v) => v.value.fromChannelId === list.channel.id.toString() || v.value.toChannelId === list.channel.id.toString(),
         });
 
         // Exist Check
