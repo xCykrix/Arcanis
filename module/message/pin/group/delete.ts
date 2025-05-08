@@ -1,7 +1,3 @@
-// Delete guid and guid from underlying database query
-// [guid]
-// ['counter', guid]
-
 import { ChannelTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
@@ -22,6 +18,7 @@ export default class extends AsyncInitializable {
       applicationRequiredGuildPermissions: [],
       applicationRequiredChannelPermissions: [],
     })
+      // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
         return args.pin?.delete === undefined;
       })

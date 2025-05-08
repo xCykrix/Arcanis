@@ -7,7 +7,7 @@ import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { hasChannelPermissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Bootstrap } from '../../../../mod.ts';
-import { MessagePinSet } from '../../definition.ts';
+import type { MessagePinSet } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
