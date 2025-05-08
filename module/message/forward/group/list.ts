@@ -4,7 +4,7 @@ import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { ComponentHandler } from '../../../../lib/util/builder/components.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import type { ReactionForwardList } from '../../definition.ts';
+import type { MessageForwardList } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
@@ -108,8 +108,8 @@ export default class extends AsyncInitializable {
     });
     listCallback.build();
 
-    GroupHandler.builder<Required<ReactionForwardList>>({
-      interaction: 'reaction',
+    GroupHandler.builder<Required<MessageForwardList>>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],

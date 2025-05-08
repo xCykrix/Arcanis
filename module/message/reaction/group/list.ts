@@ -3,13 +3,13 @@ import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import type { ReactionAutoList } from '../../definition.ts';
+import type { MessageReactionList } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<ReactionAutoList>({
-      interaction: 'reaction',
+    GroupHandler.builder<MessageReactionList>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -19,10 +19,10 @@ export default class extends AsyncInitializable {
     })
       // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
-        return args.auto?.list === undefined;
+        return args.reaction?.list === undefined;
       })
       .handle(async ({ interaction, args }) => {
-        const list = args.auto!.list!;
+        const list = args.reaction!.list!;
 
         // Defer for Main Processing
         await interaction.defer();

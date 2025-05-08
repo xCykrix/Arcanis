@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, InputTextComponent, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, type InputTextComponent, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -7,7 +7,8 @@ import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { hasChannelPermissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Bootstrap } from '../../../../mod.ts';
-import type { PinStickySet } from '../../definition.ts';
+import { MessagePinSet } from '../../definition.ts';
+
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
@@ -160,8 +161,8 @@ export default class extends AsyncInitializable {
     });
     modal.build();
 
-    GroupHandler.builder<PinStickySet>({
-      interaction: 'pin',
+    GroupHandler.builder<MessagePinSet>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -171,10 +172,10 @@ export default class extends AsyncInitializable {
     })
       // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
-        return args.sticky?.set === undefined;
+        return args.pin?.set === undefined;
       })
       .handle(async ({ interaction, args, guild, botMember }) => {
-        const set = args.sticky!.set!;
+        const set = args.pin!.set!;
 
         // Permission Guard (Target Channel) - Bot Permissions
         const botPermissions: PermissionStrings[] = ['SEND_MESSAGES'];

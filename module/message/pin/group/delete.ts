@@ -8,13 +8,13 @@ import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import { PinStickyRemove } from '../../definition.ts';
+import type { MessagePinDelete } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<PinStickyRemove>({
-      interaction: 'pin',
+    GroupHandler.builder<MessagePinDelete>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -23,10 +23,10 @@ export default class extends AsyncInitializable {
       applicationRequiredChannelPermissions: [],
     })
       .inhibitor(async ({ args }) => {
-        return args.sticky?.remove === undefined;
+        return args.pin?.delete === undefined;
       })
       .handle(async ({ interaction, args }) => {
-        const remove = args.sticky!.remove!;
+        const remove = args.pin!.delete!;
 
         // Fetch Appd Pin by Primary
         const guid = GUID.makeVersion1GUID({

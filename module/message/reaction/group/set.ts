@@ -6,13 +6,13 @@ import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { hasChannelPermissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Emoji } from '../../../../lib/util/validation/emoji.ts';
-import type { ReactionAutoSet } from '../../definition.ts';
+import type { MessageReactionSet } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<ReactionAutoSet>({
-      interaction: 'reaction',
+    GroupHandler.builder<MessageReactionSet>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -22,10 +22,10 @@ export default class extends AsyncInitializable {
     })
       // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
-        return args.auto?.set === undefined;
+        return args.reaction?.set === undefined;
       })
       .handle(async ({ interaction, args, guild, botMember }) => {
-        const set = args.auto!.set!;
+        const set = args.reaction!.set!;
 
         // Parse Reactions
         const reaction = set.reactions.split('\u0020').filter((v) => v.trim().length !== 0);

@@ -4,13 +4,13 @@ import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import type { ReactionAutoRemove } from '../../definition.ts';
+import type { MessageReactionDelete } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<ReactionAutoRemove>({
-      interaction: 'reaction',
+    GroupHandler.builder<MessageReactionDelete>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -20,10 +20,10 @@ export default class extends AsyncInitializable {
     })
       // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
-        return args.auto?.remove === undefined;
+        return args.reaction?.delete === undefined;
       })
       .handle(async ({ interaction, args }) => {
-        const remove = args.auto!.remove!;
+        const remove = args.reaction!.delete!;
 
         // Defer for Main Processing
         await interaction.defer();

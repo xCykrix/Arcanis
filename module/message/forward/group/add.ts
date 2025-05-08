@@ -6,13 +6,13 @@ import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { hasChannelPermissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Emoji } from '../../../../lib/util/validation/emoji.ts';
-import type { ReactionForwardAdd } from '../../definition.ts';
+import type { MessageForwardSet } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<Required<ReactionForwardAdd>>({
-      interaction: 'reaction',
+    GroupHandler.builder<Required<MessageForwardSet>>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],

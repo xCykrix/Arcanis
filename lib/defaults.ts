@@ -12,7 +12,7 @@ export function defaults(): void {
     for (const guild of packet.guilds) {
       // const channel = await Bootstrap.bot.helpers.getGuild(guild);
       // await Bootstrap.bot.helpers.getChannel();
-      await Bootstrap.bot.helpers.upsertGuildApplicationCommands(guild, Bootstrap.interaction.values().toArray()).catch((e) => {
+      await Bootstrap.bot.helpers.upsertGuildApplicationCommands(guild, Bootstrap.guildChatInputInteraction.values().toArray()).catch((e) => {
         createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGlobalApplicationCommands.', e);
       });
     }

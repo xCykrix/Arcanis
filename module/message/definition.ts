@@ -6,47 +6,51 @@ import { Bootstrap } from '../../mod.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    Bootstrap.interaction.add({
-      name: 'reaction',
-      description: 'Reaction Management Module',
+    Bootstrap.guildChatInputInteraction.add({
+      name: 'message',
+      description: 'Reaction Management Module.',
+      defaultMemberPermissions: [
+        'MANAGE_MESSAGES',
+        'ADD_REACTIONS',
+      ],
       options: [
         {
-          name: 'auto',
-          description: 'Auto Reaction Module Management',
+          name: 'reaction',
+          description: 'Auto Reaction Module Management.',
           type: ApplicationCommandOptionTypes.SubCommandGroup,
           options: [
             {
               name: 'set',
-              description: 'Set auto reactions for a channel for the specified type.',
+              description: 'Set a Auto Reactions in a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'channel',
-                  description: 'The channel to apply this auto reaction.',
+                  description: 'Target Channel.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'reactions',
-                  description: 'Please use Discord Emoji Picker. Please ensure a space is between each reaction.',
+                  description: 'List of Reactions from the Discord Emoji Picker.',
                   type: ApplicationCommandOptionTypes.String,
                   required: true,
                 },
                 {
                   name: 'self',
-                  description: 'If this auto reaction will apply to the bot.',
+                  description: 'If I should react to Myself.',
                   type: ApplicationCommandOptionTypes.Boolean,
                   required: true,
                 },
                 {
                   name: 'type',
-                  description: 'The type filters to apply to this auto reaction.',
+                  description: 'The Target Message Type.',
                   type: ApplicationCommandOptionTypes.String,
                   required: true,
                   choices: [
                     {
-                      name: 'All Messages',
+                      name: 'All Messages (Exclusive)',
                       value: 'all',
                     },
                     {
@@ -70,20 +74,20 @@ export default class extends AsyncInitializable {
               ],
             },
             {
-              name: 'remove',
-              description: 'Remove auto reactions from a channel.',
+              name: 'delete',
+              description: 'Delete a Auto Reaction from a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'channel',
-                  description: 'The channel to apply this auto reaction.',
+                  description: 'Target Channel.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'type',
-                  description: 'The type filters to apply to this auto reaction.',
+                  description: 'The Target Message Type.',
                   type: ApplicationCommandOptionTypes.String,
                   required: true,
                   choices: [
@@ -113,19 +117,19 @@ export default class extends AsyncInitializable {
             },
             {
               name: 'exclude',
-              description: 'Set the excluded users and roles for a channel.',
+              description: 'Exclude User or Roles from Auto Reaction in a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'channel',
-                  description: 'The channel to specify this action for.',
+                  description: 'Target Channel.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'type',
-                  description: 'The type filters to apply to this auto reaction.',
+                  description: 'The Target Message Type.',
                   type: ApplicationCommandOptionTypes.String,
                   required: true,
                   choices: [
@@ -155,12 +159,12 @@ export default class extends AsyncInitializable {
             },
             {
               name: 'list',
-              description: 'List the configured auto reactions.',
+              description: 'Get a List of Auto Reactions in a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'channel',
-                  description: 'A channel to search.',
+                  description: 'Target Channel to Search.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
@@ -171,37 +175,37 @@ export default class extends AsyncInitializable {
         },
         {
           name: 'forward',
-          description: 'Reaction Forward Module Management',
+          description: 'Reaction Forward Module Management.',
           type: ApplicationCommandOptionTypes.SubCommandGroup,
           options: [
             {
               name: 'add',
-              description: 'Add auto forwarding for a channel.',
+              description: 'Add a Reaction Forwarder in a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'from',
-                  description: 'The channel to monitor for reactions.',
+                  description: 'Source Channel.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'to',
-                  description: 'The channel to send messages to.',
+                  description: 'Target Channel.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'reaction',
-                  description: 'Please use Discord Emoji Picker. Select one reaction.',
+                  description: 'A Reactions from the Discord Emoji Picker.',
                   type: ApplicationCommandOptionTypes.String,
                   required: true,
                 },
                 {
                   name: 'threshold',
-                  description: 'The threshold of Reactions to trigger the Forwarder.',
+                  description: 'Amount of Reactions required, excluding the Bot, to Forward the Message.',
                   type: ApplicationCommandOptionTypes.Integer,
                   required: true,
                   minValue: 1,
@@ -209,7 +213,7 @@ export default class extends AsyncInitializable {
                 },
                 {
                   name: 'within',
-                  description: 'The maximum age of the message to be elible to forward, in seconds. Defaults to no limit.',
+                  description: 'The time, in seconds, to accept Reactions to Forward the Message.',
                   type: ApplicationCommandOptionTypes.Integer,
                   required: true,
                   minValue: 1,
@@ -217,7 +221,7 @@ export default class extends AsyncInitializable {
                 },
                 {
                   name: 'alert',
-                  description: 'The alert message to send with the forwarded message. Useful for mentions or context details.',
+                  description: 'The alert to include with the Forwarded Message.',
                   type: ApplicationCommandOptionTypes.String,
                   required: false,
                   minValue: 1,
@@ -226,20 +230,20 @@ export default class extends AsyncInitializable {
               ],
             },
             {
-              name: 'remove',
-              description: 'Remove a Forwarder from a Channel',
+              name: 'delete',
+              description: 'Delete a Reaction Forwarder in a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
                   name: 'from',
-                  description: 'The channel to specify this action for.',
+                  description: 'Source Channel.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
                   required: true,
                 },
                 {
                   name: 'reaction',
-                  description: 'The Emoji to remove from the Forwarder. Use the Discord Emoji Picker. Pick 1 at a time.',
+                  description: 'A Reactions from the Discord Emoji Picker.',
                   type: ApplicationCommandOptionTypes.String,
                   required: true,
                 },
@@ -247,7 +251,7 @@ export default class extends AsyncInitializable {
             },
             {
               name: 'list',
-              description: 'List the configured auto forwarders.',
+              description: 'Get a List of Auto Forwarders to/from a Channel.',
               type: ApplicationCommandOptionTypes.SubCommand,
               options: [
                 {
@@ -255,7 +259,58 @@ export default class extends AsyncInitializable {
                   description: 'A channel to search. Supports to and from forwarding.',
                   type: ApplicationCommandOptionTypes.Channel,
                   channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
-                  required: false,
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'pin',
+          description: 'Pin Module Management.',
+          type: ApplicationCommandOptionTypes.SubCommandGroup,
+          options: [
+            {
+              name: 'set',
+              description: 'Set a Pinned (Sticky) Message in a Channel.',
+              type: ApplicationCommandOptionTypes.SubCommand,
+              options: [
+                {
+                  name: 'channel',
+                  description: 'Target Channel.',
+                  type: ApplicationCommandOptionTypes.Channel,
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
+                  required: true,
+                },
+                {
+                  name: 'every',
+                  description: 'The number of sent messages before immediately re-sending the Pinned Message.',
+                  type: ApplicationCommandOptionTypes.Integer,
+                  minValue: 3,
+                  maxValue: 15,
+                  required: true,
+                },
+                {
+                  name: 'within',
+                  description: 'The time, in seconds, before re-sending the Pinned Message if at least one message has been sent.',
+                  type: ApplicationCommandOptionTypes.Integer,
+                  minValue: 15,
+                  maxValue: 1800,
+                  required: true,
+                },
+              ],
+            },
+            {
+              name: 'delete',
+              description: 'Delete a Pinned (Sticky) Message in a Channel.',
+              type: ApplicationCommandOptionTypes.SubCommand,
+              options: [
+                {
+                  name: 'channel',
+                  description: 'Target Channel.',
+                  type: ApplicationCommandOptionTypes.Channel,
+                  channelTypes: [ChannelTypes.GuildText, ChannelTypes.GuildAnnouncement],
+                  required: true,
                 },
               ],
             },
@@ -266,8 +321,8 @@ export default class extends AsyncInitializable {
   }
 }
 
-export type ReactionAutoSet = {
-  auto?: {
+export type MessageReactionSet = {
+  reaction?: {
     set?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       reactions: string;
@@ -277,17 +332,17 @@ export type ReactionAutoSet = {
   };
 };
 
-export type ReactionAutoRemove = {
-  auto?: {
-    remove?: {
+export type MessageReactionDelete = {
+  reaction?: {
+    delete?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       type: ReactionType;
     };
   };
 };
 
-export type ReactionAutoExclude = {
-  auto?: {
+export type MessageReactionExclude = {
+  reaction?: {
     exclude?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       type: ReactionType;
@@ -295,8 +350,8 @@ export type ReactionAutoExclude = {
   };
 };
 
-export type ReactionAutoList = {
-  auto?: {
+export type MessageReactionList = {
+  reaction?: {
     list?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       request?: 'reactions' | 'exclude' | 'both';
@@ -305,7 +360,7 @@ export type ReactionAutoList = {
   };
 };
 
-export type ReactionForwardAdd = {
+export type MessageForwardSet = {
   forward?: {
     add?: {
       from: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
@@ -318,20 +373,38 @@ export type ReactionForwardAdd = {
   };
 };
 
-export type ReactionForwardRemove = {
+export type MessageForwardDelete = {
   forward?: {
-    remove?: {
+    delete?: {
       from: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       reaction: string;
     };
   };
 };
 
-export type ReactionForwardList = {
+export type MessageForwardList = {
   forward?: {
     list?: {
       channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
       page?: number;
+    };
+  };
+};
+
+export type MessagePinSet = {
+  pin?: {
+    set?: {
+      channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
+      every: number;
+      within: number;
+    };
+  };
+};
+
+export type MessagePinDelete = {
+  pin?: {
+    delete?: {
+      channel: typeof Bootstrap.bot.transformers.$inferredTypes.channel;
     };
   };
 };

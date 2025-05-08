@@ -6,7 +6,7 @@ import { ComponentHandler } from '../../../../lib/util/builder/components.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { Bootstrap } from '../../../../mod.ts';
-import type { ReactionAutoExclude } from '../../definition.ts';
+import type { MessageReactionExclude } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
@@ -105,8 +105,8 @@ export default class extends AsyncInitializable {
     });
     roleCallback.build();
 
-    GroupHandler.builder<ReactionAutoExclude>({
-      interaction: 'reaction',
+    GroupHandler.builder<MessageReactionExclude>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -116,10 +116,10 @@ export default class extends AsyncInitializable {
     })
       // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
-        return args.auto?.exclude === undefined;
+        return args.reaction?.exclude === undefined;
       })
       .handle(async ({ interaction, args }) => {
-        const exclude = args.auto!.exclude!;
+        const exclude = args.reaction!.exclude!;
 
         // Defer for Main Processing
         await interaction.defer();

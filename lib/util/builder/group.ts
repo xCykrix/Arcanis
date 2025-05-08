@@ -6,12 +6,14 @@ import { Responses } from '../helper/responses.ts';
 type OmittedProperties = 'context';
 type OmittedCallbackProperties = 'handle' | 'filter' | 'build';
 
-interface FilterPassthroughType<Context> {
+/** Passthrough for Inhibitor. */
+interface InhibitorPassthroughType<Context> {
   interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
   args: Context;
   self: Omit<GroupHandler<Context>, OmittedCallbackProperties>;
 }
 
+/** Passthrough for Handler. */
 interface HandlePassthroughType<Context> {
   interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
   args: Context;
@@ -21,13 +23,20 @@ interface HandlePassthroughType<Context> {
   botMember?: typeof Bootstrap.bot.cache.$inferredTypes.member;
 }
 
+/**
+ * A Group Handler for Commands.
+ */
 export class GroupHandler<Context> {
   #initialized = false;
   #assurances: Assurances | null = null;
   // deno-lint-ignore require-await
-  #inbibitor: (passthrough: FilterPassthroughType<Context>) => Promise<boolean> = async () => true;
+  #inbibitor: (passthrough: InhibitorPassthroughType<Context>) => Promise<boolean> = async () => true;
   #handle: (passthrough: HandlePassthroughType<Context>) => Promise<void> = async () => {};
 
+  /**
+   * @param assurances The {@link Assurances} the ChatInput Interaction to meet.
+   * @returns Omit<GroupHandler<T>, OmittedProperties>
+   */
   public static builder<T>(assurances: Assurances): Omit<GroupHandler<T>, OmittedProperties> {
     const state = new GroupHandler<T>();
     state.#assurances = assurances;
@@ -43,7 +52,7 @@ export class GroupHandler<Context> {
    * @returns
    */
   public inhibitor(
-    inhibitor: (passthrough: FilterPassthroughType<Context>) => Promise<boolean>,
+    inhibitor: (passthrough: InhibitorPassthroughType<Context>) => Promise<boolean>,
   ): Omit<GroupHandler<Context>, OmittedProperties> {
     this.#inbibitor = inhibitor;
     return this;
@@ -62,6 +71,12 @@ export class GroupHandler<Context> {
     return this;
   }
 
+  /**
+   * Creates the Interaction Argument Context.
+   *
+   * @param interaction
+   * @returns A {@link Context}
+   */
   public context(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction): Context {
     return commandOptionsParser(interaction) as Context;
   }
@@ -71,7 +86,7 @@ export class GroupHandler<Context> {
     this.#initialized = true;
 
     Bootstrap.event.add('interactionCreate', async (interaction) => {
-      if (!(await this.enforce(interaction))) return;
+      if (!(await this.assure(interaction))) return;
       await this.#handle({
         interaction,
         args: this.context(interaction),
@@ -82,7 +97,12 @@ export class GroupHandler<Context> {
     });
   }
 
-  private async enforce(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction): Promise<boolean> {
+  /**
+   * Enforce the Assurances from {@link Assurances}.
+   * @param interaction
+   * @returns
+   */
+  private async assure(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction): Promise<boolean> {
     if (interaction.type !== InteractionTypes.ApplicationCommand) return false;
     if (interaction.channelId === undefined) return false;
     if (interaction.data?.name !== this.#assurances?.interaction) return false;
@@ -160,6 +180,9 @@ export class GroupHandler<Context> {
   }
 }
 
+/**
+ * The Assurances for the Slash Command.
+ */
 export interface Assurances {
   interaction: string;
   supportedChannelTypes: (ChannelTypes.GuildAnnouncement | ChannelTypes.GuildText | ChannelTypes.DM | ChannelTypes.GroupDm)[];

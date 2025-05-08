@@ -1,4 +1,4 @@
-import type { CreateApplicationCommand } from '@discordeno';
+import type { CreateSlashApplicationCommand } from '@discordeno';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
 import { DatabaseConnector } from './lib/database/database.ts';
 import type { Application } from './lib/database/model/rconf/application.model.ts';
@@ -13,7 +13,8 @@ export class Bootstrap {
   static #application: Application | null = null;
 
   /** The Interaction Catalyst Index. */
-  public static interaction = new Set<CreateApplicationCommand>();
+  public static guildChatInputInteraction = new Set<Omit<CreateSlashApplicationCommand, 'nameLocalizations' | 'descriptionLocalizations' | 'dmPermission' | 'handler' | 'integrationTypes' | 'contexts'>>();
+  public static globalChatInputInteraction = new Set<Omit<CreateSlashApplicationCommand, 'nameLocalizations' | 'descriptionLocalizations' | 'dmPermission' | 'handler'>>();
 
   /** The Internal CacheBot Application. */
   public static bot: CacheBotType;

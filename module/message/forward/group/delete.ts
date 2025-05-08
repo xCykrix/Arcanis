@@ -5,13 +5,13 @@ import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GroupHandler } from '../../../../lib/util/builder/group.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Emoji } from '../../../../lib/util/validation/emoji.ts';
-import type { ReactionForwardRemove } from '../../definition.ts';
+import type { MessageForwardDelete } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupHandler.builder<Required<ReactionForwardRemove>>({
-      interaction: 'reaction',
+    GroupHandler.builder<Required<MessageForwardDelete>>({
+      interaction: 'message',
       requireGuild: true,
       supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
       userRequiredGuildPermissions: ['MANAGE_MESSAGES'],
@@ -21,10 +21,10 @@ export default class extends AsyncInitializable {
     })
       // deno-lint-ignore require-await
       .inhibitor(async ({ args }) => {
-        return args.forward?.remove === undefined;
+        return args.forward?.delete === undefined;
       })
       .handle(async ({ interaction, args }) => {
-        const remove = args.forward!.remove!;
+        const remove = args.forward!.delete!;
 
         // Defer for Main Processing
         await interaction.defer();
