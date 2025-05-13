@@ -58,6 +58,6 @@ export default class extends AsyncInitializable {
             .addField('Channel', `<#${remove.channel.id}>`, true)
             .addField('Type', remove.type, true),
         });
-      }).build();
+      });
   }
 }

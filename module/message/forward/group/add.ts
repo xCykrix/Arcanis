@@ -1,4 +1,4 @@
-import { ChannelTypes, type PermissionStrings } from '@discordeno';
+import { ChannelTypes } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -28,10 +28,17 @@ export default class extends AsyncInitializable {
         const add = args.forward!.add!;
 
         // Permission Guard (Target Channel) - Bot Permissions
-        const botPermissions: PermissionStrings[] = ['SEND_MESSAGES'];
-        if (!hasChannelPermissions(guild!, add.to!.id, botMember!, botPermissions)) {
+        if (!hasChannelPermissions(guild!, add.to!.id, botMember!, ['VIEW_CHANNEL', 'SEND_MESSAGES'])) {
           await interaction.respond({
-            embeds: Responses.error.makeBotPermissionDenied(botPermissions),
+            embeds: Responses.error.makeBotPermissionDenied(['VIEW_CHANNEL', 'SEND_MESSAGES']),
+          }, { isPrivate: true });
+          return;
+        }
+
+        // Permission Guard (Source Channel) - Bot Permissions
+        if (!hasChannelPermissions(guild!, add.from!.id, botMember!, ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'])) {
+          await interaction.respond({
+            embeds: Responses.error.makeBotPermissionDenied(['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY']),
           }, { isPrivate: true });
           return;
         }
@@ -43,7 +50,7 @@ export default class extends AsyncInitializable {
         if (!Emoji.validate(add.reaction)) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription('Invalid Emoji Data in Reaction Field.')
+              .setDescription('An Invalid Reaction was specified. Please use the Discord Emoji Picker.')
               .addField('Data', add.reaction),
           });
           return;
@@ -54,7 +61,7 @@ export default class extends AsyncInitializable {
         if (fetchBySecondary >= 10) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription('You may only create up to 10 forwarders in a source (from) channel.'),
+              .setDescription('You may only create up to 10 Reaction Forwarders in the specified Source Channel. This Reaction Forwarder would exceed the limitation and has been rejected.'),
           });
           return;
         }
@@ -95,12 +102,12 @@ export default class extends AsyncInitializable {
         // Respond
         await interaction.respond({
           embeds: Responses.success.make()
-            .setDescription('Forwarding has been set for the specified channel.')
+            .setDescription('Reaction Forwarding Added.')
             .addField('From Channel', `<#${add.from.id}>`, false)
             .addField('To Channel', `<#${add.to.id}>`, false)
             .addField('Reaction', `${add.reaction}`, false)
             .addField('Threshold', `${add.threshold} Reactions`, false),
         });
-      }).build();
+      });
   }
 }

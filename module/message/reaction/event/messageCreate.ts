@@ -2,6 +2,7 @@ import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import type { ReactionType } from '../../../../lib/database/model/reaction.model.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
 
 export default class extends AsyncInitializable {
@@ -55,7 +56,9 @@ export default class extends AsyncInitializable {
 
       // Add Reactions
       for (const reaction of fetchByPrimary.value.reaction) {
-        await Bootstrap.bot.helpers.addReaction(message.channelId, message.id, reaction);
+        await Bootstrap.bot.helpers.addReaction(message.channelId, message.id, reaction).catch((e) => {
+          optic.warn('Failed to add reaction.', e);
+        });
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     });

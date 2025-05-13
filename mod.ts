@@ -10,7 +10,7 @@ import { optic } from './lib/util/optic.ts';
 /** Boostrap Class */
 export class Bootstrap {
   // Internal Registers
-  static #application: Application | null = null;
+  static application: Application | null = null;
 
   /** The Interaction Catalyst Index. */
   public static guildChatInputInteraction = new Set<Omit<CreateSlashApplicationCommand, 'nameLocalizations' | 'descriptionLocalizations' | 'dmPermission' | 'handler' | 'integrationTypes' | 'contexts'>>();
@@ -26,16 +26,16 @@ export class Bootstrap {
   private static async boot(connect: boolean = true): Promise<void> {
     // Fetch Data from Remote Configuration Server
     if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPLICATION_ID' is undefined.`);
-    this.#application = (await DatabaseConnector.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
+    this.application = (await DatabaseConnector.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
 
     // Check Remote Configuration Server Response
-    if (this.#application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);
+    if (this.application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);
 
     // Post Status
-    optic.info(`Application ID: ${this.#application?.applicationId} / ${this.#application.publicKey}`);
+    optic.info(`Application ID: ${this.application?.applicationId} / ${this.application.publicKey}`);
 
     // Initialize Bot Application
-    this.bot = createBotWithToken(this.#application.token);
+    this.bot = createBotWithToken(this.application.token);
     this.bot.logger = optic as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
 
     // Setup Event Manager and Load Default Events

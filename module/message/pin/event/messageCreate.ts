@@ -3,7 +3,7 @@ import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../../../mod.ts';
-import { PinStickyMessageLogic } from '../logic/pinStickyMessageLogic.ts';
+import { MessagePinLogic } from '../logic/messagePinLogic.ts';
 
 export default class extends AsyncInitializable {
   private database = DatabaseConnector.persistd['kv'] as Deno.Kv;
@@ -34,7 +34,7 @@ export default class extends AsyncInitializable {
 
       // Post Event
       if (((fetch.value ?? 0) + 1) >= (fetchByPrimary.value.every ?? 5)) {
-        PinStickyMessageLogic.post(guid, fetchByPrimary.value, true);
+        MessagePinLogic.post(guid, fetchByPrimary.value, true);
       }
     });
   }

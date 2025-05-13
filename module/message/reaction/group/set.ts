@@ -122,6 +122,6 @@ export default class extends AsyncInitializable {
             .addField('Type', set.type, true)
             .addField('Reactions', reaction.join(' '), false),
         });
-      }).build();
+      });
   }
 }

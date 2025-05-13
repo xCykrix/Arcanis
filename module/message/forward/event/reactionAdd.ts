@@ -42,7 +42,7 @@ export default class extends AsyncInitializable {
 
       // Get Message
       const message = await Bootstrap.bot.helpers.getMessage(reaction.channelId, reaction.messageId).catch((e) => {
-        createIncidentEvent(crypto.randomUUID(), `Failed to Fetch Message for Reaction Forward Module reactionAdd Event. ${reaction.guildId}${reaction.channelId}/${reaction.messageId}`, e);
+        createIncidentEvent(crypto.randomUUID(), `Failed to Fetch Message for Reaction Forward Module reactionAdd Event. ${reaction.guildId}/${reaction.channelId}/${reaction.messageId}`, e);
         return null;
       });
       if (message === null) return;
@@ -112,7 +112,7 @@ export default class extends AsyncInitializable {
               },
             ],
           }).catch((e) => {
-            createIncidentEvent(crypto.randomUUID(), `Failed to do a reaction forward for type embed. ${reaction.guildId}${reaction.channelId}/${reaction.messageId}`, e);
+            createIncidentEvent(crypto.randomUUID(), `Failed to do a Reaction Forward for type embed. ${reaction.guildId}${reaction.channelId}/${reaction.messageId}`, e);
             return null;
           });
           break;
@@ -154,7 +154,7 @@ export default class extends AsyncInitializable {
               },
             ],
           }).catch((e) => {
-            createIncidentEvent(crypto.randomUUID(), `Failed to do a reaction forward for type text. ${reaction.guildId}${reaction.channelId}/${reaction.messageId}`, e);
+            createIncidentEvent(crypto.randomUUID(), `Failed to do a reaction forward for non embeds. ${reaction.guildId}${reaction.channelId}/${reaction.messageId}`, e);
             return null;
           });
           break;

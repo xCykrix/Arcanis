@@ -8,10 +8,9 @@ export default class extends AsyncInitializable {
   public override async initialize(): Promise<void> {
     Bootstrap.guildChatInputInteraction.add({
       name: 'message',
-      description: 'Reaction Management Module.',
+      description: 'Message-based Management Module.',
       defaultMemberPermissions: [
         'MANAGE_MESSAGES',
-        'ADD_REACTIONS',
       ],
       options: [
         {

@@ -62,6 +62,6 @@ export default class extends AsyncInitializable {
         await interaction.respond({
           embeds,
         });
-      }).build();
+      });
   }
 }

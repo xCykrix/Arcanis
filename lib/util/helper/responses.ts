@@ -1,4 +1,5 @@
 import { type ChannelTypes, EmbedsBuilder, type PermissionStrings } from '@discordeno';
+import { getLang } from '../../../lang.ts';
 
 /**
  * A Successful Response Generator for EmbedsBuilder.
@@ -38,7 +39,9 @@ class ErrorResponseGenerator {
    */
   public makeUnsupportedChannel(supported: ChannelTypes[]): EmbedsBuilder {
     return this.make()
-      .setDescription(`This interaction does not support this type of channel. Supports: ${supported.join(' ')}`);
+      .setDescription(getLang('global', 'channel.unsupported')!)
+      .addField('Supported', supported.join('\n'))
+      ;
   }
 
   /**
@@ -48,7 +51,7 @@ class ErrorResponseGenerator {
    */
   public makeBotPermissionDenied(permissions: PermissionStrings[]): EmbedsBuilder {
     return this.make()
-      .setDescription(`Unable to process this request. I am not authorized with the required permissions for this Channel.`)
+      .setDescription(getLang('global', 'permission.bot.missing')!)
       .addField('Permissions', permissions.join('\n'));
   }
 }

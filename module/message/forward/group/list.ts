@@ -10,7 +10,7 @@ export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     const listCallback = ComponentHandler.builder({
-      moduleId: 'reaction.callback.forward-list',
+      moduleId: 'message.forward.list',
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
@@ -29,7 +29,7 @@ export default class extends AsyncInitializable {
 
       // Build Embed
       const embeds = Responses.success.make()
-        .setTitle('Auto Forward List');
+        .setTitle('Reaction Forwarding List');
       const fields = new Map<string, Set<[string, string]>>();
 
       // Iterate Embeds from Pagination
@@ -106,7 +106,6 @@ export default class extends AsyncInitializable {
         ],
       });
     });
-    listCallback.build();
 
     GroupHandler.builder<Required<MessageForwardList>>({
       interaction: 'message',
@@ -136,14 +135,14 @@ export default class extends AsyncInitializable {
         if (fetchBySecondary.result.length === 0) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription('No Reaction Forwarder configurations found. Please check the channel is correct and try again.'),
+              .setDescription('Reaction Forwarder(s) not found. Please check the Channel and Reaction is correct.'),
           });
           return;
         }
 
         // Build Embed
         const embeds = Responses.success.make()
-          .setTitle('Auto Forward List')
+          .setTitle('Reaction Forwarding List')
           .setFooter(`Page: 1`);
         const fields = new Map<string, Set<[string, string]>>();
 
@@ -205,6 +204,6 @@ export default class extends AsyncInitializable {
             },
           ],
         });
-      }).build();
+      });
   }
 }

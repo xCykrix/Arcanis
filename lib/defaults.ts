@@ -8,12 +8,14 @@ export function defaults(): void {
     optic.info(`[${packet.shardId}] Username: ${botUser.username} | Guilds: ${packet.guilds.length} | Application: ${packet.applicationId} | Session: ${packet.sessionId}.`);
 
     // Upsert Guild Commands
-    await Bootstrap.bot.helpers.upsertGlobalApplicationCommands([]);
+    await Bootstrap.bot.helpers.upsertGlobalApplicationCommands(Bootstrap.globalChatInputInteraction.values().toArray()).catch((e) => {
+      createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGlobalApplicationCommands.', e);
+    });
     for (const guild of packet.guilds) {
       // const channel = await Bootstrap.bot.helpers.getGuild(guild);
       // await Bootstrap.bot.helpers.getChannel();
       await Bootstrap.bot.helpers.upsertGuildApplicationCommands(guild, Bootstrap.guildChatInputInteraction.values().toArray()).catch((e) => {
-        createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGlobalApplicationCommands.', e);
+        createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGuildApplicationCommands.', e);
       });
     }
   });

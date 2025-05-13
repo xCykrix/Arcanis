@@ -37,7 +37,7 @@ export default class extends AsyncInitializable {
         if (fetchByPrimary?.versionstamp === undefined) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription('Unable to a Sticky Message. Please check the Channel specified.'),
+              .setDescription('Unknown Pinned Message. Please check the Channel and Reaction is correct.'),
           });
           return;
         }
@@ -51,6 +51,6 @@ export default class extends AsyncInitializable {
             .setDescription('Sticky Message Removed')
             .addField('Channel', `<#${remove!.channel.id}>`, true),
         });
-      }).build();
+      });
   }
 }

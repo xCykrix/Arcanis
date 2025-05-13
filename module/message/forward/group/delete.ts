@@ -33,18 +33,8 @@ export default class extends AsyncInitializable {
         if (!Emoji.validate(remove.reaction)) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription('Invalid Emoji Data in Reaction Field.')
+              .setDescription('An Invalid Reaction was specified. Please use the Discord Emoji Picker.')
               .addField('Data', remove.reaction),
-          });
-          return;
-        }
-
-        // Verify Limit
-        const fetchBySecondary = await DatabaseConnector.appd.forward.countBySecondaryIndex('fromChannelId', remove.from.id.toString());
-        if (fetchBySecondary >= 10) {
-          await interaction.respond({
-            embeds: Responses.error.make()
-              .setDescription('You may only create up to 10 forwarders in a source (from) channel.'),
           });
           return;
         }
@@ -64,7 +54,7 @@ export default class extends AsyncInitializable {
         if (fetchByPrimary?.versionstamp === undefined) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription('Unknown Reaction Forwarder Configuration. Please check the channel and reaction is correct.'),
+              .setDescription('Unknown Reaction Forwarding Configuration. Please check the Channel and Reaction is correct.'),
           });
           return;
         }
@@ -75,11 +65,11 @@ export default class extends AsyncInitializable {
         // Respond
         await interaction.respond({
           embeds: Responses.success.make()
-            .setDescription('Forwarding has been set for the specified channel.')
+            .setDescription('Reaction Forwarding Deleted.')
             .addField('From Channel', `<#${remove.from.id}>`, false)
             .addField('To Channel', `<#${fetchByPrimary.value.toChannelId}>`, false)
             .addField('Reaction', `${remove.reaction}`, false),
         });
-      }).build();
+      });
   }
 }

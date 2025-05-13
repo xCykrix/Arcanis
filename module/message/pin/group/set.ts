@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, type InputTextComponent, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, type InputTextComponent, type MessageComponent, MessageComponentTypes, TextStyles } from '@discordeno';
 import { DatabaseConnector } from '../../../../lib/database/database.ts';
 import { GUID } from '../../../../lib/database/guid.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -13,7 +13,7 @@ export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     const preview = ComponentHandler.builder({
-      moduleId: 'pin.stick.callback.preview',
+      moduleId: 'message.pin.callback.preview',
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
@@ -24,8 +24,8 @@ export default class extends AsyncInitializable {
       if (channel?.id.toString() === undefined) {
         await interaction.respond({
           embeds: Responses.error.make()
-            .setDescription('Unable to locate channel via cache. Please try again later.'),
-        });
+            .setDescription('Unknown Channel for Reaction Forwarding. Please try again. (Cache Miss)'),
+        }, { isPrivate: true });
         return;
       }
 
@@ -56,10 +56,9 @@ export default class extends AsyncInitializable {
         components: [],
       });
     });
-    preview.build();
 
     const returnToModal = ComponentHandler.builder({
-      moduleId: 'pin.stick.callback.returnToModal',
+      moduleId: 'message.pin.callback.returnToModal',
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
@@ -95,14 +94,12 @@ export default class extends AsyncInitializable {
             ],
           },
         ],
-      }, {
-        isPrivate: true,
       });
+      await interaction.delete();
     });
-    returnToModal.build();
 
     const modal = ComponentHandler.builder({
-      moduleId: 'pin.sticky.callback.modal',
+      moduleId: 'message.pin.callback.modal',
       requireAuthor: true,
       within: 300,
     }).handle(async (interaction, self) => {
@@ -155,11 +152,8 @@ export default class extends AsyncInitializable {
             ],
           },
         ],
-      }, {
-        isPrivate: true,
       });
     });
-    modal.build();
 
     GroupHandler.builder<MessagePinSet>({
       interaction: 'message',
@@ -178,11 +172,10 @@ export default class extends AsyncInitializable {
         const set = args.pin!.set!;
 
         // Permission Guard (Target Channel) - Bot Permissions
-        const botPermissions: PermissionStrings[] = ['SEND_MESSAGES'];
-        if (!hasChannelPermissions(guild!, set.channel!.id, botMember!, botPermissions)) {
+        if (!hasChannelPermissions(guild!, set.channel!.id, botMember!, ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'])) {
           await interaction.respond({
-            embeds: Responses.error.makeBotPermissionDenied(botPermissions),
-          }, { isPrivate: true });
+            embeds: Responses.error.makeBotPermissionDenied(['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY']),
+          });
           return;
         }
 
@@ -194,14 +187,15 @@ export default class extends AsyncInitializable {
         });
         const fetchByPrimary = await DatabaseConnector.appd.pin.findByPrimaryIndex('guid', guid);
 
+        // Build Component with Dynamic Placeholder Fill.
         const inputTextComponent: InputTextComponent = {
           type: MessageComponentTypes.InputText,
           customId: 'text',
-          label: 'Message Content',
+          label: 'Message Text',
           style: TextStyles.Paragraph,
           minLength: 1,
           maxLength: 2000,
-          placeholder: 'Type your message you want pinned here! Markdown supported.',
+          placeholder: 'Enter the Message in this field. Markdown Supported.',
           required: true,
         };
         if (fetchByPrimary?.value.message !== undefined) {
@@ -220,7 +214,7 @@ export default class extends AsyncInitializable {
               `${set.within}`,
             ],
           }),
-          title: 'Set Sticky Message',
+          title: 'Pinned Message Editor',
           components: [
             {
               type: MessageComponentTypes.ActionRow,
@@ -229,9 +223,7 @@ export default class extends AsyncInitializable {
               ],
             },
           ],
-        }, {
-          isPrivate: true,
         });
-      }).build();
+      });
   }
 }

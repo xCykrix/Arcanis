@@ -56,7 +56,6 @@ export default class extends AsyncInitializable {
       });
       return;
     });
-    userCallback.build();
 
     const roleCallback = ComponentHandler.builder({
       moduleId: 'reaction.callback.role',
@@ -103,7 +102,6 @@ export default class extends AsyncInitializable {
       });
       return;
     });
-    roleCallback.build();
 
     GroupHandler.builder<MessageReactionExclude>({
       interaction: 'message',
@@ -207,6 +205,6 @@ export default class extends AsyncInitializable {
             },
           ],
         });
-      }).build();
+      });
   }
 }

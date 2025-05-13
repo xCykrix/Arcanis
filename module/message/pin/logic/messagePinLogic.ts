@@ -5,7 +5,7 @@ import { hasChannelPermissions } from '../../../../lib/util/helper/permissions.t
 import { createIncidentEvent, optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
 
-export class PinStickyMessageLogic {
+export class MessagePinLogic {
   private static database = DatabaseConnector.persistd['kv'] as Deno.Kv;
 
   public static async post(guid: string, pin: PinModuleConfiguration, fromMessageEvent = false): Promise<void> {

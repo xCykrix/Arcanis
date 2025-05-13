@@ -1,8 +1,10 @@
 import type { MessageComponent } from '@discordeno';
+import { getLang } from '../../../lang.ts';
 import { Bootstrap } from '../../../mod.ts';
 import { DatabaseConnector } from '../../database/database.ts';
 import type { Component } from '../../database/model/component.model.ts';
 import { Responses } from '../helper/responses.ts';
+import { createIncidentEvent } from '../optic.ts';
 
 export class ComponentHandler {
   #initialized = false;
@@ -40,6 +42,7 @@ export class ComponentHandler {
   /** Set the Callback Handler. */
   public handle(handle: (interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction, self: ComponentHandler) => Promise<void>): ComponentHandler {
     this.#handle = handle;
+    this.build();
     return this;
   }
 
@@ -68,7 +71,7 @@ export class ComponentHandler {
   }
 
   /** Called to 'build' the Component Handler. Must be called as last step and only once. */
-  public build(): void {
+  private build(): void {
     // Initialization Guard
     if (this.#initialized) return;
     this.#initialized = true;
@@ -76,7 +79,9 @@ export class ComponentHandler {
     // Register
     Bootstrap.event.add('interactionCreate', async (interaction) => {
       if (!(await this.enforce(interaction))) return;
-      await this.#handle(interaction, this);
+      await this.#handle(interaction, this).catch((e) => {
+        createIncidentEvent(crypto.randomUUID(), `Failed to process a component interactionCreate event. ${this.#expectations?.moduleId}.`, e);
+      });
     });
   }
 
@@ -91,7 +96,7 @@ export class ComponentHandler {
     if (callback === null) {
       interaction.respond({
         embeds: Responses.error.make()
-          .setDescription('I have timed out waiting on this request and will no longer respond to this interaction. Please issue the original request again.'),
+          .setDescription(getLang('global', 'internal.interaction.timeout')!),
       }, {
         isPrivate: true,
       });
@@ -103,7 +108,7 @@ export class ComponentHandler {
     if (this.#expectations?.requireAuthor && (interaction.user.id.toString() !== callback.userId)) {
       interaction.respond({
         embeds: Responses.error.make()
-          .setDescription('I will not respond to this request unless you are the original author if this interaction. Please issue the original request again.'),
+          .setDescription(getLang('global', 'internal.interaction.authorRequired')!),
       }, {
         isPrivate: true,
       });

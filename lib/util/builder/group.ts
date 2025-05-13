@@ -1,4 +1,5 @@
 import { ChannelTypes, commandOptionsParser, InteractionTypes, type PermissionStrings } from '@discordeno';
+import { getLang } from '../../../lang.ts';
 import { Bootstrap } from '../../../mod.ts';
 import { hasChannelPermissions, hasGuildPermissions } from '../helper/permissions.ts';
 import { Responses } from '../helper/responses.ts';
@@ -68,6 +69,7 @@ export class GroupHandler<Context> {
     handle: (passthrough: HandlePassthroughType<Context>) => Promise<void>,
   ): Omit<GroupHandler<Context>, OmittedProperties> {
     this.#handle = handle;
+    this.build();
     return this;
   }
 
@@ -81,7 +83,7 @@ export class GroupHandler<Context> {
     return commandOptionsParser(interaction) as Context;
   }
 
-  public build(): void {
+  private build(): void {
     if (this.#initialized) return;
     this.#initialized = true;
 
@@ -135,14 +137,12 @@ export class GroupHandler<Context> {
     }
 
     // Get Guild from Cache
-    const response = (permissions: PermissionStrings[], userType: 'bot' | 'member', permissionType: 'guild' | 'channel') => {
+    const response = (permissions: PermissionStrings[], userType: 'bot' | 'member') => {
       const embed = Responses.error.make();
       if (userType === 'bot') {
-        if (permissionType === 'guild') embed.setDescription('Unable to process this request. I am not authorized with the required permissions for this Guild.');
-        else embed.setDescription('Unable to process this request. I am not authorized with the required permissions for this Channel.');
+        embed.setDescription(getLang('global', 'permission.bot.missing')!);
       } else {
-        if (permissionType === 'guild') embed.setDescription('Unable to process this request. You are not authorized with the required permissions for this Guild.');
-        else embed.setDescription('Unable to process this request. You are not authorized with the required permissions for this Channel.');
+        embed.setDescription(getLang('global', 'permission.user.missing')!);
       }
       embed.addField('Permissions', permissions.join('\n'));
       return embed;
@@ -155,21 +155,21 @@ export class GroupHandler<Context> {
         const member = (await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, interaction.guildId!))!;
         // Enforce User Permissions
         if (this.#assurances?.userRequiredGuildPermissions?.length > 0 && !hasGuildPermissions(guild, interaction.member!, this.#assurances?.userRequiredGuildPermissions)) {
-          await interaction.respond({ embeds: response(this.#assurances!.userRequiredGuildPermissions, 'member', 'guild') }, { isPrivate: true });
+          await interaction.respond({ embeds: response(this.#assurances!.userRequiredGuildPermissions, 'member') }, { isPrivate: true });
           return false;
         }
         if (this.#assurances?.userRequiredChannelPermissions?.length > 0 && !hasChannelPermissions(guild, interaction.channelId, interaction.member!, this.#assurances?.userRequiredChannelPermissions)) {
-          await interaction.respond({ embeds: response(this.#assurances!.userRequiredChannelPermissions, 'member', 'channel') }, { isPrivate: true });
+          await interaction.respond({ embeds: response(this.#assurances!.userRequiredChannelPermissions, 'member') }, { isPrivate: true });
           return false;
         }
 
         // Enforce Bot Permissions
         if (this.#assurances?.applicationRequiredGuildPermissions?.length > 0 && !hasGuildPermissions(guild, member, this.#assurances?.applicationRequiredGuildPermissions)) {
-          await interaction.respond({ embeds: response(this.#assurances!.applicationRequiredGuildPermissions, 'bot', 'guild') }, { isPrivate: true });
+          await interaction.respond({ embeds: response(this.#assurances!.applicationRequiredGuildPermissions, 'bot') }, { isPrivate: true });
           return false;
         }
         if (this.#assurances?.applicationRequiredChannelPermissions?.length > 0 && !hasChannelPermissions(guild, interaction.channelId, member, this.#assurances?.applicationRequiredChannelPermissions)) {
-          await interaction.respond({ embeds: response(this.#assurances!.applicationRequiredChannelPermissions, 'bot', 'channel') }, { isPrivate: true });
+          await interaction.respond({ embeds: response(this.#assurances!.applicationRequiredChannelPermissions, 'bot') }, { isPrivate: true });
           return false;
         }
       }
