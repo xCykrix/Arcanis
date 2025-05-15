@@ -1,22 +1,31 @@
 import { Bootstrap } from '../mod.ts';
-import { createIncidentEvent, optic } from './util/optic.ts';
+import { AsyncInitializable } from './generic/initializable.ts';
+import { Optic } from './util/optic.ts';
 
-export function defaults(): void {
-  // Native Startup
-  Bootstrap.event.add('ready', async (packet) => {
-    const botUser: typeof Bootstrap.bot.transformers.$inferredTypes.user = packet.user;
-    optic.info(`[${packet.shardId}] Username: ${botUser.username} | Guilds: ${packet.guilds.length} | Application: ${packet.applicationId} | Session: ${packet.sessionId}.`);
+export class Defaults extends AsyncInitializable {
+  // deno-lint-ignore require-await
+  public override async initialize(): Promise<void> {
+    Bootstrap.event.add('ready', async (packet) => {
+      const botUser: typeof Bootstrap.bot.transformers.$inferredTypes.user = packet.user;
+      Optic.f.info(`[${packet.shardId}] Username: ${botUser.username} | Guilds: ${packet.guilds.length} | Application: ${packet.applicationId} | Session: ${packet.sessionId}.`);
 
-    // Upsert Guild Commands
-    await Bootstrap.bot.helpers.upsertGlobalApplicationCommands(Bootstrap.globalChatInputInteraction.values().toArray()).catch((e) => {
-      createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGlobalApplicationCommands.', e);
-    });
-    for (const guild of packet.guilds) {
-      // const channel = await Bootstrap.bot.helpers.getGuild(guild);
-      // await Bootstrap.bot.helpers.getChannel();
-      await Bootstrap.bot.helpers.upsertGuildApplicationCommands(guild, Bootstrap.guildChatInputInteraction.values().toArray()).catch((e) => {
-        createIncidentEvent(crypto.randomUUID(), 'Failed to upsertGuildApplicationCommands.', e);
+      // Upsert Guild Commands
+      await Bootstrap.bot.helpers.upsertGlobalApplicationCommands(Bootstrap.globalChatInputInteraction.values().toArray()).catch((e) => {
+        Optic.incident({
+          moduleId: 'Defaults',
+          message: 'Failed to upsertGlobalApplicationCommands.',
+          err: e,
+        });
       });
-    }
-  });
+      for (const guild of packet.guilds) {
+        await Bootstrap.bot.helpers.upsertGuildApplicationCommands(guild, Bootstrap.guildChatInputInteraction.values().toArray()).catch((e) => {
+          Optic.incident({
+            moduleId: 'Defaults',
+            message: 'Failed to upsertGuildApplicationCommands.',
+            err: e,
+          });
+        });
+      }
+    });
+  }
 }

@@ -1,5 +1,5 @@
 import type { Bootstrap } from '../../mod.ts';
-import { asyncInterceptor } from '../util/optic.ts';
+import { Optic } from '../util/optic.ts';
 
 export type EventParameters<T extends keyof typeof Bootstrap.bot.events> = Parameters<NonNullable<typeof Bootstrap.bot.events[T]>>;
 
@@ -19,7 +19,7 @@ export class EventManager {
       const key = k as keyof typeof bot.events;
       bot.events[key] = (...args) => {
         for (const callback of this.events[key]!) {
-          asyncInterceptor(key, async (...args) => {
+          Optic.intercept(key, async (...args) => {
             await callback(...args);
           }, ...args);
         }

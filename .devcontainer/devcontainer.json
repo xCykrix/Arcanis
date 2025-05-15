@@ -42,7 +42,7 @@
         // Editor
         "editorconfig.editorconfig",
         // Utilities
-        "ms-azuretools.vscode-docker",
+        "ms-azuretools.vscode-containers",
         // Language
         "justjavac.vscode-deno-extensionpack",
         // IntelliCode

@@ -4,7 +4,7 @@ import { every, FileStream, of } from '@optic/fileStream';
 import { JsonFormatter, TokenReplacer } from '@optic/formatters';
 import { Level, Logger } from '@optic/logger';
 import { Bootstrap } from '../../mod.ts';
-import { isWebhookValid } from '../util/guard/webhook.ts';
+import { APIWebhookGuard } from './guard/apiWebhookGuard.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()
@@ -36,56 +36,94 @@ const fileStream = new FileStream('./optical/optic.txt')
   .withLogHeader(true)
   .withLogFooter(true);
 
-/** Export the Logger. */
-interface InjectToOptic {
-  fatal?: <T>(msg: () => T, ...metadata: unknown[]) => T | undefined;
-}
-export const optic: Logger & InjectToOptic = new Logger()
-  .withMinLogLevel(Level.Trace)
-  .addStream(consoleStream)
-  .addStream(fileStream);
-optic.fatal = optic.error;
+type DefinedLogger = Logger & {
+  fatal: <T>(msg: () => T, ...metadata: unknown[]) => T | undefined;
+};
 
-export async function createIncidentEvent(incidentId: string, message: string, error?: Error): Promise<void> {
-  const alertWebhookValid = await isWebhookValid(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, true);
-  if (!alertWebhookValid) {
-    optic.warn('Alert Webhook does not exist. Unable to fetch from API. Please investigate.');
-  }
-  if (!Deno.env.get('ALERT_WEBHOOK_TOKEN')) {
-    optic.warn('Alert Webhook token is not configured. Please investigate.');
+export class Optic {
+  public static f: DefinedLogger = new Logger()
+    .withMinLogLevel(Level.Trace)
+    .addStream(consoleStream)
+    .addStream(fileStream) as DefinedLogger;
+
+  static {
+    this.f.fatal = this.f.error;
   }
 
-  optic.warn(`Incident: ${incidentId}; Message: ${message}\n`, error);
+  public static async incident(chunk: {
+    moduleId: string;
+    message: string;
+    err?: Error;
+  }): Promise<void> {
+    const incidentId = crypto.randomUUID();
+    this.f.warn(`Incident: ${incidentId}; Module: ${chunk.moduleId}; Message: ${chunk.message}\n`, chunk.err);
 
-  if (alertWebhookValid && Deno.env.get('ALERT_WEBHOOK_TOKEN') !== undefined) {
+    if (!Deno.env.get('ALERT_WEBHOOK_TOKEN')) {
+      this.f.warn('Alert Webhook token is not configured. Please investigate.');
+      return;
+    }
+    const alertWebhookValid = await APIWebhookGuard.valid(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!);
+    if (!alertWebhookValid) {
+      this.f.warn('Alert Webhook does not exist. Unable to fetch from API. Please investigate.');
+      return;
+    }
+
     Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {
       embeds: new EmbedsBuilder()
         .setTitle('Incident Report')
         .addField('Application', `${Bootstrap.bot.applicationId.toString()}`)
-        .addField('ID', incidentId)
-        .addField('Message', message)
-        .addField('Error', error?.message ?? 'Refer to Service Log'),
+        .addField('Module', chunk.moduleId)
+        .addField('ID', incidentId, true)
+        .addField('Message', chunk.message)
+        .addField('Error', chunk.err?.message ?? 'Refer to Service Log'),
     }).catch((e: Error) => {
-      optic.warn(`Failed to dispatch createIncidentEvent Webhook.\n`, e);
+      this.f.warn(`Failed to dispatch createIncidentEvent Webhook.\n`, e);
     });
   }
-}
 
-export function asyncInterceptor(id: string, callback: (...args: unknown[]) => Promise<void> | void, ...args: unknown[]): void {
-  try {
-    callback(...args)?.catch((e: Error) => {
-      createIncidentEvent(crypto.randomUUID(), `Unhandled Exception in '${id}'.`, e);
-    });
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      createIncidentEvent(crypto.randomUUID(), `Unhandled Exception in '${id}'.`, e);
-    } else {
-      optic.warn(`Unhandled Exception(?) in '${id}'. Caught to thrown non-error instanceof.`, e);
+  public static intercept(id: string, callback: (...args: unknown[]) => Promise<void> | void, ...args: unknown[]): void {
+    try {
+      callback(...args)?.catch((e: unknown) => {
+        if (e instanceof Error) {
+          this.incident({
+            moduleId: `Internal Interceptor - ${id}`,
+            message: `Unhandled Exception (Promise) in '${id}'.`,
+            err: e,
+          });
+        } else {
+          this.incident({
+            moduleId: `Internal Interceptor - ${id}`,
+            message: `Unhandled Exception (Sync) in '${id}'. V=${
+              Deno.inspect(e, {
+                colors: false,
+                compact: true,
+                depth: 2,
+                showHidden: false,
+              })
+            }`,
+          });
+        }
+      });
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        this.incident({
+          moduleId: `Internal Interceptor - ${id}`,
+          message: `Unhandled Exception (Sync) in '${id}'.`,
+          err: e,
+        });
+      } else {
+        this.incident({
+          moduleId: `Internal Interceptor - ${id}`,
+          message: `Unhandled Exception (Sync) in '${id}'. V=${
+            Deno.inspect(e, {
+              colors: false,
+              compact: true,
+              depth: 2,
+              showHidden: false,
+            })
+          }`,
+        });
+      }
     }
   }
-}
-
-export function intercept<T>(instance: T): T {
-  optic.debug(JSON.stringify(instance, null, 2));
-  return instance;
 }

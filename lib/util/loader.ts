@@ -1,9 +1,12 @@
 import { walk } from '@fs/walk';
-import type { AsyncInitializable } from '../generic/initializable.ts';
-import { createIncidentEvent } from './optic.ts';
+import { AsyncInitializable } from '../generic/initializable.ts';
+import { Optic } from './optic.ts';
 
-export class Loader {
-  public static async load(): Promise<void> {
+/**
+ * Dynamic Runtime Loader
+ */
+export class DynamicModuleLoader extends AsyncInitializable {
+  public override async initialize(): Promise<void> {
     for await (
       const ent of walk(new URL('../../module', import.meta.url), {
         exts: ['.ts'],
@@ -16,26 +19,26 @@ export class Loader {
         default: new () => AsyncInitializable;
       } | Error;
       if (imported instanceof Error) {
-        await createIncidentEvent(
-          crypto.randomUUID(),
-          `Failed to Import Module: ${ent.path}`,
-          imported,
-        );
+        await Optic.incident({
+          moduleId: 'DynamicModuleLoader',
+          message: `Failed to Import Module: ${ent.path}`,
+          err: imported,
+        });
       } else {
         try {
           await (new imported.default()).initialize().catch((e) => {
-            createIncidentEvent(
-              crypto.randomUUID(),
-              `Failed to Register Module: ${ent.path}`,
-              e,
-            );
+            Optic.incident({
+              moduleId: 'DynamicModuleLoader',
+              message: `Failed to Register Module: ${ent.path}`,
+              err: e,
+            });
           });
         } catch (e: unknown) {
-          await createIncidentEvent(
-            crypto.randomUUID(),
-            `Failed to Construct Module: ${ent.path}`,
-            e as Error,
-          );
+          Optic.incident({
+            moduleId: 'DynamicModuleLoader',
+            message: `Failed to Construct Module: ${ent.path}`,
+            err: e as Error,
+          });
         }
       }
     }
