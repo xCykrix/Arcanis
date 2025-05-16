@@ -2,7 +2,8 @@ import { ChannelTypes, type MessageComponent, MessageComponentTypes, TextStyles 
 import { getLang } from '../../../constants/lang.ts';
 import { GroupBuilder } from '../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
-import { stringify } from '../../../lib/util/helper/stringify.ts';
+import { stringify } from '../../../lib/util/helper/stringify.ts';1
+
 import { Optic } from '../../../lib/util/optic.ts';
 import type { DevEval } from '../definition.ts';
 
