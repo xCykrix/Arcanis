@@ -1,6 +1,6 @@
 {
   "name": "Deno",
-  "image": "mcr.microsoft.com/devcontainers/base:bullseye",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
   "features": {
     "ghcr.io/devcontainers-extra/features/deno:1": {
       "version": "latest"
@@ -10,6 +10,9 @@
     }
   },
   "customizations": {
+    "settings": {
+      "remote.containers.copyGitConfig": true
+    },
     "vscode": {
       "settings": {
         "files.hotExit": "onExitAndWindowClose",
