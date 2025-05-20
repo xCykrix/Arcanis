@@ -45,11 +45,16 @@
         // Editor
         "editorconfig.editorconfig",
         // Utilities
+        "aaron-bond.better-comments",
         "ms-azuretools.vscode-containers",
+        "christian-kohler.path-intellisense",
         // Language
+        "mattpocock.ts-error-translator",
+        "yoavbls.pretty-ts-errors",
         "justjavac.vscode-deno-extensionpack",
         // IntelliCode
         "VisualStudioExptTeam.vscodeintellicode",
+        "VisualStudioExptTeam.vscodeintellicode-insiders",
         "VisualStudioExptTeam.vscodeintellicode-completions",
         "VisualStudioExptTeam.intellicode-api-usage-examples"
       ]
