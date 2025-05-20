@@ -15,11 +15,6 @@
     },
     "vscode": {
       "settings": {
-        "files.hotExit": "onExitAndWindowClose",
-        "files.insertFinalNewline": true,
-        "files.trimFinalNewlines": true,
-        "editor.formatOnSave": true,
-        "editor.formatOnPaste": true,
         "[typescript]": {
           "editor.defaultFormatter": "denoland.vscode-deno",
           "editor.codeActionsOnSave": {
@@ -37,6 +32,12 @@
         "[jsonc]": {
           "editor.defaultFormatter": "vscode.json-language-features"
         },
+        "editor.formatOnSave": true,
+        "fileNestingUpdater.autoUpdate": true,
+        "fileNestingUpdater.autoUpdateInterval": 720,
+        "fileNestingUpdater.promptOnAutoUpdate": false,
+        "fileNestingUpdater.upstreamRepo": "antfu/vscode-file-nesting-config",
+        "fileNestingUpdater.upstreamBranch": "main",
         "deno.enable": true,
         "extensions.webWorker": true,
         "extensions.ignoreRecommendations": true
@@ -48,6 +49,7 @@
         "aaron-bond.better-comments",
         "ms-azuretools.vscode-containers",
         "christian-kohler.path-intellisense",
+        "antfu.file-nesting",
         // Language
         "mattpocock.ts-error-translator",
         "yoavbls.pretty-ts-errors",
