@@ -16,7 +16,7 @@ export class APIWebhookGuard {
     if (this.resolve.has(id)) return this.resolve.get(id)!;
 
     const webhook = await Bootstrap.bot.helpers.getWebhookWithToken(id, token).catch((e) => {
-      Optic.f.error(`Failed to getWebhookWithToken: ${id}`, e);
+      Optic.al.error(`Failed to getWebhookWithToken: ${id}`, e);
       this.resolve.set(id, false);
       return false;
     });

@@ -1,10 +1,10 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
-import type { Component } from './model/component.model.ts';
-import type { ReactionModuleForwardConfiguration } from './model/forward.model.ts';
-import { Lock } from './model/persistd/lock.ts';
-import type { PinModuleConfiguration } from './model/pin.model.ts';
+import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
+import type { PinModuleConfiguration } from './model/appd/pin.ts';
+import type { ReactionModuleConfiguration } from './model/appd/reaction.ts';
+import { Component } from './model/persistd/component.ts';
+import type { Lock } from './model/persistd/lock.ts';
 import type { Application } from './model/rconf/application.model.ts';
-import type { ReactionModuleConfiguration } from './model/reaction.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
   return model();
@@ -58,17 +58,6 @@ const persistdStaticSchema = {
       guid: 'primary',
     },
   }),
-  counter: collection(
-    createModel<{
-      guid: string;
-      counter: number;
-    }>(),
-    {
-      indices: {
-        guid: 'primary',
-      },
-    },
-  ),
 };
 
 /**

@@ -8,6 +8,7 @@ import { Optic } from '../../../lib/util/optic.ts';
 import type { DevEval } from '../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<DevEval>()
       .createGroupHandler({

@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionTypes, ChannelTypes } from '@discordeno';
-import type { ReactionType } from '../../lib/database/model/reaction.model.ts';
+import type { ReactionType } from '../../lib/database/model/appd/reaction.ts';
 import { AsyncInitializable } from '../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../mod.ts';
 

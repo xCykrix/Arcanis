@@ -3,12 +3,15 @@ export type ReactionModuleConfiguration = {
   guid: string;
   guildId: string;
   channelId: string;
+
   reaction: string[];
   type: ReactionType;
+
   exclusion?: {
     user?: string[];
     role?: string[];
   };
+
   self?: boolean;
 };
 
