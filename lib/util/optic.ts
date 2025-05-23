@@ -4,7 +4,7 @@ import { every, FileStream, of } from '@optic/fileStream';
 import { JsonFormatter, TokenReplacer } from '@optic/formatters';
 import { Level, Logger } from '@optic/logger';
 import { Bootstrap } from '../../mod.ts';
-import { APIWebhookGuard } from './guard/apiWebhookGuard.ts';
+import { Webhook } from './guard/webhook.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()
@@ -54,6 +54,7 @@ export class Optic {
     moduleId: string;
     message: string;
     err?: Error;
+    dispatch?: boolean;
   }): Promise<void> {
     const incidentId = crypto.randomUUID();
     this.f.warn(`Incident: ${incidentId}; Module: ${chunk.moduleId}; Message: ${chunk.message}\n`, chunk.err);
@@ -62,26 +63,34 @@ export class Optic {
       this.f.warn('Alert Webhook token is not configured. Please investigate.');
       return;
     }
-    const alertWebhookValid = await APIWebhookGuard.valid(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!);
+
+    if (!Deno.env.get('ALERT_THREAD_ID')) {
+      this.f.warn('Alert Webhook threadId is not configured. Please create a tenant.');
+    }
+
+    const alertWebhookValid = await Webhook.check(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!);
     if (!alertWebhookValid) {
       this.f.warn('Alert Webhook does not exist. Unable to fetch from API. Please investigate.');
       return;
     }
 
-    Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {
-      embeds: new EmbedsBuilder()
-        .setTitle('Incident Report')
-        .addField('Application', `${Bootstrap.bot.applicationId.toString()}`)
-        .addField('Module', chunk.moduleId)
-        .addField('ID', incidentId, true)
-        .addField('Message', chunk.message)
-        .addField('Error', chunk.err?.message ?? 'Refer to Service Log'),
-    }).catch((e: Error) => {
-      this.f.warn(`Failed to dispatch createIncidentEvent Webhook.\n`, e);
-    });
+    if (chunk.dispatch !== false) {
+      Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {
+        threadId: Deno.env.get('ALERT_THREAD_ID')!,
+        embeds: new EmbedsBuilder()
+          .setTitle('Incident Report')
+          .addField('Application', `${Bootstrap.bot.applicationId.toString()}`)
+          .addField('Module', chunk.moduleId)
+          .addField('ID', incidentId, true)
+          .addField('Message', chunk.message)
+          .addField('Error', chunk.err?.message ?? 'Refer to Service Log'),
+      }).catch((e: Error) => {
+        this.f.warn(`Failed to dispatch createIncidentEvent Webhook.\n`, e);
+      });
+    }
   }
 
-  public static intercept(id: string, callback: (...args: unknown[]) => Promise<void> | void, ...args: unknown[]): void {
+  public static interceptAsync(id: string, callback: (...args: unknown[]) => Promise<void> | void, ...args: unknown[]): void {
     try {
       callback(...args)?.catch((e: unknown) => {
         if (e instanceof Error) {

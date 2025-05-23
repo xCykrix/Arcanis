@@ -1,12 +1,12 @@
 //
 
-import { ChannelTypes, commandOptionsParser, InteractionTypes, MessageComponent, type PermissionStrings } from '@discordeno';
+import { ApplicationCommandOptionTypes, Camelize, ChannelTypes, commandOptionsParser, DiscordApplicationCommandOption, InteractionTypes, MessageComponent, type PermissionStrings } from '@discordeno';
 import type { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
 import { ulid } from '@ulid';
 import { developerAuthorizationConst, supportAuthorizationConst } from '../../constants/const.ts';
 import { getLang } from '../../constants/lang.ts';
 import { Bootstrap } from '../../mod.ts';
-import { DatabaseConnector } from '../database/database.ts';
+import { KVC } from '../kvc/kvc.ts';
 import { Permissions } from '../util/helper/permissions.ts';
 import { Responses } from '../util/helper/responses.ts';
 import { Optic } from '../util/optic.ts';
@@ -21,6 +21,7 @@ export class GroupBuilder<Context> {
   private assurance: GroupAssurance = {
     interactionTopLevel: null,
     componentTopLevel: null,
+    guidTopLevel: null,
     supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText, ChannelTypes.GuildForum, ChannelTypes.GuildMedia],
     requireGuild: true,
     requireDeveloper: false,
@@ -77,6 +78,15 @@ export class GroupBuilder<Context> {
       if (interaction.data?.name !== this.assurance.interactionTopLevel) return;
       if (interaction.channelId === undefined) return;
 
+      // Run Inhibitor
+      if (
+        handler.inhibitor({
+          interaction,
+          args: this.assistant.context(interaction),
+          assistant: this.assistant,
+        })
+      ) return;
+
       // Strict Enforce Developer
       if (
         this.assurance.requireDeveloper &&
@@ -102,15 +112,6 @@ export class GroupBuilder<Context> {
         });
         return;
       }
-
-      // Run Inhibitor
-      if (
-        handler.inhibitor({
-          interaction,
-          args: this.assistant.context(interaction),
-          assistant: this.assistant,
-        })
-      ) return;
 
       // Enforce Type Restrictions
       const channelTypes: ChannelTypes[] = this.assurance.supportedChannelTypes ?? [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText, ChannelTypes.GuildForum, ChannelTypes.GuildMedia];
@@ -281,7 +282,7 @@ class InteractionHandlerAssistant<Context> {
     let result: DenoKvCommitResult | DenoKvCommitError | null = null;
     while (result === null || result.ok === false) {
       culid = `${this.assurance.componentTopLevel}.${partition.ref}.${ulid()}`;
-      result = await DatabaseConnector.appd.component.add({
+      result = await KVC.appd.component.add({
         callbackId: culid,
         userId: partition.userId.toString(),
         constants: partition.constants,
@@ -299,7 +300,7 @@ class InteractionHandlerAssistant<Context> {
       constants: string[];
     } | null
   > {
-    const fbpi = await DatabaseConnector.appd.component.findByPrimaryIndex('callbackId', cluid);
+    const fbpi = await KVC.appd.component.findByPrimaryIndex('callbackId', cluid);
     if (fbpi?.versionstamp === undefined) return null;
     if (this.assurance.componentRequireAuthor && fbpi.value.userId !== userId.toString()) return null;
 
@@ -312,6 +313,7 @@ class InteractionHandlerAssistant<Context> {
 interface GroupAssurance {
   interactionTopLevel: string | null;
   componentTopLevel: string | null;
+  guidTopLevel: string | null;
   supportedChannelTypes: (ChannelTypes.GuildAnnouncement | ChannelTypes.GuildText | ChannelTypes.GuildForum | ChannelTypes.GuildMedia | ChannelTypes.DM | ChannelTypes.GroupDm)[];
 
   // Guild Specific
@@ -327,3 +329,18 @@ interface GroupAssurance {
   userRequiredGuildPermissions: PermissionStrings[];
   userRequiredChannelPermissions: PermissionStrings[];
 }
+
+export type CommandOptions<T extends Camelize<DiscordApplicationCommandOption>[]> = {
+  [K in T[number] as K['name']]: K['type'] extends ApplicationCommandOptionTypes.Boolean ? boolean
+    : K['type'] extends ApplicationCommandOptionTypes.Integer ? number
+    : K['type'] extends ApplicationCommandOptionTypes.Number ? number
+    : K['type'] extends ApplicationCommandOptionTypes.String ? string
+    : K['type'] extends ApplicationCommandOptionTypes.User ? typeof Bootstrap.bot.transformers.$inferredTypes.user
+    : K['type'] extends ApplicationCommandOptionTypes.Channel ? typeof Bootstrap.bot.transformers.$inferredTypes.channel
+    : K['type'] extends ApplicationCommandOptionTypes.Role ? string
+    : K['type'] extends ApplicationCommandOptionTypes.Mentionable ? string
+    : K['type'] extends ApplicationCommandOptionTypes.Attachment ? string
+    : K['type'] extends ApplicationCommandOptionTypes.SubCommandGroup ? CommandOptions<Extract<K, { options: Camelize<DiscordApplicationCommandOption>[] }>['options']>
+    : K['type'] extends ApplicationCommandOptionTypes.SubCommand ? CommandOptions<Extract<K, { options: Camelize<DiscordApplicationCommandOption>[] }>['options']>
+    : never;
+};

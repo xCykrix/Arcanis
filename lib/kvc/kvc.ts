@@ -1,8 +1,8 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
 import type { PinModuleConfiguration } from './model/appd/pin.ts';
-import type { ReactionModuleConfiguration } from './model/appd/reaction.ts';
-import { Component } from './model/persistd/component.ts';
+import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
+import type { Component } from './model/persistd/component.ts';
 import type { Lock } from './model/persistd/lock.ts';
 import type { Application } from './model/rconf/application.model.ts';
 
@@ -37,16 +37,32 @@ const appdStaticSchema = {
       toChannelId: 'secondary',
     },
   }),
+
+  // Message: Pin Collections
   pin: collection(createModel<PinModuleConfiguration>(), {
     indices: {
       guid: 'primary',
     },
   }),
+  // pinTemplate: collection(createModel<PinModuleTemplate>(), {
+  //   indices: {
+  //     guid: 'primary',
+  //     channelId: 'secondary',
+  //   }
+  // }),
+
+  // Message: Reaction Collections
   reaction: collection(createModel<ReactionModuleConfiguration>(), {
     indices: {
       guid: 'primary',
       guildId: 'secondary',
       channelId: 'secondary',
+    },
+  }),
+  reactionExclusion: collection(createModel<ReactionModuleExclusionConfiguration>(), {
+    indices: {
+      guildId: 'secondary',
+      channelId: 'primary',
     },
   }),
 };
@@ -63,7 +79,7 @@ const persistdStaticSchema = {
 /**
  * DatabaseConnector for Remote Key Database.
  */
-export class DatabaseConnector {
+export class KVC {
   static #rconf: Deno.Kv;
   static #appd: Deno.Kv;
   static #persistd: Deno.Kv;
@@ -111,4 +127,4 @@ export class DatabaseConnector {
 }
 
 /** Setup DatabaseConnector. */
-await DatabaseConnector['setup']();
+await KVC['setup']();

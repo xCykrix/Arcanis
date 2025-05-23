@@ -10,10 +10,29 @@ export const lang = {
     'permission.user.denied': 'You are not authorized for this request. A Security Incident has been tracked.',
     'component.timeout': 'I have timed out waiting on this request. I will no longer be able to reply to this action to you.',
   },
-  'eval': {
+  'dev.eval': {
     'component.code': 'Unable to validate the input.',
     'result.default': 'Async Wrapper failed to evaluate.',
     'result.undefined': 'Async Wrapper did not have a returned value.',
+  },
+  'reaction.set': {
+    'emoji.invalid': 'One ore more of the specified Emojis to react was invalid. Please ensure you use the built-in Emoji Picker and that each reaction is separated by one space.',
+    'emoji.exceed': 'Discord limits us to 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} more would exceed 20.',
+    'exclusivity': 'The message type "{{0}}" is not compatible with "{{1}}". Please delete existing auto reactions and try again.',
+    'result': 'Auto Reactions have been applied to the specified channel.',
+  },
+  'reaction.delete': {
+    'nonexistant': 'Unable to find the specified auto reaction. Please check the provided information.',
+    'result': 'The Auto Reaction has been removed from the specified channel.',
+  },
+  'reaction.list': {
+    'nonexistant': 'Unable to find any specified auto reaction(s). Please check the provided information.',
+    'result': 'The following Auto Reaction(s) are configured for the specified channel.',
+  },
+  'reaction.exclude': {
+    'nonexistant': 'Unable to find the specified auto reaction. Please check the provided information or issue the original request again.',
+    'follow-up.description': 'Please use the following drop-downs to configure the exclusions.',
+    'follow-up.save': 'Auto reaction exclusions have been updated.',
   },
 } as const;
 
@@ -34,10 +53,15 @@ type Lang = DeepReadonly<typeof lang>;
 export function getLang<T extends keyof Lang, K extends keyof Lang[T]>(
   group: T,
   key: K,
+  placeholders?: (string | number | boolean)[],
 ): Lang[T][K] | null {
   const groupValue = lang[group];
   if (groupValue && typeof groupValue === 'object' && key in groupValue) {
-    return groupValue[key];
+    let gv = groupValue[key] as string;
+    for (let i = 0; i < (placeholders?.length ?? 0); i++) {
+      gv = gv.replace(`{{${i}}}`, `${(placeholders ?? [])[i]!}`);
+    }
+    return gv as Lang[T][K];
   }
   return null as Lang[T][K];
 }

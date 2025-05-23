@@ -1,8 +1,8 @@
 import type { CreateSlashApplicationCommand } from '@discordeno';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
-import { DatabaseConnector } from './lib/database/database.ts';
 import type { Application } from './lib/database/model/rconf/application.model.ts';
 import { Defaults } from './lib/defaults.ts';
+import { KVC } from './lib/kvc/kvc.ts';
 import { EventManager } from './lib/manager/event.ts';
 import { DynamicModuleLoader } from './lib/util/loader.ts';
 import { Optic } from './lib/util/optic.ts';
@@ -26,7 +26,7 @@ export class Bootstrap {
   private static async boot(): Promise<void> {
     // Fetch Data from Remote Configuration Server
     if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPLICATION_ID' is undefined.`);
-    this.application = (await DatabaseConnector.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
+    this.application = (await KVC.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
 
     // Check Remote Configuration Server Response
     if (this.application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);

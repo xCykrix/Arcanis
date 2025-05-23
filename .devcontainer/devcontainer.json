@@ -58,7 +58,8 @@
         "VisualStudioExptTeam.vscodeintellicode",
         "VisualStudioExptTeam.vscodeintellicode-insiders",
         "VisualStudioExptTeam.vscodeintellicode-completions",
-        "VisualStudioExptTeam.intellicode-api-usage-examples"
+        "VisualStudioExptTeam.intellicode-api-usage-examples",
+        "ms-vsliveshare.vsliveshare",
       ]
     }
   },

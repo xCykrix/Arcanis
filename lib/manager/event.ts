@@ -19,7 +19,7 @@ export class EventManager {
       const key = k as keyof typeof bot.events;
       bot.events[key] = (...args) => {
         for (const callback of this.events[key]!) {
-          Optic.intercept(key, async (...args) => {
+          Optic.interceptAsync(key, async (...args) => {
             await callback(...args);
           }, ...args);
         }

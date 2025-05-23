@@ -23,6 +23,7 @@ export class DynamicModuleLoader extends AsyncInitializable {
           moduleId: 'DynamicModuleLoader',
           message: `Failed to Import Module: ${ent.path}`,
           err: imported,
+          dispatch: false,
         });
       } else {
         try {
@@ -31,6 +32,7 @@ export class DynamicModuleLoader extends AsyncInitializable {
               moduleId: 'DynamicModuleLoader',
               message: `Failed to Register Module: ${ent.path}`,
               err: e,
+              dispatch: false,
             });
           });
         } catch (e: unknown) {
@@ -38,6 +40,7 @@ export class DynamicModuleLoader extends AsyncInitializable {
             moduleId: 'DynamicModuleLoader',
             message: `Failed to Construct Module: ${ent.path}`,
             err: e as Error,
+            dispatch: false,
           });
         }
       }

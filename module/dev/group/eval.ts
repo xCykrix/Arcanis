@@ -2,19 +2,19 @@ import { ChannelTypes, type MessageComponent, MessageComponentTypes, TextStyles 
 import { getLang } from '../../../constants/lang.ts';
 import { GroupBuilder } from '../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
-import { stringify } from '../../../lib/util/helper/stringify.ts';1
-
+import { stringify } from '../../../lib/util/helper/stringify.ts';
 import { Optic } from '../../../lib/util/optic.ts';
-import type { DevEval } from '../definition.ts';
+import type { DevDefinition } from '../definition.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<DevEval>()
+    GroupBuilder.builder<Partial<DevDefinition>>()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'dev',
           componentTopLevel: 'component.dev',
+          guidTopLevel: 'dev.eval',
           supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText, ChannelTypes.GuildForum, ChannelTypes.GuildMedia, ChannelTypes.DM],
           requireGuild: false,
           requireDeveloper: true,
@@ -31,7 +31,7 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             customId: await assistant.makeComponentCallback({
               ref: 'eval.consume-modal',
-              timeToLive: 10,
+              timeToLive: 300,
               userId: interaction.user.id,
               constants: [
                 `${args.eval!.depth ?? 2}`,
@@ -66,7 +66,7 @@ export default class extends AsyncInitializable {
             typescript: string;
           }>(interaction.data!.components as MessageComponent[]);
 
-          let result = getLang('eval', 'result.default');
+          let result = getLang('dev.eval', 'result.default');
           try {
             // deno-lint-ignore no-eval
             result = await eval(`(async () => { ${components.typescript!} })();`);
@@ -79,7 +79,7 @@ export default class extends AsyncInitializable {
           }
 
           let cleaned = await stringify(result, parseInt(constants[0]!));
-          if (cleaned === 'undefined') cleaned = getLang('eval', 'result.undefined')!;
+          if (cleaned === 'undefined') cleaned = getLang('dev.eval', 'result.undefined')!;
           await interaction.respond({
             content: ['```', `${cleaned}`, '```'].join('\n'),
           });

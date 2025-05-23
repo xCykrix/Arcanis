@@ -5,7 +5,8 @@
   "imports": {
     // Core Library
     "@discordeno": "npm:@discordeno/bot@next",
-    "@discordeno-cache": "npm:dd-cache-proxy@2.6.4",
+    "@discordeno-cache": "npm:dd-cache-proxy@latest",
+    "@builders": "npm:@discordjs/builders@dev",
     // Standard
     "@fs": "jsr:@std/fs@1.0.17",
     "@ulid": "jsr:@std/ulid@1.0.0",

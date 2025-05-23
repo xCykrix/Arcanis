@@ -1,7 +1,7 @@
 import { Bootstrap } from '../../../mod.ts';
 import { Optic } from '../optic.ts';
 
-export class APIWebhookGuard {
+export class Webhook {
   private static resolve = new Map<string, boolean>();
 
   /**
@@ -11,12 +11,12 @@ export class APIWebhookGuard {
    * @param token The Webhook Token.
    * @returns If this is a Valid Webhook.
    */
-  public static async valid(id: string, token: string): Promise<boolean> {
+  public static async check(id: string, token: string): Promise<boolean> {
     if (id === undefined || token === undefined) return false;
     if (this.resolve.has(id)) return this.resolve.get(id)!;
 
     const webhook = await Bootstrap.bot.helpers.getWebhookWithToken(id, token).catch((e) => {
-      Optic.al.error(`Failed to getWebhookWithToken: ${id}`, e);
+      Optic.f.error(`Failed to getWebhookWithToken: ${id}`, e);
       this.resolve.set(id, false);
       return false;
     });
