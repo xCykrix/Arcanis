@@ -51,7 +51,7 @@ const definition = {
               type: ApplicationCommandOptionTypes.Boolean,
               required: false,
             },
-          ] as const,
+          ],
         },
         {
           name: 'delete',
@@ -78,7 +78,7 @@ const definition = {
               ],
               required: true,
             },
-          ] as const,
+          ],
         },
         {
           name: 'exclude',
@@ -92,7 +92,7 @@ const definition = {
               channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
               required: true,
             },
-          ] as const,
+          ],
         },
         {
           name: 'list',
@@ -106,12 +106,91 @@ const definition = {
               channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
               required: true,
             },
-          ] as const,
+          ],
         },
-      ] as const,
+      ],
     },
-  ] as const,
-} satisfies CreateSlashApplicationCommand;
+    {
+      name: 'forward',
+      description: 'Manage forwarders with the message module.',
+      type: ApplicationCommandOptionTypes.SubCommandGroup,
+      options: [
+        {
+          name: 'add',
+          description: 'Create a forwarder for the specified channels.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'from',
+              description: 'The source channel to forward based on reactions.',
+              type: ApplicationCommandOptionTypes.Channel,
+              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+              required: true,
+            },
+            {
+              name: 'to',
+              description: 'The channel to receive forwarded messages.',
+              type: ApplicationCommandOptionTypes.Channel,
+              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+              required: true,
+            },
+            {
+              name: 'reaction',
+              description: 'The reaction to forward based on.',
+              type: ApplicationCommandOptionTypes.String,
+              minValue: 1,
+              maxValue: 64,
+              required: true,
+            },
+            {
+              name: 'alert',
+              description: 'The message to send as an alert to the channel with the forwarded message.',
+              type: ApplicationCommandOptionTypes.String,
+              minValue: 1,
+              maxValue: 1250,
+            },
+          ],
+        },
+        {
+          name: 'delete',
+          description: 'Delete the specified forwarder based on the from channel and reaction.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'from',
+              description: 'The channel being forwarded from.',
+              type: ApplicationCommandOptionTypes.Channel,
+              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+              required: true,
+            },
+            {
+              name: 'reaction',
+              description: 'The forwarder reaction to remove.',
+              type: ApplicationCommandOptionTypes.String,
+              minValue: 1,
+              maxValue: 64,
+              required: true,
+            },
+          ],
+        },
+        {
+          name: 'list',
+          description: 'Lists the configured forwarders to or from a specified channel.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'channel',
+              description: 'The channel being forwarded to or from.',
+              type: ApplicationCommandOptionTypes.Channel,
+              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as const satisfies CreateSlashApplicationCommand;
 export type MessageDefinition = CommandOptions<typeof definition.options>;
 
 export default class extends AsyncInitializable {
