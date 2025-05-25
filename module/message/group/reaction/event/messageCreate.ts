@@ -1,6 +1,7 @@
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
-import { ReactionType } from '../../../../../lib/kvc/model/appd/reaction.ts';
+import type { ReactionType } from '../../../../../lib/kvc/model/appd/reaction.ts';
+import { Optic } from '../../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../../mod.ts';
 
 export default class extends AsyncInitializable {
@@ -18,8 +19,8 @@ export default class extends AsyncInitializable {
 
       // Get Configuration
       const kvFind = await KVC.appd.reaction.findBySecondaryIndex('channelId', message.channelId.toString(), {
-        filter: (v) => v.value.type === type || v.value.type === 'a';
-      })
+        filter: (v) => v.value.type === type || v.value.type === 'a',
+      });
       if (kvFind.result.length === 0) return;
       const result = kvFind.result[0];
       if (result?.versionstamp === undefined) return;
@@ -31,7 +32,16 @@ export default class extends AsyncInitializable {
       const kvFindExclusion = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', message.channelId.toString());
       if (kvFindExclusion?.versionstamp !== undefined) {
         if (kvFindExclusion.value.exclusion.user?.includes(message.author.id.toString())) return;
-        // ! Do Exclusions.
+        for (const role of message.member?.roles ?? []) {
+          if (kvFindExclusion.value.exclusion.role?.includes(role.toString())) return;
+        }
+      }
+
+      for (const react of result.value.reaction) {
+        await Bootstrap.bot.helpers.addReaction(message.channelId, message.id, react).catch((e) => {
+          Optic.f.warn(`[${message.channelId}/${message.id}] Failed to add reaction '${react}'.`, e);
+        });
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     });
   }
