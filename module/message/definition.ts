@@ -92,7 +92,6 @@ const definition = {
               channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
               required: true,
             },
-
           ] as const,
         },
         {

@@ -7,6 +7,7 @@ import { Bootstrap } from '../../../../../mod.ts';
 export default class extends AsyncInitializable {
   private regex = /^https?:\/\/(?:www\.)?(?:[\w\-_.~])+(?:\.\w+)\/?(?:[\S]){1,}$/gi;
 
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     Bootstrap.event.add('messageCreate', async (message) => {
       if (message.guildId === undefined) return;
