@@ -32,7 +32,7 @@ export default class extends AsyncInitializable {
           return args.reaction?.set === undefined;
         },
         handle: async ({ interaction, args, assistant, guild, botMember }) => {
-          if (args.reaction === undefined || args.reaction.set === undefined) return;
+          if (args.reaction?.set === undefined) return; // Assertion
           await interaction.defer();
 
           // Permission Guard (Target Channel) - Bot Permissions
