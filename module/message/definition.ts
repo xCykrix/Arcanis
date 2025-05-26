@@ -143,6 +143,22 @@ const definition = {
               required: true,
             },
             {
+              name: 'threshold',
+              description: 'The amount of reactions required to forward, inclusive of the initial reaction.',
+              type: ApplicationCommandOptionTypes.Integer,
+              minValue: 2,
+              maxValue: 65535,
+              required: true,
+            },
+            {
+              name: 'within',
+              description: 'The amount of time, in seconds, before a message can no longer be forwarded.',
+              type: ApplicationCommandOptionTypes.Integer,
+              minValue: 5,
+              maxValue: 1800,
+              required: true,
+            },
+            {
               name: 'alert',
               description: 'The message to send as an alert to the channel with the forwarded message.',
               type: ApplicationCommandOptionTypes.String,

@@ -36,7 +36,7 @@ export default class extends AsyncInitializable {
           await interaction.defer();
 
           // Permission Guard (Target Channel) - Bot Permissions
-          const botPermissions: PermissionStrings[] = ['ADD_REACTIONS', 'READ_MESSAGE_HISTORY'];
+          const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'ADD_REACTIONS', 'READ_MESSAGE_HISTORY'];
           if (!Permissions.hasChannelPermissions(guild!, args.reaction.set.channel.id, botMember!, botPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()

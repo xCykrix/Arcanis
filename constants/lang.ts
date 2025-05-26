@@ -15,6 +15,11 @@ export const lang = {
     'result.default': 'Async Wrapper failed to evaluate.',
     'result.undefined': 'Async Wrapper did not have a returned value.',
   },
+  'forward.add': {
+    'emoji.invalid': 'The specified Emoji for the forwarder was invalid. Please ensure you use the built-in Emoji Picker and add one reaction only.',
+    'result.exceed': 'You may only create up to {{0}} forwarders per channel. Please remove one before creating another.',
+    'result': 'Reaction Fowarder Configured',
+  },
   'reaction.set': {
     'emoji.invalid': 'One ore more of the specified Emojis to react was invalid. Please ensure you use the built-in Emoji Picker and that each reaction is separated by one space.',
     'emoji.exceed': 'Discord limits us to 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} more would exceed 20.',
