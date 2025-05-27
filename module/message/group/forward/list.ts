@@ -1,6 +1,9 @@
 import { ChannelTypes } from '@discordeno';
+import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { KVC } from '../../../../lib/kvc/kvc.ts';
+import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
@@ -30,8 +33,23 @@ export default class extends AsyncInitializable {
             pick: args.forward?.list ?? null,
           };
         },
-        handle: async ({ args }) => {
+        handle: async ({ interaction, args }) => {
           if (args === null) return; // Assertion
+          await interaction.defer();
+
+          // Fetch Listing
+          const kvFind = await KVC.appd.forward.findBySecondaryIndex('guildId', args.channel.guildId!.toString(), {
+            filter: (v) => v.value.fromChannelId === args.channel.id.toString() || v.value.toChannelId === args.channel.id.toString(),
+          });
+
+          // Exists Check
+          if (kvFind.result.length === 0) {
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('forward.list', 'nonexistant')!),
+            });
+            return;
+          }
         },
       });
   }

@@ -36,7 +36,7 @@ export default class extends AsyncInitializable {
           };
         },
         handle: async ({ interaction, args, assistant }) => {
-          if (args === null) return;
+          if (args === null) return; // Assertion
           await interaction.defer();
 
           // Database GUID

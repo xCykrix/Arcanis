@@ -9,7 +9,10 @@ import type { MessageDefinition } from '../../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<MessageDefinition>>()
+    GroupBuilder.builder<
+      MessageDefinition['reaction']['list'],
+      MessageDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
@@ -25,14 +28,17 @@ export default class extends AsyncInitializable {
           botRequiredChannelPermissions: [],
         },
         pickAndInhibit: ({ args }) => {
-          return args.reaction?.list === undefined;
+          return {
+            inhibit: args.reaction?.list === undefined,
+            pick: args.reaction?.list ?? null,
+          };
         },
         handle: async ({ interaction, args }) => {
-          if (args.reaction === undefined || args.reaction.list === undefined) return;
+          if (args === null) return; // Assertion
           await interaction.defer();
 
           // Fetch Database Reaction for Listing
-          const kvFind = await KVC.appd.reaction.findBySecondaryIndex('channelId', args.reaction.list.channel.id.toString());
+          const kvFind = await KVC.appd.reaction.findBySecondaryIndex('channelId', args.channel.id.toString());
 
           // Exists Check
           if (kvFind.result.length === 0) {
@@ -44,14 +50,14 @@ export default class extends AsyncInitializable {
           }
 
           // Optional Exclusions
-          const kvFindExclusion = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.reaction.list.channel.id.toString());
+          const kvFindExclusion = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.channel.id.toString());
           const user: string[] = kvFindExclusion?.value.exclusion.user ?? [];
           const role: string[] = kvFindExclusion?.value.exclusion.user ?? [];
 
           // Template
           const embed = Responses.success.make()
             .setDescription(getLang('reaction.list', 'result')!)
-            .addField('Channel', `<#${args.reaction.list.channel.id}>`)
+            .addField('Channel', `<#${args.channel.id}>`)
             .addField('Exclusions', `${user.length} User(s) and ${role.length} Role(s) Excluded.`);
 
           // Consolidate

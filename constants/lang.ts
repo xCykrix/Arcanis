@@ -25,6 +25,10 @@ export const lang = {
     'nonexistant': 'Unable to find the specified forwarder. Please check the provided information or issue the original request again.',
     'result': 'Reaction Forwarder Deleted',
   },
+  'forward.list': {
+    'nonexistant': 'Unable to find any specified forwarder(s). Please check the provided information.',
+    'result': '',
+  },
   'reaction.set': {
     'emoji.invalid': 'One ore more of the specified Emojis to react was invalid. Please ensure you use the built-in Emoji Picker and that each reaction is separated by one space.',
     'emoji.exceed': 'Discord limits us to 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} more would exceed 20.',

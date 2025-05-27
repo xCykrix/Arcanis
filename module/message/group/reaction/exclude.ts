@@ -32,11 +32,11 @@ export default class extends AsyncInitializable {
         pickAndInhibit: ({ args }) => {
           return {
             inhibit: args.reaction?.exclude === undefined,
-            pick: args.reaction?.delete ?? null,
+            pick: args.reaction?.exclude ?? null,
           };
         },
         handle: async ({ interaction, args, assistant }) => {
-          if (args === null) return;
+          if (args === null) return; // Assertion
           await interaction.defer();
 
           // Exists Check
