@@ -1,6 +1,6 @@
 //
 
-import { ApplicationCommandOptionTypes, Camelize, ChannelTypes, commandOptionsParser, DiscordApplicationCommandOption, InteractionTypes, MessageComponent, type PermissionStrings } from '@discordeno';
+import { type ApplicationCommandOptionTypes, type Camelize, ChannelTypes, commandOptionsParser, type DiscordApplicationCommandOption, InteractionTypes, type MessageComponent, type PermissionStrings } from '@discordeno';
 import type { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
 import { ulid } from '@ulid';
 import { developerAuthorizationConst, supportAuthorizationConst } from '../../constants/const.ts';
@@ -14,8 +14,8 @@ import { Optic } from '../util/optic.ts';
 /**
  * Create a ChatInput Group Command Builder.
  */
-export class GroupBuilder<Context> {
-  private assistant!: InteractionHandlerAssistant<Context>;
+export class GroupBuilder<Packet, RawPacket> {
+  private assistant!: InteractionHandlerAssistant<RawPacket>;
 
   /** The Assurances of the Builder */
   private assurance: GroupAssurance = {
@@ -37,7 +37,7 @@ export class GroupBuilder<Context> {
    *
    * @returns A {@link GroupBuilder}
    */
-  public static builder<BuilderContext>(): GroupBuilder<BuilderContext> {
+  public static builder<BuilderContext, RawPacket>(): GroupBuilder<BuilderContext, RawPacket> {
     return new GroupBuilder();
   }
 
@@ -50,24 +50,27 @@ export class GroupBuilder<Context> {
   public createGroupHandler(handler: {
     assurance: GroupAssurance;
     /** Inhibits the Execution if true is returned. */
-    inhibitor: (passthrough: {
+    pickAndInhibit: (passthrough: {
       interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
-      args: Context;
-      assistant: InteractionHandlerAssistant<Context>;
-    }) => boolean;
+      args: Partial<RawPacket>;
+      assistant: InteractionHandlerAssistant<RawPacket>;
+    }) => {
+      inhibit: boolean;
+      pick: Packet | null;
+    };
     /** Consumes the Interaction. */
     handle: (passthrough: {
       interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
-      args: Context;
-      assistant: InteractionHandlerAssistant<Context>;
+      args: Packet | null;
+      assistant: InteractionHandlerAssistant<RawPacket>;
       // Optionals
       guild?: typeof Bootstrap.bot.cache.$inferredTypes.guild;
       botMember?: typeof Bootstrap.bot.cache.$inferredTypes.member;
     }) => Promise<void>;
-  }): Omit<GroupBuilder<Context>, 'createGroupHandler'> {
+  }): Omit<GroupBuilder<Packet, RawPacket>, 'createGroupHandler'> {
     // Set Assistant
     this.assurance = handler.assurance;
-    this.assistant = new InteractionHandlerAssistant<Context>(this.assurance);
+    this.assistant = new InteractionHandlerAssistant<RawPacket>(this.assurance);
 
     // Verify Assurance
     if (this.assurance.interactionTopLevel === null) throw new Deno.errors.InvalidData('interactionTopLevel cannot be null.');
@@ -79,13 +82,12 @@ export class GroupBuilder<Context> {
       if (interaction.channelId === undefined) return;
 
       // Run Inhibitor
-      if (
-        handler.inhibitor({
-          interaction,
-          args: this.assistant.context(interaction),
-          assistant: this.assistant,
-        })
-      ) return;
+      let inhibitor = handler.pickAndInhibit({
+        interaction,
+        args: this.assistant.getPacket(interaction),
+        assistant: this.assistant,
+      });
+      if (inhibitor.inhibit) return;
 
       // Strict Enforce Developer
       if (
@@ -181,7 +183,7 @@ export class GroupBuilder<Context> {
       // Run Handle
       await handler.handle({
         interaction,
-        args: this.assistant.context(interaction),
+        args: inhibitor.pick as Packet,
         assistant: this.assistant,
         guild: interaction.guildId !== undefined ? (await Bootstrap.bot.cache.guilds.get(interaction.guildId)) : undefined,
         botMember: interaction.guildId !== undefined ? (await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, interaction.guildId)) : undefined,
@@ -203,9 +205,9 @@ export class GroupBuilder<Context> {
     handle: (passthrough: {
       interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
       constants: string[];
-      assistant: InteractionHandlerAssistant<Context>;
+      assistant: InteractionHandlerAssistant<RawPacket>;
     }) => Promise<void>;
-  }): Omit<GroupBuilder<Context>, 'createGroupHandler'> {
+  }): Omit<GroupBuilder<Packet, RawPacket>, 'createGroupHandler'> {
     if (this.assurance.componentTopLevel === null) throw new Deno.errors.InvalidData('componentTopLevel cannot be null.');
 
     Bootstrap.event.add('interactionCreate', async (interaction) => {
@@ -241,16 +243,16 @@ export class GroupBuilder<Context> {
   }
 }
 
-class InteractionHandlerAssistant<Context> {
+class InteractionHandlerAssistant<RawPacket> {
   private assurance: GroupAssurance;
 
   public constructor(assurance: GroupAssurance) {
     this.assurance = assurance;
   }
 
-  /** Fetch the Context of a Interaction. Helper Function. */
-  public context(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction): Context {
-    return commandOptionsParser(interaction) as Context;
+  /** Fetch the Raw Packet Context of a Interaction. Helper Function. */
+  public getPacket(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction): RawPacket {
+    return commandOptionsParser(interaction) as RawPacket;
   }
 
   public parseModal<T extends Record<string, string>>(components?: MessageComponent[]): Partial<T> {

@@ -13,7 +13,10 @@ import type { MessageDefinition } from '../../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<MessageDefinition>>()
+    GroupBuilder.builder<
+      MessageDefinition['reaction']['set'],
+      MessageDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
@@ -28,27 +31,30 @@ export default class extends AsyncInitializable {
           botRequiredGuildPermissions: [],
           botRequiredChannelPermissions: [],
         },
-        inhibitor: ({ args }) => {
-          return args.reaction?.set === undefined;
+        pickAndInhibit: ({ args }) => {
+          return {
+            inhibit: args.reaction?.set === undefined,
+            pick: args.reaction?.set ?? null,
+          };
         },
         handle: async ({ interaction, args, assistant, guild, botMember }) => {
-          if (args.reaction?.set === undefined) return; // Assertion
+          if (args === null) return; // Assertion
           await interaction.defer();
 
           // Permission Guard (Target Channel) - Bot Permissions
           const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'ADD_REACTIONS', 'READ_MESSAGE_HISTORY'];
-          if (!Permissions.hasChannelPermissions(guild!, args.reaction.set.channel.id, botMember!, botPermissions)) {
+          if (!Permissions.hasChannelPermissions(guild!, args.channel.id, botMember!, botPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(getLang('global', 'permission.bot.cmissing')!)
-                .addField('Channel', `<#${args.reaction.set.channel.id}>`)
+                .addField('Channel', `<#${args.channel.id}>`)
                 .addField('Missing', botPermissions.join('\n')),
             });
             return;
           }
 
           // Build Reaction List
-          const reactions = args.reaction.set.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
+          const reactions = args.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
 
           // Validate Reactions
           for (const v of reactions) {
@@ -62,9 +68,9 @@ export default class extends AsyncInitializable {
           }
 
           // Fetch Database Reaction Sum for Channel
-          const kvFind = await KVC.appd.reaction.findBySecondaryIndex('channelId', args.reaction.set.channel.id.toString());
+          const kvFind = await KVC.appd.reaction.findBySecondaryIndex('channelId', args.channel.id.toString());
           const count = kvFind.result.reduce((acc, v) => {
-            if (v.value.type === args.reaction!.set.type) return acc;
+            if (v.value.type === args.type) return acc;
             return acc + v.value.reaction.length;
           }, 0);
 
@@ -86,7 +92,7 @@ export default class extends AsyncInitializable {
           });
 
           // Affirm Exclusivity of Reaction Types
-          if (args.reaction.set.type === 'a' && hasSpecific) {
+          if (args.type === 'a' && hasSpecific) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(
@@ -98,7 +104,7 @@ export default class extends AsyncInitializable {
             });
             return;
           }
-          if (args.reaction.set.type !== 'a' && hasAll) {
+          if (args.type !== 'a' && hasAll) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(
@@ -114,25 +120,25 @@ export default class extends AsyncInitializable {
           // Write to Database
           const guid = GUID.make({
             moduleId: assistant['assurance'].guidTopLevel!,
-            guildId: args.reaction.set.channel.guildId!.toString(),
-            channelId: args.reaction.set.channel.id.toString(),
+            guildId: args.channel.guildId!.toString(),
+            channelId: args.channel.id.toString(),
             constants: [
-              args.reaction.set.type,
+              args.type,
             ],
           });
           await KVC.appd.reaction.upsertByPrimaryIndex({
             index: ['guid', guid],
             update: {
               reaction: reactions,
-              self: args.reaction.set.self ?? false,
+              self: args.self ?? false,
             },
             set: {
               guid,
-              guildId: args.reaction.set.channel.guildId!.toString(),
-              channelId: args.reaction.set.channel.id.toString(),
+              guildId: args.channel.guildId!.toString(),
+              channelId: args.channel.id.toString(),
               reaction: reactions,
-              type: args.reaction.set.type as ReactionType,
-              self: args.reaction.set.self ?? false,
+              type: args.type as ReactionType,
+              self: args.self ?? false,
             },
           }, {
             strategy: 'merge-shallow',
@@ -142,9 +148,9 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setDescription(getLang('reaction.set', 'result')!)
-              .addField('Channel', `<#${args.reaction.set.channel.id}>`)
-              .addField('Type', lookup[args.reaction.set.type as ReactionType], true)
-              .addField('React to Self', `${args.reaction.set.self ? 'True' : 'False'}`, true),
+              .addField('Channel', `<#${args.channel.id}>`)
+              .addField('Type', lookup[args.type as ReactionType], true)
+              .addField('React to Self', `${args.self ? 'True' : 'False'}`, true),
           });
         },
       });

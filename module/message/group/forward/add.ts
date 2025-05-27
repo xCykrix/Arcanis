@@ -10,8 +10,12 @@ import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<MessageDefinition>>()
+    GroupBuilder.builder<
+      MessageDefinition['forward']['add'],
+      MessageDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
@@ -26,20 +30,23 @@ export default class extends AsyncInitializable {
           botRequiredGuildPermissions: [],
           botRequiredChannelPermissions: [],
         },
-        inhibitor: ({ args }) => {
-          return args.forward?.add === undefined;
+        pickAndInhibit: ({ args }) => {
+          return {
+            inhibit: args.forward?.add === undefined,
+            pick: args.forward?.add ?? null,
+          };
         },
         handle: async ({ interaction, args, assistant, guild, botMember }) => {
-          if (args.forward?.add === undefined) return; // Assertion
+          if (args === null) return; // Assertion
           await interaction.defer();
 
           // Permission Guard (Source Channel) - Bot Permissions
           const fromBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
-          if (!Permissions.hasChannelPermissions(guild!, args.forward.add.from.id, botMember!, fromBotPermissions)) {
+          if (!Permissions.hasChannelPermissions(guild!, args.from.id, botMember!, fromBotPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(getLang('global', 'permission.bot.cmissing')!)
-                .addField('Channel', `<#${args.forward.add.from.id}>`)
+                .addField('Channel', `<#${args.from.id}>`)
                 .addField('Missing', fromBotPermissions.join('\n')),
             });
             return;
@@ -47,18 +54,18 @@ export default class extends AsyncInitializable {
 
           // Permission Guard (Target Channel) - Bot Permissions
           const toBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'];
-          if (!Permissions.hasChannelPermissions(guild!, args.forward.add.to.id, botMember!, toBotPermissions)) {
+          if (!Permissions.hasChannelPermissions(guild!, args.to.id, botMember!, toBotPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(getLang('global', 'permission.bot.cmissing')!)
-                .addField('Channel', `<#${args.forward.add.to.id}>`)
+                .addField('Channel', `<#${args.to.id}>`)
                 .addField('Missing', toBotPermissions.join('\n')),
             });
             return;
           }
 
           // Validate Reaction
-          if (!Emoji.check(args.forward.add.reaction)) {
+          if (!Emoji.check(args.reaction)) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(getLang('forward.add', 'emoji.invalid')!),
@@ -67,7 +74,7 @@ export default class extends AsyncInitializable {
           }
 
           // Verify Limiter
-          const count = await KVC.appd.forward.countBySecondaryIndex('fromChannelId', args.forward.add.from.id.toString());
+          const count = await KVC.appd.forward.countBySecondaryIndex('fromChannelId', args.from.id.toString());
           if (count >= 10) {
             await interaction.respond({
               embeds: Responses.error.make()
@@ -79,30 +86,30 @@ export default class extends AsyncInitializable {
           // Write to Database
           const guid = GUID.make({
             moduleId: assistant['assurance'].guidTopLevel!,
-            guildId: args.forward.add.from.guildId!.toString(),
-            channelId: args.forward.add.from.id.toString(),
+            guildId: args.from.guildId!.toString(),
+            channelId: args.from.id.toString(),
             constants: [
-              args.forward.add.reaction,
+              args.reaction,
             ],
           });
 
           await KVC.appd.forward.upsertByPrimaryIndex({
             index: ['guid', guid],
             update: {
-              toChannelId: args.forward.add.to.id.toString(),
-              threshold: args.forward.add.threshold,
-              within: args.forward.add.within,
-              alert: args.forward.add.alert,
+              toChannelId: args.to.id.toString(),
+              threshold: args.threshold,
+              within: args.within,
+              alert: args.alert,
             },
             set: {
               guid,
-              guildId: args.forward.add.from.guildId!.toString(),
-              fromChannelId: args.forward.add.from.id.toString(),
-              toChannelId: args.forward.add.to.id.toString(),
-              reaction: args.forward.add.reaction,
-              threshold: args.forward.add.threshold,
-              within: args.forward.add.within,
-              alert: args.forward.add.alert,
+              guildId: args.from.guildId!.toString(),
+              fromChannelId: args.from.id.toString(),
+              toChannelId: args.to.id.toString(),
+              reaction: args.reaction,
+              threshold: args.threshold,
+              within: args.within,
+              alert: args.alert,
             },
           });
 
@@ -110,11 +117,11 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setDescription(getLang('forward.add', 'result')!)
-              .addField('From Channel', `<#${args.forward.add.from.id}>`, true)
-              .addField('To Channel', `<#${args.forward.add.to.id}>`, true)
-              .addField('Reaction', `${args.forward.add.reaction}`)
-              .addField('Threshold', `${args.forward.add.threshold} Reactions`, true)
-              .addField('Within', `${args.forward.add.within} Seconds`, true),
+              .addField('From Channel', `<#${args.from.id}>`, true)
+              .addField('To Channel', `<#${args.to.id}>`, true)
+              .addField('Reaction', `${args.reaction}`)
+              .addField('Threshold', `${args.threshold} Reactions`, true)
+              .addField('Within', `${args.within} Seconds`, true),
           });
         },
       });

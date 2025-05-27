@@ -11,7 +11,10 @@ import type { MessageDefinition } from '../../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<MessageDefinition>>()
+    GroupBuilder.builder<
+      MessageDefinition['reaction']['delete'],
+      MessageDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
@@ -26,20 +29,23 @@ export default class extends AsyncInitializable {
           botRequiredGuildPermissions: [],
           botRequiredChannelPermissions: [],
         },
-        inhibitor: ({ args }) => {
-          return args.reaction?.delete === undefined;
+        pickAndInhibit: ({ args }) => {
+          return {
+            inhibit: args.reaction?.delete === undefined,
+            pick: args.reaction?.delete ?? null,
+          };
         },
         handle: async ({ interaction, args, assistant }) => {
-          if (args.reaction === undefined || args.reaction.delete === undefined) return;
+          if (args === null) return;
           await interaction.defer();
 
           // Database GUID
           const guid = GUID.make({
             moduleId: assistant['assurance'].guidTopLevel!,
-            guildId: args.reaction.delete.channel.guildId!.toString(),
-            channelId: args.reaction.delete.channel.id.toString(),
+            guildId: args.channel.guildId!.toString(),
+            channelId: args.channel.id.toString(),
             constants: [
-              args.reaction.delete.type,
+              args.type,
             ],
           });
 
@@ -60,8 +66,8 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setDescription(getLang('reaction.delete', 'result')!)
-              .addField('Channel', `<#${args.reaction.delete.channel.id}>`)
-              .addField('Type', lookup[args.reaction.delete.type as ReactionType]),
+              .addField('Channel', `<#${args.channel.id}>`)
+              .addField('Type', lookup[args.type as ReactionType]),
           });
         },
       });

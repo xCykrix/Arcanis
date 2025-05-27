@@ -11,7 +11,10 @@ import type { MessageDefinition } from '../../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<MessageDefinition>>()
+    GroupBuilder.builder<
+      MessageDefinition['reaction']['exclude'],
+      MessageDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
@@ -26,29 +29,32 @@ export default class extends AsyncInitializable {
           botRequiredGuildPermissions: [],
           botRequiredChannelPermissions: [],
         },
-        inhibitor: ({ args }) => {
-          return args.reaction?.exclude === undefined;
+        pickAndInhibit: ({ args }) => {
+          return {
+            inhibit: args.reaction?.exclude === undefined,
+            pick: args.reaction?.delete ?? null,
+          };
         },
         handle: async ({ interaction, args, assistant }) => {
-          if (args.reaction === undefined || args.reaction.exclude === undefined) return;
+          if (args === null) return;
           await interaction.defer();
 
           // Exists Check
-          let kvFind = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.reaction.exclude.channel.id.toString());
+          let kvFind = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.channel.id.toString());
           if (kvFind?.versionstamp === undefined) {
             await KVC.appd.reactionExclusion.upsertByPrimaryIndex({
-              index: ['channelId', args.reaction.exclude.channel.id.toString()],
+              index: ['channelId', args.channel.id.toString()],
               update: {},
               set: {
-                guildId: args.reaction.exclude.channel.guildId!.toString(),
-                channelId: args.reaction.exclude.channel.id.toString(),
+                guildId: args.channel.guildId!.toString(),
+                channelId: args.channel.id.toString(),
                 exclusion: {
                   role: [],
                   user: [],
                 },
               },
             });
-            kvFind = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.reaction.exclude.channel.id.toString());
+            kvFind = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.channel.id.toString());
           }
           if (kvFind?.versionstamp === undefined) {
             Optic.f.warn('Unexpected Interaction Error. Failed to create default KVC entry to reactionExclusion. Bug? Graceful failure.');
@@ -75,7 +81,7 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setDescription(getLang('reaction.exclude', 'follow-up.description')!)
-              .addField('Channel', `<#${args.reaction.exclude.channel.id}>`),
+              .addField('Channel', `<#${args.channel.id}>`),
             components: [
               {
                 type: MessageComponentTypes.ActionRow,

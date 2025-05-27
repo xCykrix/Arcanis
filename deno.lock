@@ -21,6 +21,7 @@
     "npm:g@*": "2.0.1",
     "npm:go@*": "3.0.1",
     "npm:googleapis@*": "148.0.0",
+    "npm:ts-deep-pick@*": "0.2.2",
     "npm:url-regex-safe@*": "4.0.0",
     "npm:zod@^3.24.0": "3.24.2"
   },
@@ -1559,8 +1560,17 @@
     "tr46@0.0.3": {
       "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="
     },
+    "ts-deep-pick@0.2.2": {
+      "integrity": "sha512-DFR0THXKY8Hil84r4vx5Ofb7zVryHCBfv/vYcgbDyymmivdB1vUcBwbYsDzP3j9pwnQqVFNZZplYu628STrXAA==",
+      "dependencies": [
+        "ts-typetools"
+      ]
+    },
     "ts-mixer@6.0.4": {
       "integrity": "sha512-ufKpbmrugz5Aou4wcr5Wc1UUFWOLhq+Fm6qa6P0w0K5Qw2yhaUoiWszhCVuNQyNwrlGiscHOmqYoAox1PtvgjA=="
+    },
+    "ts-typetools@0.6.2": {
+      "integrity": "sha512-Ke2q5ejYamdlJxs5lvcl7uet+2Bm22MXlTTT9vjopVaDlx/rHMek60qap1tTzPlYoab+aeaIL8fHS7XakJQx7A=="
     },
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
@@ -1665,6 +1675,7 @@
       "npm:@discordeno/bot@next",
       "npm:@discordjs/builders@dev",
       "npm:dd-cache-proxy@latest",
+      "npm:ts-deep-pick@*",
       "npm:url-regex-safe@*"
     ]
   }

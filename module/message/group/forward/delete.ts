@@ -10,8 +10,12 @@ import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<MessageDefinition>>()
+    GroupBuilder.builder<
+      MessageDefinition['forward']['delete'],
+      MessageDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
@@ -26,27 +30,30 @@ export default class extends AsyncInitializable {
           botRequiredGuildPermissions: [],
           botRequiredChannelPermissions: [],
         },
-        inhibitor: ({ args }) => {
-          return args.forward?.delete === undefined;
+        pickAndInhibit: ({ args }) => {
+          return {
+            inhibit: args.forward?.delete === undefined,
+            pick: args.forward?.delete ?? null,
+          };
         },
         handle: async ({ interaction, args, assistant, guild, botMember }) => {
-          if (args.forward?.delete === undefined) return; // Assertion
+          if (args === null) return; // Assertion
           await interaction.defer();
 
           // Permission Guard (Source Channel) - Bot Permissions
           const fromBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
-          if (!Permissions.hasChannelPermissions(guild!, args.forward.delete.from.id, botMember!, fromBotPermissions)) {
+          if (!Permissions.hasChannelPermissions(guild!, args.from.id as bigint, botMember!, fromBotPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(getLang('global', 'permission.bot.cmissing')!)
-                .addField('Channel', `<#${args.forward.delete.from.id}>`)
+                .addField('Channel', `<#${args.from.id}>`)
                 .addField('Missing', fromBotPermissions.join('\n')),
             });
             return;
           }
 
           // Validate Reaction
-          if (!Emoji.check(args.forward.delete.reaction)) {
+          if (!Emoji.check(args.reaction)) {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(getLang('forward.delete', 'emoji.invalid')!),
@@ -57,10 +64,10 @@ export default class extends AsyncInitializable {
           // Attempt Fetch
           const guid = GUID.make({
             moduleId: assistant['assurance'].guidTopLevel!,
-            guildId: args.forward.delete.from.guildId!.toString(),
-            channelId: args.forward.delete.from.id.toString(),
+            guildId: args.from.guildId!.toString(),
+            channelId: args.from.id.toString(),
             constants: [
-              args.forward.delete.reaction,
+              args.reaction,
             ],
           });
           const kvFind = await KVC.appd.forward.findByPrimaryIndex('guid', guid);
@@ -81,9 +88,9 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setDescription(getLang('forward.delete', 'result')!)
-              .addField('From Channel', `<#${args.forward.delete.from.id}>`, true)
+              .addField('From Channel', `<#${args.from.id}>`, true)
               .addField('To Channel', `<#${kvFind.value.toChannelId}>`, true)
-              .addField('Reaction', `${args.forward.delete.reaction}`, false),
+              .addField('Reaction', `${args.reaction}`, false),
           });
         },
       });

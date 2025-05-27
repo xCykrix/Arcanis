@@ -24,7 +24,7 @@ export default class extends AsyncInitializable {
           botRequiredGuildPermissions: [],
           botRequiredChannelPermissions: [],
         },
-        inhibitor: ({ args }) => {
+        pickAndInhibit: ({ args }) => {
           return args.eval === undefined;
         },
         handle: async ({ interaction, args, assistant }) => {
