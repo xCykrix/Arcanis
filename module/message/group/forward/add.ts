@@ -73,6 +73,15 @@ export default class extends AsyncInitializable {
             return;
           }
 
+          // Validate Source and Origin Channel
+          if (args.from.id === args.to.id) {
+            await interaction.respond({
+              embeds: Responses.error.make()
+              .setDescription(getLang('forward.add', "result.same-channel")!)
+            })
+            return;
+          }
+
           // Verify Limiter
           const count = await KVC.appd.forward.countBySecondaryIndex('fromChannelId', args.from.id.toString());
           if (count >= 10) {

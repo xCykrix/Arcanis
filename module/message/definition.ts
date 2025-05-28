@@ -144,9 +144,9 @@ const definition = {
             },
             {
               name: 'threshold',
-              description: 'The amount of reactions required to forward, inclusive of the initial reaction.',
+              description: 'The amount of reactions required to forward, excluding of the initial reaction of the bot.',
               type: ApplicationCommandOptionTypes.Integer,
-              minValue: 2,
+              minValue: 1,
               maxValue: 65535,
               required: true,
             },

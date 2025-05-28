@@ -17,6 +17,7 @@ export const lang = {
   },
   'forward.add': {
     'emoji.invalid': 'The specified Emoji for the forwarder was invalid. Please ensure you use the built-in Emoji Picker and add one reaction only.',
+    'result.same-channel': 'You cannot forward from and to the same channel.',
     'result.exceed': 'You may only create up to {{0}} forwarders per channel. Please remove one before creating another.',
     'result': 'Reaction Forwarder Configured',
   },
@@ -27,7 +28,7 @@ export const lang = {
   },
   'forward.list': {
     'nonexistant': 'Unable to find any specified forwarder(s). Please check the provided information.',
-    'result': '',
+    'result': 'Reaction Forward List',
   },
   'reaction.set': {
     'emoji.invalid': 'One ore more of the specified Emojis to react was invalid. Please ensure you use the built-in Emoji Picker and that each reaction is separated by one space.',

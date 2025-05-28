@@ -1,4 +1,4 @@
-import { ChannelTypes } from '@discordeno';
+import { ButtonStyles, ChannelTypes, MessageComponentTypes } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -33,7 +33,7 @@ export default class extends AsyncInitializable {
             pick: args.forward?.list ?? null,
           };
         },
-        handle: async ({ interaction, args }) => {
+        handle: async ({ interaction, args, assistant }) => {
           if (args === null) return; // Assertion
           await interaction.defer();
 
@@ -50,6 +50,162 @@ export default class extends AsyncInitializable {
             });
             return;
           }
+
+          // Build Embed
+          const embeds = Responses.success.make()
+            .setDescription('Reaction Forward List')
+            .setFooter('Page: 1');
+          const fields = new Map<string, Set<[string, string]>>();
+
+          // Iterate Embeds from Pagination
+          const currentPage = kvFind.result.slice(0, 14);
+          const hasNextPage = kvFind.result.slice(15, 29).length !== 0;
+
+          for (const configuration of currentPage) {
+            if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
+            fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
+          }
+          for (const [key, value] of fields.entries()) {
+            const chunk: string[] = [];
+            for (const v of value) {
+              chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
+            }
+            embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
+          }
+          embeds.addField('Search Channel', `<#${args.channel.id.toString()}>`);
+
+          // Respond
+          await interaction.respond({
+            embeds,
+            components: [
+              {
+                type: MessageComponentTypes.ActionRow,
+                components: [
+                  {
+                    type: MessageComponentTypes.Button,
+                    customId: 'disabled.button.previous',
+                    style: ButtonStyles.Secondary,
+                    label: 'Previous',
+                    disabled: true,
+                  },
+                  {
+                    type: MessageComponentTypes.Button,
+                    customId: hasNextPage
+                      ? await assistant.makeComponentCallback({
+                        ref: 'page',
+                        timeToLive: 300,
+                        userId: interaction.user.id,
+                        constants: [
+                          args.channel.guildId!.toString(),
+                          args.channel.id.toString(),
+                          '1',
+                        ],
+                      })
+                      : 'disabled.button.next',
+                    style: ButtonStyles.Secondary,
+                    label: 'Next',
+                    disabled: !hasNextPage,
+                  },
+                ],
+              },
+            ],
+          });
+        },
+      }).createGroupComponentHandler({
+        ref: 'page',
+        handle: async ({ interaction, constants, assistant }) => {
+          await interaction.deferEdit();
+
+          // Parse Constants
+          const guild = constants[0];
+          const channel = constants[1];
+          const index = parseInt(constants[2]);
+
+          // Fetch Listing
+          const kvFind = await KVC.appd.forward.findBySecondaryIndex('guildId', guild, {
+            filter: (v) => v.value.fromChannelId === channel || v.value.toChannelId === channel,
+          });
+
+          // Exists Check
+          if (kvFind.result.length === 0) {
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('forward.list', 'nonexistant')!),
+            });
+            return;
+          }
+
+          // Build Embed
+          const embeds = Responses.success.make()
+            .setDescription('Reaction Forward List')
+            .setFooter(`Page: ${index + 1}`);
+          const fields = new Map<string, Set<[string, string]>>();
+
+          // Iterate Embeds from Pagination
+          const hasPreviousPage = index >= 1 ? true : false;
+          const currentPage = kvFind.result.slice(0 + (index * 15), 14 + (index * 15));
+          const hasNextPage = kvFind.result.slice(15 + (index * 15), 29 + (index * 15)).length !== 0;
+
+          for (const configuration of currentPage) {
+            if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
+            fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
+          }
+          for (const [key, value] of fields.entries()) {
+            const chunk: string[] = [];
+            for (const v of value) {
+              chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
+            }
+            embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
+          }
+          embeds.addField('Search Channel', `<#${channel}>`);
+
+          // Respond
+          await interaction.respond({
+            embeds,
+            components: [
+              {
+                type: MessageComponentTypes.ActionRow,
+                components: [
+                  {
+                    type: MessageComponentTypes.Button,
+                    customId: hasPreviousPage
+                      ? await assistant.makeComponentCallback({
+                        ref: 'page',
+                        timeToLive: 300,
+                        userId: interaction.user.id,
+                        constants: [
+                          guild,
+                          channel,
+                          `${index - 1}`,
+                        ],
+                      })
+                      : 'disabled.button.previous',
+                    style: ButtonStyles.Secondary,
+                    label: 'Previous',
+                    disabled: !hasPreviousPage,
+                  },
+                  {
+                    type: MessageComponentTypes.Button,
+                    customId: hasNextPage
+                      ? await assistant.makeComponentCallback({
+                        ref: 'page',
+                        timeToLive: 300,
+                        userId: interaction.user.id,
+                        constants: [
+                          guild,
+                          channel,
+                          `${index + 1}`,
+                        ],
+                      })
+                      : 'disabled.button.next',
+                    style: ButtonStyles.Secondary,
+                    label: 'Next',
+                    disabled: !hasNextPage,
+                  },
+                ],
+              },
+            ],
+          });
         },
       });
   }
