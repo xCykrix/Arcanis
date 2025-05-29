@@ -24,11 +24,6 @@ const rconfStaticSchema = {
 
 /** appdStaticSchema */
 const appdStaticSchema = {
-  component: collection(createModel<Component>(), {
-    indices: {
-      callbackId: 'primary',
-    },
-  }),
   forward: collection(createModel<ReactionModuleForwardConfiguration>(), {
     indices: {
       guid: 'primary',
@@ -41,7 +36,8 @@ const appdStaticSchema = {
   // Message: Pin Collections
   pin: collection(createModel<PinModuleConfiguration>(), {
     indices: {
-      guid: 'primary',
+      channelId: 'primary',
+      guildId: 'secondary',
     },
   }),
   // pinTemplate: collection(createModel<PinModuleTemplate>(), {
@@ -61,14 +57,19 @@ const appdStaticSchema = {
   }),
   reactionExclusion: collection(createModel<ReactionModuleExclusionConfiguration>(), {
     indices: {
-      guildId: 'secondary',
       channelId: 'primary',
+      guildId: 'secondary',
     },
   }),
 };
 
 /** persistdStaticSchema */
 const persistdStaticSchema = {
+  component: collection(createModel<Component>(), {
+    indices: {
+      callbackId: 'primary',
+    },
+  }),
   locks: collection(createModel<Lock>(), {
     indices: {
       guid: 'primary',

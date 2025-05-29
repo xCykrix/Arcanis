@@ -1,6 +1,6 @@
 //
 
-import { type ApplicationCommandOptionTypes, type Camelize, ChannelTypes, commandOptionsParser, type DiscordApplicationCommandOption, InteractionTypes, type MessageComponent, type PermissionStrings } from '@discordeno';
+import { ApplicationCommandOptionChoice, type ApplicationCommandOptionTypes, type Camelize, ChannelTypes, commandOptionsParser, type DiscordApplicationCommandOption, InteractionDataOption, InteractionTypes, type MessageComponent, type PermissionStrings } from '@discordeno';
 import type { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
 import { ulid } from '@ulid';
 import { developerAuthorizationConst, supportAuthorizationConst } from '../../constants/const.ts';
@@ -82,12 +82,12 @@ export class GroupBuilder<Packet, RawPacket> {
       if (interaction.channelId === undefined) return;
 
       // Run Inhibitor
-      let inhibitor = handler.pickAndInhibit({
+      const pickAndInhibit = handler.pickAndInhibit({
         interaction,
         args: this.assistant.getPacket(interaction),
         assistant: this.assistant,
       });
-      if (inhibitor.inhibit) return;
+      if (pickAndInhibit.inhibit) return;
 
       // Strict Enforce Developer
       if (
@@ -183,7 +183,7 @@ export class GroupBuilder<Packet, RawPacket> {
       // Run Handle
       await handler.handle({
         interaction,
-        args: inhibitor.pick as Packet,
+        args: pickAndInhibit.pick as Packet,
         assistant: this.assistant,
         guild: interaction.guildId !== undefined ? (await Bootstrap.bot.cache.guilds.get(interaction.guildId)) : undefined,
         botMember: interaction.guildId !== undefined ? (await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, interaction.guildId)) : undefined,
@@ -211,6 +211,7 @@ export class GroupBuilder<Packet, RawPacket> {
     if (this.assurance.componentTopLevel === null) throw new Deno.errors.InvalidData('componentTopLevel cannot be null.');
 
     Bootstrap.event.add('interactionCreate', async (interaction) => {
+      if (![InteractionTypes.MessageComponent, InteractionTypes.ModalSubmit].includes(interaction.type)) return;
       if (interaction.data?.customId === undefined) return;
       if (!interaction.data.customId.startsWith(`${this.assurance.componentTopLevel}.${handler.ref}`)) return;
 
@@ -241,6 +242,66 @@ export class GroupBuilder<Packet, RawPacket> {
 
     return this;
   }
+
+  public createAutoCompleteHandler(handler: {
+    /** Inhibits the Execution if true is returned. */
+    pick: (passthrough: {
+      interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
+      assistant: InteractionHandlerAssistant<RawPacket>;
+    }) => InteractionDataOption | null;
+    generate: (passthrough: {
+      interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
+      pick: InteractionDataOption | null;
+    }) => Promise<ApplicationCommandOptionChoice[]>;
+  }): Omit<GroupBuilder<Packet, RawPacket>, 'createGroupHandler'> {
+    Bootstrap.event.add('interactionCreate', async (interaction) => {
+      if (interaction.type !== InteractionTypes.ApplicationCommandAutocomplete) return;
+
+      // Run Picker
+      const pick = handler.pick({
+        interaction,
+        assistant: this.assistant,
+      });
+      if (pick === null) return;
+
+      // Run Handle
+      const choices = await handler.generate({
+        interaction,
+        pick,
+      }).catch((e) => {
+        Optic.incident({
+          moduleId: this.assurance.interactionTopLevel!,
+          message: 'Failed to process auto complete handler.',
+          err: e,
+        });
+        return null;
+      });
+
+      if (choices === null || choices.length === 0) {
+        await interaction.respond({
+          choices: [
+            {
+              name: getLang('global', 'autocomplete.notfound')!,
+              value: 'autocomplete.notfound',
+            },
+          ],
+        });
+        return;
+      }
+
+      await interaction.respond({
+        choices: [
+          ...choices.slice(0, 9),
+          {
+            name: getLang('global', 'autocomplete.toomany')!,
+            value: 'autocomplete.toomany',
+          },
+        ],
+      });
+    });
+
+    return this;
+  }
 }
 
 class InteractionHandlerAssistant<RawPacket> {
@@ -253,6 +314,32 @@ class InteractionHandlerAssistant<RawPacket> {
   /** Fetch the Raw Packet Context of a Interaction. Helper Function. */
   public getPacket(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction): RawPacket {
     return commandOptionsParser(interaction) as RawPacket;
+  }
+
+  public parseAutoComplete(interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction, path: string[]): InteractionDataOption | null {
+    let focus: InteractionDataOption | null = null;
+
+    // Get Focused
+    for (const a of interaction.data?.options ?? []) {
+      if (a.focused && a.name === (path[0] ?? '0xA1')) {
+        focus = a;
+        break;
+      }
+      for (const b of a.options ?? []) {
+        if (b.focused && b.name === (path[1] ?? '0xA2')) {
+          focus = b;
+          break;
+        }
+        for (const c of b.options ?? []) {
+          if (c.focused && c.name === (path[2] ?? '0xA3')) {
+            focus = c;
+            break;
+          }
+        }
+      }
+    }
+
+    return focus;
   }
 
   public parseModal<T extends Record<string, string>>(components?: MessageComponent[]): Partial<T> {
@@ -284,7 +371,7 @@ class InteractionHandlerAssistant<RawPacket> {
     let result: DenoKvCommitResult | DenoKvCommitError | null = null;
     while (result === null || result.ok === false) {
       culid = `${this.assurance.componentTopLevel}.${partition.ref}.${ulid()}`;
-      result = await KVC.appd.component.add({
+      result = await KVC.persistd.component.add({
         callbackId: culid,
         userId: partition.userId.toString(),
         constants: partition.constants,
@@ -302,7 +389,7 @@ class InteractionHandlerAssistant<RawPacket> {
       constants: string[];
     } | null
   > {
-    const fbpi = await KVC.appd.component.findByPrimaryIndex('callbackId', cluid);
+    const fbpi = await KVC.persistd.component.findByPrimaryIndex('callbackId', cluid);
     if (fbpi?.versionstamp === undefined) return null;
     if (this.assurance.componentRequireAuthor && fbpi.value.userId !== userId.toString()) return null;
 
