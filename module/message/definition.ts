@@ -134,7 +134,6 @@ const definition = {
               minValue: 15,
               maxValue: 86400,
               required: true,
-              autocomplete: true,
             },
             {
               name: 'template',
@@ -162,9 +161,32 @@ const definition = {
           ],
         },
         {
-          name: 'list',
-          description: 'Lists the configured pinned messages.',
+          name: 'add-template',
+          description: 'Create a reusable template for pinned messages.',
           type: ApplicationCommandOptionTypes.SubCommand,
+          options: [],
+        },
+        {
+          name: 'delete-template',
+          description: 'Delete a reusable template for pinned mesages.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [],
+        },
+        {
+          name: 'get-template',
+          description: 'Search the available templates based on title and content keyword searching.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'search',
+              description: 'The keyword of the title or content to search.',
+              type: ApplicationCommandOptionTypes.String,
+              minLength: 1,
+              maxLength: 255,
+              required: true,
+              autocomplete: true,
+            },
+          ],
         },
       ],
     },

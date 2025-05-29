@@ -6,14 +6,14 @@ import { MessageDefinition } from '../../definition.ts';
 export default class extends AsyncInitializable {
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<
-      MessageDefinition['pin']['set'],
+      MessageDefinition['pin']['add-template'],
       MessageDefinition
     >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'message',
-          componentTopLevel: 'message.pin.set',
-          guidTopLevel: 'message.pin',
+          componentTopLevel: 'message.pin.add-template',
+          guidTopLevel: 'message.template-pin',
           supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
           requireGuild: true,
           requireDeveloper: false,
@@ -25,11 +25,12 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.pin?.set === undefined,
-            pick: args.pin?.set ?? null,
+            inhibit: args.pin?.['add-template'] === undefined,
+            pick: args.pin?.['add-template'] ?? null,
           };
         },
         handle: async ({ interaction, args }) => {
+          // ! TODO: Add Template Logic.
         },
       });
   }
