@@ -14,5 +14,6 @@ export type PinModuleConfiguration = {
 export type PinModuleTemplate = {
   guid: string;
   guildId: string;
-  message: string;
+  name: string;
+  message: string;  
 };

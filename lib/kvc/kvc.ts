@@ -1,6 +1,6 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
-import type { PinModuleConfiguration } from './model/appd/pin.ts';
+import type { PinModuleConfiguration, PinModuleTemplate } from './model/appd/pin.ts';
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
 import type { Component } from './model/persistd/component.ts';
 import type { Lock } from './model/persistd/lock.ts';
@@ -40,12 +40,12 @@ const appdStaticSchema = {
       guildId: 'secondary',
     },
   }),
-  // pinTemplate: collection(createModel<PinModuleTemplate>(), {
-  //   indices: {
-  //     guid: 'primary',
-  //     channelId: 'secondary',
-  //   }
-  // }),
+  pinTemplate: collection(createModel<PinModuleTemplate>(), {
+    indices: {
+      guid: 'primary',
+      channelId: 'secondary',
+    },
+  }),
 
   // Message: Reaction Collections
   reaction: collection(createModel<ReactionModuleConfiguration>(), {

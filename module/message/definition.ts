@@ -164,7 +164,16 @@ const definition = {
           name: 'add-template',
           description: 'Create a reusable template for pinned messages.',
           type: ApplicationCommandOptionTypes.SubCommand,
-          options: [],
+          options: [
+            {
+              name: 'name',
+              description: 'The name of the template.',
+              type: ApplicationCommandOptionTypes.String,
+              minLength: 1,
+              maxLength: 100,
+              required: true,
+            },
+          ],
         },
         {
           name: 'delete-template',
