@@ -84,7 +84,7 @@ export default class extends AsyncInitializable {
           if (component.text === undefined || (component.text?.length ?? 0) === 0 || (component.text ?? '').trim() === '') {
             await interaction[constants[1] === 'editing' ? 'edit' : 'respond']({
               embeds: Responses.error.make()
-                .setDescription(getLang('pin.set', 'text.invalid')!),
+                .setDescription(getLang('message', 'pin', 'invalid.message')!),
             });
             return;
           }
@@ -139,7 +139,7 @@ export default class extends AsyncInitializable {
             guildId: interaction.guildId!.toString(),
             constants: [
               constants[0],
-            ]
+            ],
           });
           await KVC.appd.pinTemplate.upsertByPrimaryIndex({
             index: ['guid', guid],
@@ -157,7 +157,7 @@ export default class extends AsyncInitializable {
           await interaction.edit({
             content: '',
             embeds: Responses.success.make()
-              .setDescription(getLang('pin.set', 'result')!)
+              .setDescription(getLang('message', 'pin.set', 'result')),
             components: [],
           });
         },

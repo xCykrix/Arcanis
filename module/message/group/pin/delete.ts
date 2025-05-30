@@ -4,7 +4,7 @@ import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import { MessageDefinition } from '../../definition.ts';
+import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
   public override async initialize(): Promise<void> {
@@ -32,7 +32,7 @@ export default class extends AsyncInitializable {
             pick: args.pin?.delete ?? null,
           };
         },
-        handle: async ({ interaction, args, assistant, guild, botMember }) => {
+        handle: async ({ interaction, args }) => {
           if (args === null) return; // Assertion
 
           // Exists
@@ -40,7 +40,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('pin.delete', 'nonexistant')!),
+                .setDescription(getLang('message', 'pin', 'none-found')!),
             });
             return;
           }
@@ -51,7 +51,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pin.delete', 'result')!)
+              .setDescription(getLang('message', 'pin.delete', 'result')!)
               .addField('Channel', `<#${args.channel.id}>`),
           });
         },
