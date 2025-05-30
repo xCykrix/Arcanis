@@ -96,7 +96,7 @@ export class GroupBuilder<Packet, RawPacket> {
       ) {
         await interaction.respond({
           embeds: Responses.error.make()
-            .setDescription(getLang('global', 'permission.user.denied')!),
+            .setDescription(getLang('global', 'interaction', 'user.denied')),
         }, {
           isPrivate: true,
         });
@@ -110,7 +110,7 @@ export class GroupBuilder<Packet, RawPacket> {
       // Strict Enforce Guild w/ Member
       if (this.assurance.requireGuild && (interaction.guildId === undefined || interaction.member?.id === undefined)) {
         await interaction.respond({
-          embeds: Responses.error.make().setDescription(getLang('global', 'interaction.requireGuild')!),
+          embeds: Responses.error.make().setDescription(getLang('global', 'interaction', 'guild.required')),
         });
         return;
       }
@@ -120,7 +120,7 @@ export class GroupBuilder<Packet, RawPacket> {
       if (interaction.channel.type === undefined || !channelTypes.includes(interaction.channel.type)) {
         await interaction.respond({
           embeds: Responses.error.make()
-            .setDescription(getLang('global', 'channel.unsupported')!)
+            .setDescription(getLang('global', 'channel', 'unsupported'))
             .addField('Supported', channelTypes.map((v) => ChannelTypes[v.valueOf()] as keyof typeof ChannelTypes).join('\n')),
         }, {
           isPrivate: true,
@@ -138,7 +138,7 @@ export class GroupBuilder<Packet, RawPacket> {
         if (!isUserSupport && this.assurance.userRequiredGuildPermissions.length > 0 && !Permissions.hasGuildPermissions(guild, interaction.member, this.assurance.userRequiredGuildPermissions)) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription(getLang('global', 'permission.user.gmissing')!)
+              .setDescription(getLang('global', 'guild', 'permission.user.missing'))
               .addField('Permissions', this.assurance.userRequiredGuildPermissions.join('\n')),
           }, {
             isPrivate: true,
@@ -149,7 +149,7 @@ export class GroupBuilder<Packet, RawPacket> {
         if (!isUserSupport && this.assurance.userRequiredChannelPermissions.length > 0 && !Permissions.hasChannelPermissions(guild, interaction.channelId, interaction.member, this.assurance.userRequiredChannelPermissions)) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription(getLang('global', 'permission.user.cmissing')!)
+              .setDescription(getLang('global', 'channel', 'permission.user.missing'))
               .addField('Permissions', this.assurance.userRequiredChannelPermissions.join('\n')),
           }, {
             isPrivate: true,
@@ -160,7 +160,7 @@ export class GroupBuilder<Packet, RawPacket> {
         if (this.assurance.botRequiredGuildPermissions.length > 0 && !Permissions.hasGuildPermissions(guild, member, this.assurance.botRequiredGuildPermissions)) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription(getLang('global', 'permission.bot.gmissing')!)
+              .setDescription(getLang('global', 'guild', 'permission.bot.missing'))
               .addField('Permissions', this.assurance.botRequiredGuildPermissions.join('\n')),
           }, {
             isPrivate: true,
@@ -171,7 +171,7 @@ export class GroupBuilder<Packet, RawPacket> {
         if (this.assurance.botRequiredChannelPermissions.length > 0 && !Permissions.hasChannelPermissions(guild, interaction.channelId, member, this.assurance.botRequiredChannelPermissions)) {
           await interaction.respond({
             embeds: Responses.error.make()
-              .setDescription(getLang('global', 'permission.bot.cmissing')!)
+              .setDescription(getLang('global', 'channel', 'permission.bot.missing'))
               .addField('Permissions', this.assurance.botRequiredChannelPermissions.join('\n')),
           }, {
             isPrivate: true,
@@ -219,7 +219,7 @@ export class GroupBuilder<Packet, RawPacket> {
       const callback = await this.assistant.getComponentCallback(interaction.data.customId, interaction.user.id);
       if (callback === null) {
         interaction.respond({
-          embeds: Responses.error.make().setDescription(getLang('global', 'component.timeout')!),
+          embeds: Responses.error.make().setDescription(getLang('global', 'component', 'expire')),
         }, {
           isPrivate: true,
         });
@@ -281,7 +281,7 @@ export class GroupBuilder<Packet, RawPacket> {
         await interaction.respond({
           choices: [
             {
-              name: getLang('global', 'autocomplete.notfound')!,
+              name: getLang('global', 'autocomplete', 'lt-1-found'),
               value: 'autocomplete.notfound',
             },
           ],
@@ -293,7 +293,7 @@ export class GroupBuilder<Packet, RawPacket> {
         choices: [
           ...choices.slice(0, 9),
           {
-            name: getLang('global', 'autocomplete.toomany')!,
+            name: getLang('global', 'autocomplete', 'gt-10-found'),
             value: 'autocomplete.toomany',
           },
         ],

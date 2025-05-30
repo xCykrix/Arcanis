@@ -164,7 +164,11 @@ export default class extends AsyncInitializable {
           const channel = await Bootstrap.bot.cache.channels.get(BigInt(constants[1]));
           await KVC.appd.pin.upsertByPrimaryIndex({
             index: ['channelId', channel!.id.toString()],
-            update: {},
+            update: {
+              message: interaction.message!.content!,
+              every: parseInt(constants[2]),
+              within: parseInt(constants[3]),
+            },
             set: {
               guid: GUID.make({
                 moduleId: assistant['assurance'].guidTopLevel!,

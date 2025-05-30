@@ -5,7 +5,6 @@ import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import { Bootstrap } from '../../../../mod.ts';
 import { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
@@ -56,7 +55,7 @@ export default class extends AsyncInitializable {
               timeToLive: 900,
               userId: interaction.user.id,
               constants: [
-                args.
+                args.name,
               ],
             }),
             title: 'Pinned Message Template Editor',
@@ -103,7 +102,7 @@ export default class extends AsyncInitializable {
                       timeToLive: 300,
                       userId: interaction.user.id.toString(),
                       constants: [
-
+                        constants[0],
                         component.text,
                       ],
                     }),
@@ -117,7 +116,7 @@ export default class extends AsyncInitializable {
                       timeToLive: 300,
                       userId: interaction.user.id.toString(),
                       constants: [
-                        'editing',
+                        constants[0],
                         component.text,
                       ],
                     }),
@@ -135,21 +134,23 @@ export default class extends AsyncInitializable {
         handle: async ({ interaction, constants, assistant }) => {
           await interaction.deferEdit();
 
-          const channel = await Bootstrap.bot.cache.channels.get(BigInt(constants[1]));
-          await KVC.appd.pin.upsertByPrimaryIndex({
-            index: ['channelId', channel!.id.toString()],
-            update: {},
+          const guid = GUID.make({
+            moduleId: assistant['assurance'].guidTopLevel!,
+            guildId: interaction.guildId!.toString(),
+            constants: [
+              constants[0],
+            ]
+          });
+          await KVC.appd.pinTemplate.upsertByPrimaryIndex({
+            index: ['guid', guid],
+            update: {
+              message: constants[1],
+            },
             set: {
-              guid: GUID.make({
-                moduleId: assistant['assurance'].guidTopLevel!,
-                guildId: channel!.guildId!.toString(),
-                channelId: channel!.id.toString(),
-              }),
-              guildId: channel!.guildId!.toString(),
-              channelId: channel!.id.toString(),
-              message: interaction.message!.content!,
-              every: parseInt(constants[2]),
-              within: parseInt(constants[3]),
+              guid,
+              guildId: interaction.guildId!.toString(),
+              name: constants[0],
+              message: constants[1],
             },
           });
 
@@ -157,7 +158,6 @@ export default class extends AsyncInitializable {
             content: '',
             embeds: Responses.success.make()
               .setDescription(getLang('pin.set', 'result')!)
-              .addField('Channel', `<#${constants[1]}>`),
             components: [],
           });
         },
@@ -171,6 +171,7 @@ export default class extends AsyncInitializable {
               timeToLive: 900,
               userId: interaction.user.id,
               constants: [
+                constants[0],
                 'editing',
               ],
             }),
@@ -186,7 +187,7 @@ export default class extends AsyncInitializable {
                     style: TextStyles.Paragraph,
                     minLength: 1,
                     maxLength: 2000,
-                    value: constants[0],
+                    value: constants[1],
                     required: true,
                   },
                 ],
