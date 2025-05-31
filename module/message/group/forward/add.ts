@@ -45,7 +45,7 @@ export default class extends AsyncInitializable {
           if (!Permissions.hasChannelPermissions(guild!, args.from.id, botMember!, fromBotPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('global', 'permission.bot.cmissing')!)
+                .setDescription(getLang('global', 'channel', 'permission.bot.missing')!)
                 .addField('Channel', `<#${args.from.id}>`)
                 .addField('Missing', fromBotPermissions.join('\n')),
             });
@@ -57,7 +57,7 @@ export default class extends AsyncInitializable {
           if (!Permissions.hasChannelPermissions(guild!, args.to.id, botMember!, toBotPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('global', 'permission.bot.cmissing')!)
+                .setDescription(getLang('global', 'channel', 'permission.bot.missing')!)
                 .addField('Channel', `<#${args.to.id}>`)
                 .addField('Missing', toBotPermissions.join('\n')),
             });
@@ -68,7 +68,7 @@ export default class extends AsyncInitializable {
           if (!Emoji.check(args.reaction)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('forward.add', 'emoji.invalid')!),
+                .setDescription(getLang('message', 'emoji.invalid.single')!),
             });
             return;
           }
@@ -77,8 +77,8 @@ export default class extends AsyncInitializable {
           if (args.from.id === args.to.id) {
             await interaction.respond({
               embeds: Responses.error.make()
-              .setDescription(getLang('forward.add', "result.same-channel")!)
-            })
+                .setDescription(getLang('message', 'forward.add', 'same-channel')!),
+            });
             return;
           }
 
@@ -87,7 +87,7 @@ export default class extends AsyncInitializable {
           if (count >= 10) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('forward.add', 'result.exceed', [10])!),
+                .setDescription(getLang('message', 'forward.add', 'exceed', [10])!),
             });
             return;
           }
@@ -125,7 +125,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('forward.add', 'result')!)
+              .setDescription(getLang('message', 'forward.add', 'result')!)
               .addField('From Channel', `<#${args.from.id}>`, true)
               .addField('To Channel', `<#${args.to.id}>`, true)
               .addField('Reaction', `${args.reaction}`)

@@ -46,14 +46,14 @@ export default class extends AsyncInitializable {
           if (kvFind.result.length === 0) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('forward.list', 'nonexistant')!),
+                .setDescription(getLang('message', 'forward', 'none-found')!),
             });
             return;
           }
 
           // Build Embed
           const embeds = Responses.success.make()
-            .setDescription('Reaction Forward List')
+            .setDescription(getLang('message', 'forward.list', 'result'))
             .setFooter('Page: 1');
           const fields = new Map<string, Set<[string, string]>>();
 
@@ -130,14 +130,14 @@ export default class extends AsyncInitializable {
           if (kvFind.result.length === 0) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('forward.list', 'nonexistant')!),
+                .setDescription(getLang('message', 'forward', 'none-found')!),
             });
             return;
           }
 
           // Build Embed
           const embeds = Responses.success.make()
-            .setDescription('Reaction Forward List')
+            .setDescription(getLang('message', 'forward', 'none-found'))
             .setFooter(`Page: ${index + 1}`);
           const fields = new Map<string, Set<[string, string]>>();
 

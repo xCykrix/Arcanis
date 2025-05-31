@@ -1,13 +1,14 @@
-import { ButtonStyles, ChannelTypes, InputTextComponent, MessageComponent, MessageComponentTypes, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, type InputTextComponent, type MessageComponent, MessageComponentTypes, TextStyles } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
-import { MessageDefinition } from '../../definition.ts';
+import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<
       MessageDefinition['pin']['add-template'],
@@ -157,7 +158,7 @@ export default class extends AsyncInitializable {
           await interaction.edit({
             content: '',
             embeds: Responses.success.make()
-              .setDescription(getLang('message', 'pin.set', 'result')),
+              .setDescription(getLang('message', 'pin.add-template', 'result')),
             components: [],
           });
         },

@@ -63,7 +63,7 @@ export const lang = {
       'result': 'The pinned message has been applied to the specified channel. It will appear or be updated on next send.',
     },
     'pin.delete': {
-      'result': 'The pinned message has been deleteed from the specified channel.',
+      'result': 'The pinned message has been deleted from the specified channel.',
     },
     'pin.add-template': {
       'result': 'The template, {{0}}, has been saved successfully.',

@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, InputTextComponent, MessageComponent, MessageComponentTypes, PermissionStrings, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, type InputTextComponent, type MessageComponent, MessageComponentTypes, type PermissionStrings, TextStyles } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -7,9 +7,10 @@ import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Permissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Bootstrap } from '../../../../mod.ts';
-import { MessageDefinition } from '../../definition.ts';
+import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<
       MessageDefinition['pin']['set'],
@@ -43,7 +44,7 @@ export default class extends AsyncInitializable {
           if (!Permissions.hasChannelPermissions(guild!, args.channel.id, botMember!, botPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('global', 'permission.bot.cmissing')!)
+                .setDescription(getLang('global', 'channel', 'permission.bot.missing')!)
                 .addField('Channel', `<#${args.channel.id}>`)
                 .addField('Missing', botPermissions.join('\n')),
             });
@@ -114,7 +115,7 @@ export default class extends AsyncInitializable {
           if (component.text === undefined || (component.text?.length ?? 0) === 0 || (component.text ?? '').trim() === '') {
             await interaction[constants[4] === 'editing' ? 'edit' : 'respond']({
               embeds: Responses.error.make()
-                .setDescription(getLang('pin.set', 'text.invalid')!),
+                .setDescription(getLang('message', 'pin', 'invalid.message')),
             });
             return;
           }
@@ -186,7 +187,7 @@ export default class extends AsyncInitializable {
           await interaction.edit({
             content: '',
             embeds: Responses.success.make()
-              .setDescription(getLang('pin.set', 'result')!)
+              .setDescription(getLang('message', 'pin.set', 'result')!)
               .addField('Channel', `<#${constants[1]}>`),
             components: [],
           });

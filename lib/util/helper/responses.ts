@@ -10,7 +10,6 @@ class SuccessResponseGenerator {
    */
   public make(): EmbedsBuilder {
     return new EmbedsBuilder()
-      .setTitle('Success')
       .setColor('#004412')
       .setTimestamp(new Date());
   }
