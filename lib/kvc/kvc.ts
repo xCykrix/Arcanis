@@ -43,7 +43,7 @@ const appdStaticSchema = {
   pinTemplate: collection(createModel<PinModuleTemplate>(), {
     indices: {
       guid: 'primary',
-      channelId: 'secondary',
+      guildId: 'secondary',
     },
   }),
 

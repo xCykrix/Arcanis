@@ -176,12 +176,6 @@ const definition = {
           ],
         },
         {
-          name: 'delete-template',
-          description: 'Delete a reusable template for pinned mesages.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [],
-        },
-        {
           name: 'get-template',
           description: 'Search the available templates based on title and content keyword searching.',
           type: ApplicationCommandOptionTypes.SubCommand,
@@ -196,6 +190,27 @@ const definition = {
               autocomplete: true,
             },
           ],
+        },
+        {
+          name: 'delete-template',
+          description: 'Delete a reusable template for pinned mesages.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'name',
+              description: 'The name of the template.',
+              type: ApplicationCommandOptionTypes.String,
+              minLength: 1,
+              maxLength: 100,
+              required: true,
+              autocomplete: true,
+            },
+          ],
+        },
+        {
+          name: 'list-template',
+          description: 'List the stored templates.',
+          type: ApplicationCommandOptionTypes.SubCommand,
         },
       ],
     },
