@@ -339,6 +339,8 @@ class InteractionHandlerAssistant<RawPacket> {
       }
     }
 
+    console.info(focus);
+
     return focus;
   }
 

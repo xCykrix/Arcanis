@@ -11,7 +11,7 @@ export const lang = {
     },
     'autocomplete': {
       'lt-1-found': 'Search returned no results. Please verify your search criteria.',
-      'gt-10-found': 'Search returned 10+ results. Type to further specify.',
+      'gt-10-found': 'Search returned several results. Please further specify your search criteria.',
     },
     'guild': {
       'permission.bot.missing': 'I am missing one or more required permissions for this request in this Guild.',
@@ -68,6 +68,7 @@ export const lang = {
     'pin.add-template': {
       'result': 'The template, {{0}}, has been saved successfully.',
     },
+    'pin.get-template': {},
 
     // Reaction
     'reaction': {

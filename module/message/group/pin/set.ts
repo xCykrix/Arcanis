@@ -53,8 +53,10 @@ export default class extends AsyncInitializable {
 
           // Load Template or Existing Message
           if (args.template !== undefined) {
-            // ! TODO: Hook to Template Database.
-            // ! Respond with Success here instead of modal. Return overflow guard.
+            // TODO - Take the args.template, fetch from appd.pinTemplate based on the args.template and apply the
+            // TODO - template to appd.pin from this.
+            // Verify that the ID exists like get-template.
+
             return;
           } else {
             // Fetch Database
@@ -230,14 +232,27 @@ export default class extends AsyncInitializable {
           });
           return;
         },
+      })
+      .createAutoCompleteHandler({
+        pick: ({ interaction, assistant }) => {
+          return assistant.parseAutoComplete(interaction, ['pin', 'set', 'template']);
+        },
+        generate: async ({ interaction, pick }) => {
+          if (pick === null) return [];
+
+          // Query KVC
+          const kvFind = await KVC.appd.pinTemplate.findBySecondaryIndex('guildId', interaction.guild!.id.toString(), {
+            filter: (v) => v.value.name.toLowerCase().includes(`${pick.value?.toString().toLowerCase()}`) || v.value.message.toLowerCase().includes(`${pick.value?.toString().toLowerCase()}`),
+          });
+          if (kvFind.result.length === 0) return [];
+
+          return kvFind.result?.map((v) => {
+            return {
+              name: `${v.value.name}`,
+              value: v.id,
+            };
+          });
+        },
       });
-    // .createAutoCompleteHandler({
-    //   pick: ({ interaction, assistant }) => {
-    //     return assistant.parseAutoComplete(interaction, ['message', 'pin', 'within']);
-    //   },
-    //   handle: async ({ interaction, pick }) => {
-    //     console.info('handle within', pick);
-    //   },
-    // });
   }
 }

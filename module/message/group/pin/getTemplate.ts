@@ -1,7 +1,10 @@
 import { ChannelTypes } from '@discordeno';
+import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
+import { Responses } from '../../../../lib/util/helper/responses.ts';
+import { Optic } from '../../../../lib/util/optic.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
@@ -33,19 +36,49 @@ export default class extends AsyncInitializable {
         },
         handle: async ({ interaction, args, assistant }) => {
           if (args === null) return; // Assertion
+
+          // Fast Fail
+          if (args.search === 'autocomplete.toomany') {
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('message', 'pin', 'none-found')),
+            });
+            return;
+          }
+
+          // Check Exists
+          const kvFind = await KVC.appd.pinTemplate.find(args.search);
+          const secure = kvFind?.value.guildId === interaction.guildId?.toString();
+          if (kvFind?.versionstamp === undefined || !secure) {
+            if (!secure) {
+              Optic.incident({
+                moduleId: 'message.pin.get-template',
+                message: `A valid database id was provided but did not match the tenant guildId. Spoofed access? ${interaction.guildId}/${interaction.user.id} ID: ${args.search}`,
+              });
+            }
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('message', 'pin', 'none-found')),
+            });
+            return;
+          }
+
+          await interaction.respond({
+            embeds: Responses.success.make()
+              .setDescription(kvFind.value.message),
+          });
         },
       })
       .createAutoCompleteHandler({
         pick: ({ interaction, assistant }) => {
-          // ! TODO: Autofill
-          return assistant.parseAutoComplete(interaction, ['message', 'pin', 'get-template']);
+          return assistant.parseAutoComplete(interaction, ['pin', 'get-template', 'search']);
         },
         generate: async ({ interaction, pick }) => {
           if (pick === null) return [];
 
           // Query KVC
           const kvFind = await KVC.appd.pinTemplate.findBySecondaryIndex('guildId', interaction.guild!.id.toString(), {
-            filter: (v) => v.value.name.includes(`${pick.value?.toString().toLowerCase()}`) || v.value.message.includes(`${pick.value?.toString().toLowerCase()}`),
+            filter: (v) => v.value.name.toLowerCase().includes(`${pick.value?.toString().toLowerCase()}`) || v.value.message.toLowerCase().includes(`${pick.value?.toString().toLowerCase()}`),
           });
           if (kvFind.result.length === 0) return [];
 

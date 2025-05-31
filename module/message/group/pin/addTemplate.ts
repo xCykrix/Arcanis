@@ -158,7 +158,7 @@ export default class extends AsyncInitializable {
           await interaction.edit({
             content: '',
             embeds: Responses.success.make()
-              .setDescription(getLang('message', 'pin.add-template', 'result')),
+              .setDescription(getLang('message', 'pin.add-template', 'result', [constants[0]])),
             components: [],
           });
         },
