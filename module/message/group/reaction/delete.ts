@@ -54,7 +54,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('reaction.delete', 'nonexistant')!),
+                .setDescription(getLang('message', 'reaction', 'none-found')),
             });
             return;
           }
@@ -65,7 +65,7 @@ export default class extends AsyncInitializable {
           // Respond Success
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('reaction.delete', 'result')!)
+              .setDescription(getLang('message', 'reaction.delete', 'result'))
               .addField('Channel', `<#${args.channel.id}>`)
               .addField('Type', lookup[args.type as ReactionType]),
           });

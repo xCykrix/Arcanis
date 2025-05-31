@@ -80,7 +80,7 @@ export default class extends AsyncInitializable {
           // Respond Success
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('reaction.exclude', 'follow-up.description')!)
+              .setDescription(getLang('message', 'reaction.exclude', 'result'))
               .addField('Channel', `<#${args.channel.id}>`),
             components: [
               {
@@ -142,7 +142,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await interaction.edit({
               embeds: Responses.error.make()
-                .setDescription(getLang('reaction.exclude', 'nonexistant')!),
+                .setDescription(getLang('message', 'reaction', 'none-found')),
             });
             return;
           }
@@ -161,7 +161,7 @@ export default class extends AsyncInitializable {
           const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants[0]);
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('reaction.exclude', 'follow-up.save')!)
+              .setDescription(getLang('message', 'reaction.exclude', 'submit'))
               .addField('Channel', `<#${kvFindUpdate!.value.channelId}>`)
               .addField('Users', ((kvFindUpdate?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
               .addField('Roles', ((kvFindUpdate?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
@@ -183,7 +183,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await interaction.edit({
               embeds: Responses.error.make()
-                .setDescription(getLang('reaction.exclude', 'nonexistant')!),
+                .setDescription(getLang('message', 'reaction', 'none-found')),
             });
             return;
           }
@@ -202,7 +202,7 @@ export default class extends AsyncInitializable {
           const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants[0]);
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('reaction.exclude', 'follow-up.save')!)
+              .setDescription(getLang('message', 'reaction.exclude', 'submit'))
               .addField('Channel', `<#${kvFindUpdate!.value.channelId}>`)
               .addField('Users', ((kvFindUpdate?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
               .addField('Roles', ((kvFindUpdate?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),

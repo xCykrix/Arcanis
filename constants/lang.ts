@@ -72,9 +72,9 @@ export const lang = {
     // Reaction
     'reaction': {
       'none-found': 'The specified auto reaction was not found. Please check the provided information and try again.',
-      'exceed': 'Discord has a limit of 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} would cause this us exceed 20.',
     },
     'reaction.set': {
+      'exceed': 'Discord has a limit of 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} would cause this us exceed 20.',
       'exclusive': `The message type '{{0}}' is not compatible with '{{1}}'. Please delete the existing auto reaction and try again.`,
       'result': 'The auto reaction(s) have been applied to the specified channel.',
     },
@@ -206,49 +206,3 @@ export function getLang(
     return null; // The final path did not lead to a string
   }
 }
-
-// --- Example Usage (for testing type inference and functionality) ---
-/*
-// These would typically be in a .ts file to see type checking in an IDE
-
-// 2-level access
-const globalInteraction: string | null = getLang('global', 'interaction.requireGuild');
-const globalPermUser: string | null = getLang('global', 'permission.user.denied', ['user123']);
-const userGreeting: string | null = getLang('userProfile', 'greeting', ['Alice']);
-
-// 3-level access
-const userNotificationSetting: string | null = getLang('userProfile', 'settings', 'notifications', ['enabled']);
-const userPrivacySetting: string | null = getLang('userProfile', 'settings', 'privacy', ['private']);
-const forwardWarning: string | null = getLang('forward.add', 'warnings', 'rateLimit');
-
-
-console.log(globalInteraction);
-console.log(globalPermUser);
-console.log(userGreeting);
-console.log(userNotificationSetting);
-console.log(userPrivacySetting);
-console.log(forwardWarning);
-
-// Examples of invalid paths or types (should ideally show errors in IDE)
-// const invalidPath1 = getLang('global', 'nonExistentKey'); // Error: Argument of type '"nonExistentKey"'...
-// const invalidPath2 = getLang('userProfile', 'settings'); // null, because 'settings' is an object, not a string
-// console.log('Invalid path 2 (settings object):', invalidPath2); // Expected: null
-
-// const invalidPath3 = getLang('userProfile', 'greeting', 'extraKey'); // Error: overload mismatch or too many arguments
-// const invalidPath4 = getLang('userProfile', 'nonExistentSubGroup', 'someKey'); // Error: Argument of type '"nonExistentSubGroup"'...
-// const invalidPath5 = getLang('userProfile', 'settings', 'nonExistentFinalKey'); // Error: Argument of type '"nonExistentFinalKey"'...
-
-// Test case where key exists but is not a string
-const devEvalResult = getLang('dev.eval', 'result'); // This path leads to an object in the original structure.
-                                                    // With the updated lang, 'dev.eval.result' is not defined.
-                                                    // Let's use a valid example for this test.
-                                                    // If 'lang.userProfile.settings' was called with 2 keys:
-const settingsObject = getLang('userProfile', 'settings'); // This will return null because 'settings' is an object.
-console.log("Accessing 'userProfile.settings' with 2 keys:", settingsObject); // Expected: null
-
-const missingPlaceholders = getLang('userProfile', 'greeting'); // "Hello, {{0}}!"
-console.log("Missing placeholders:", missingPlaceholders);
-
-const tooManyPlaceholders = getLang('global', 'interaction.requireGuild', ['p1', 'p2']); // "This interaction must be executed..." (placeholders ignored)
-console.log("Too many placeholders:", tooManyPlaceholders);
-*/

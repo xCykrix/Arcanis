@@ -1,4 +1,4 @@
-import { avatarUrl, ButtonStyles, DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
+import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
@@ -108,7 +108,10 @@ export default class extends AsyncInitializable {
           // Send with Text and Embed
           await Bootstrap.bot.helpers.sendMessage(BigInt(forwarder.value.toChannelId), {
             content: forwarder.value.alert,
-            embeds: new EmbedsBuilder(...message.embeds as DiscordEmbed[] ?? []),
+            embeds: (message.embeds ?? [] as DiscordEmbed[]).map((v) => {
+              if (v.timestamp) v.timestamp = new Date(v.timestamp).toISOString();
+              return v;
+            }) as DiscordEmbed[],
             components: [
               {
                 type: MessageComponentTypes.ActionRow,
@@ -125,7 +128,7 @@ export default class extends AsyncInitializable {
           }).catch((e) => {
             Optic.incident({
               moduleId: 'message.forward.reactionAdd.withEmbeds',
-              message: `Failed to do a reaction forward for embeds. ${reaction.guildId}${reaction.channelId}/${reaction.messageId}`,
+              message: `Failed to do a reaction forward for embeds. ${reaction.guildId}/${reaction.channelId}/${reaction.messageId}`,
               err: e,
             });
             return null;

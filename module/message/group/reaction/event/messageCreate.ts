@@ -43,7 +43,7 @@ export default class extends AsyncInitializable {
         await Bootstrap.bot.helpers.addReaction(message.channelId, message.id, react).catch((e) => {
           Optic.f.warn(`[${message.channelId}/${message.id}] Failed to add reaction '${react}'.`, e);
         });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 1250));
       }
     });
   }

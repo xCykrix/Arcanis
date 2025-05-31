@@ -44,7 +44,7 @@ export default class extends AsyncInitializable {
           if (kvFind.result.length === 0) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('reaction.list', 'nonexistant')!),
+                .setDescription(getLang('message', 'reaction', 'none-found')!),
             });
             return;
           }
@@ -56,7 +56,7 @@ export default class extends AsyncInitializable {
 
           // Template
           const embed = Responses.success.make()
-            .setDescription(getLang('reaction.list', 'result')!)
+            .setDescription(getLang('message', 'reaction.list', 'result')!)
             .addField('Channel', `<#${args.channel.id}>`)
             .addField('Exclusions', `${user.length} User(s) and ${role.length} Role(s) Excluded.`);
 

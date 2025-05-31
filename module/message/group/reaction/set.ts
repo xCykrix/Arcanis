@@ -46,7 +46,7 @@ export default class extends AsyncInitializable {
           if (!Permissions.hasChannelPermissions(guild!, args.channel.id, botMember!, botPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('global', 'permission.bot.cmissing')!)
+                .setDescription(getLang('global', 'channel', 'permission.bot.missing'))
                 .addField('Channel', `<#${args.channel.id}>`)
                 .addField('Missing', botPermissions.join('\n')),
             });
@@ -61,7 +61,7 @@ export default class extends AsyncInitializable {
             if (Emoji.check(v)) continue;
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('reaction.set', 'emoji.invalid')!)
+                .setDescription(getLang('message', 'emoji.invalid.multi'))
                 .addField('Data', v),
             });
             return;
@@ -78,7 +78,7 @@ export default class extends AsyncInitializable {
           if (reactions.length + count > 20) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('reaction.set', 'emoji.exceed', [count, reactions.length])!),
+                .setDescription(getLang('message', 'reaction.set', 'exceed', [count, reactions.length])),
             });
             return;
           }
@@ -96,10 +96,10 @@ export default class extends AsyncInitializable {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(
-                  getLang('reaction.set', 'exclusivity', [
+                  getLang('message', 'reaction.set', 'exclusive', [
                     'All Messages (Exclusive)',
                     'Only (Priority-based)',
-                  ])!,
+                  ]),
                 ),
             });
             return;
@@ -108,10 +108,10 @@ export default class extends AsyncInitializable {
             await interaction.respond({
               embeds: Responses.error.make()
                 .setDescription(
-                  getLang('reaction.set', 'exclusivity', [
+                  getLang('message', 'reaction.set', 'exclusive', [
                     'Only (Priority-based)',
                     'All Messages (Exclusive)',
-                  ])!,
+                  ]),
                 ),
             });
             return;
@@ -147,7 +147,7 @@ export default class extends AsyncInitializable {
           // Respond Success
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('reaction.set', 'result')!)
+              .setDescription(getLang('message', 'reaction.set', 'result')!)
               .addField('Channel', `<#${args.channel.id}>`)
               .addField('Type', lookup[args.type as ReactionType], true)
               .addField('React to Self', `${args.self ? 'True' : 'False'}`, true),
