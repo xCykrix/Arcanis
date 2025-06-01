@@ -45,7 +45,7 @@ export default class extends AsyncInitializable {
           if (!Permissions.hasChannelPermissions(guild!, args.from.id as bigint, botMember!, fromBotPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('global', 'channel', 'permission.bot.missing')!)
+                .setDescription(getLang('global', 'channel', 'permission.bot.missing'))
                 .addField('Channel', `<#${args.from.id}>`)
                 .addField('Missing', fromBotPermissions.join('\n')),
             });

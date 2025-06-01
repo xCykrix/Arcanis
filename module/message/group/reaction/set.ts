@@ -147,7 +147,7 @@ export default class extends AsyncInitializable {
           // Respond Success
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('message', 'reaction.set', 'result')!)
+              .setDescription(getLang('message', 'reaction.set', 'result'))
               .addField('Channel', `<#${args.channel.id}>`)
               .addField('Type', lookup[args.type as ReactionType], true)
               .addField('React to Self', `${args.self ? 'True' : 'False'}`, true),

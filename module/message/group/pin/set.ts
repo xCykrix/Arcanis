@@ -6,6 +6,7 @@ import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Permissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
+import { Optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
@@ -44,7 +45,7 @@ export default class extends AsyncInitializable {
           if (!Permissions.hasChannelPermissions(guild!, args.channel.id, botMember!, botPermissions)) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('global', 'channel', 'permission.bot.missing')!)
+                .setDescription(getLang('global', 'channel', 'permission.bot.missing'))
                 .addField('Channel', `<#${args.channel.id}>`)
                 .addField('Missing', botPermissions.join('\n')),
             });
@@ -53,10 +54,65 @@ export default class extends AsyncInitializable {
 
           // Load Template or Existing Message
           if (args.template !== undefined) {
-            // TODO - Take the args.template, fetch from appd.pinTemplate based on the args.template and apply the
-            // TODO - template to appd.pin from this.
-            // Verify that the ID exists like get-template.
+            const kvFind = await KVC.appd.pinTemplate.find(args.template);
+            const secure = kvFind?.value.guildId === interaction.guildId?.toString();
+            if (kvFind?.versionstamp === undefined || (kvFind?.value.guildId !== undefined && !secure)) {
+              if ((kvFind?.value.guildId !== undefined && !secure)) {
+                Optic.incident({
+                  moduleId: 'message.pin.set',
+                  message: `A valid database id was provided but did not match the tenant guildId. Spoofed access? ${interaction.guildId}/${interaction.user.id} ID: ${args.template}`,
+                });
+              }
+              await interaction.respond({
+                embeds: Responses.error.make()
+                  .setDescription(getLang('message', 'pin.set', 'template.none-found')),
+              });
+              return;
+            }
 
+            await interaction.respond({
+              content: kvFind?.value.message,
+              components: [
+                {
+                  type: MessageComponentTypes.ActionRow,
+                  components: [
+                    {
+                      type: MessageComponentTypes.Button,
+                      customId: await assistant.makeComponentCallback({
+                        ref: 'modalConfirm',
+                        timeToLive: 300,
+                        userId: interaction.user.id.toString(),
+                        constants: [
+                          args.channel.guildId!.toString(),
+                          args.channel.id.toString(),
+                          `${args.every}`,
+                          `${args.within}`,
+                        ],
+                      }),
+                      style: ButtonStyles.Primary,
+                      label: 'Save',
+                    },
+                    {
+                      type: MessageComponentTypes.Button,
+                      customId: await assistant.makeComponentCallback({
+                        ref: 'modalEdit',
+                        timeToLive: 300,
+                        userId: interaction.user.id.toString(),
+                        constants: [
+                          args.channel.guildId!.toString(),
+                          args.channel.id.toString(),
+                          `${args.every}`,
+                          `${args.within}`,
+                          kvFind?.value.message,
+                        ],
+                      }),
+                      style: ButtonStyles.Secondary,
+                      label: 'Edit',
+                    },
+                  ],
+                },
+              ],
+            });
             return;
           } else {
             // Fetch Database
@@ -189,7 +245,7 @@ export default class extends AsyncInitializable {
           await interaction.edit({
             content: '',
             embeds: Responses.success.make()
-              .setDescription(getLang('message', 'pin.set', 'result')!)
+              .setDescription(getLang('message', 'pin.set', 'result'))
               .addField('Channel', `<#${constants[1]}>`),
             components: [],
           });

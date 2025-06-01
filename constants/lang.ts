@@ -60,6 +60,7 @@ export const lang = {
       'invalid.message': 'Unable to validate the input message. It must not be blank or contain empty space. Please try again.',
     },
     'pin.set': {
+      'template.none-found': 'The specified template was not found. Please check the provided information and try again.',
       'result': 'The pinned message has been applied to the specified channel. It will appear or be updated on next send.',
     },
     'pin.delete': {
@@ -69,6 +70,9 @@ export const lang = {
       'result': 'The template, {{0}}, has been saved successfully.',
     },
     'pin.get-template': {},
+    'pin.delete-template': {
+      'result': 'The template, {{0}}, has been deleted successfully.',
+    },
 
     // Reaction
     'reaction': {

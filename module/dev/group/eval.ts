@@ -9,7 +9,10 @@ import type { DevDefinition } from '../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    GroupBuilder.builder<Partial<DevDefinition>>()
+    GroupBuilder.builder<
+      DevDefinition['eval'],
+      DevDefinition
+    >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'dev',
@@ -25,16 +28,21 @@ export default class extends AsyncInitializable {
           botRequiredChannelPermissions: [],
         },
         pickAndInhibit: ({ args }) => {
-          return args.eval === undefined;
+          return {
+            inhibit: args.eval === undefined,
+            pick: args.eval ?? null,
+          };
         },
         handle: async ({ interaction, args, assistant }) => {
+          if (args === null) return;
+
           await interaction.respond({
             customId: await assistant.makeComponentCallback({
               ref: 'eval.consume-modal',
               timeToLive: 300,
               userId: interaction.user.id,
               constants: [
-                `${args.eval!.depth ?? 2}`,
+                `${args.depth ?? 2}`,
               ],
             }),
             title: 'Evaluation Form',
@@ -66,7 +74,7 @@ export default class extends AsyncInitializable {
             typescript: string;
           }>(interaction.data!.components as MessageComponent[]);
 
-          let result = getLang('dev.eval', 'result.default');
+          let result = getLang('dev', 'eval', 'default');
           try {
             // deno-lint-ignore no-eval
             result = await eval(`(async () => { ${components.typescript!} })();`);
@@ -76,10 +84,11 @@ export default class extends AsyncInitializable {
               message: 'Failed to Evaludate',
               err: e as Error,
             });
+            // TODO!: Error Capture
           }
 
           let cleaned = await stringify(result, parseInt(constants[0]!));
-          if (cleaned === 'undefined') cleaned = getLang('dev.eval', 'result.undefined')!;
+          if (cleaned === 'undefined') cleaned = getLang('dev', 'eval', 'undefined')!;
           await interaction.respond({
             content: ['```', `${cleaned}`, '```'].join('\n'),
           });

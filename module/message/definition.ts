@@ -124,7 +124,7 @@ const definition = {
               description: 'The number of sent messages before immediately sending the pinned message.',
               type: ApplicationCommandOptionTypes.Integer,
               minValue: 3,
-              maxValue: 256,
+              maxValue: 50,
               required: true,
             },
             {
@@ -206,11 +206,6 @@ const definition = {
               autocomplete: true,
             },
           ],
-        },
-        {
-          name: 'list-template',
-          description: 'List the stored templates.',
-          type: ApplicationCommandOptionTypes.SubCommand,
         },
       ],
     },

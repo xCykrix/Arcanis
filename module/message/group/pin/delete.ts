@@ -41,7 +41,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('message', 'pin', 'none-found')!),
+                .setDescription(getLang('message', 'pin', 'none-found')),
             });
             return;
           }
@@ -52,7 +52,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('message', 'pin.delete', 'result')!)
+              .setDescription(getLang('message', 'pin.delete', 'result'))
               .addField('Channel', `<#${args.channel.id}>`),
           });
         },

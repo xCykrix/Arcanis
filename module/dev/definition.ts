@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionTypes, CreateSlashApplicationCommand } from '@discordeno';
-import { CommandOptions } from '../../lib/builder/group.ts';
+import { ApplicationCommandOptionTypes, type CreateSlashApplicationCommand } from '@discordeno';
+import type { CommandOptions } from '../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../mod.ts';
 
@@ -20,10 +20,10 @@ const definition = {
           maxValue: 10,
           required: false,
         },
-      ] as const,
+      ],
     },
-  ] as const,
-} satisfies CreateSlashApplicationCommand;
+  ],
+} as const satisfies CreateSlashApplicationCommand;
 export type DevDefinition = CommandOptions<typeof definition.options>;
 
 export default class extends AsyncInitializable {

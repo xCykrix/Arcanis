@@ -34,7 +34,7 @@ export default class extends AsyncInitializable {
             pick: args.pin?.['get-template'] ?? null,
           };
         },
-        handle: async ({ interaction, args, assistant }) => {
+        handle: async ({ interaction, args }) => {
           if (args === null) return; // Assertion
 
           // Fast Fail
@@ -49,8 +49,8 @@ export default class extends AsyncInitializable {
           // Check Exists
           const kvFind = await KVC.appd.pinTemplate.find(args.search);
           const secure = kvFind?.value.guildId === interaction.guildId?.toString();
-          if (kvFind?.versionstamp === undefined || !secure) {
-            if (!secure) {
+          if (kvFind?.versionstamp === undefined || (kvFind?.value.guildId !== undefined && !secure)) {
+            if ((kvFind?.value.guildId !== undefined && !secure)) {
               Optic.incident({
                 moduleId: 'message.pin.get-template',
                 message: `A valid database id was provided but did not match the tenant guildId. Spoofed access? ${interaction.guildId}/${interaction.user.id} ID: ${args.search}`,

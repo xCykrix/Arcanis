@@ -85,7 +85,7 @@ export default class extends AsyncInitializable {
           if (component.text === undefined || (component.text?.length ?? 0) === 0 || (component.text ?? '').trim() === '') {
             await interaction[constants[1] === 'editing' ? 'edit' : 'respond']({
               embeds: Responses.error.make()
-                .setDescription(getLang('message', 'pin', 'invalid.message')!),
+                .setDescription(getLang('message', 'pin', 'invalid.message')),
             });
             return;
           }

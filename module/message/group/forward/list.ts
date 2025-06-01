@@ -46,7 +46,7 @@ export default class extends AsyncInitializable {
           if (kvFind.result.length === 0) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('message', 'forward', 'none-found')!),
+                .setDescription(getLang('message', 'forward', 'none-found')),
             });
             return;
           }
@@ -130,7 +130,7 @@ export default class extends AsyncInitializable {
           if (kvFind.result.length === 0) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('message', 'forward', 'none-found')!),
+                .setDescription(getLang('message', 'forward', 'none-found')),
             });
             return;
           }
