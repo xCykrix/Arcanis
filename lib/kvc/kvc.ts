@@ -1,4 +1,5 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
+import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/appd/alert.ts';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
 import type { PinModuleConfiguration, PinModuleTemplate } from './model/appd/pin.ts';
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
@@ -65,6 +66,22 @@ const appdStaticSchema = {
 
 /** persistdStaticSchema */
 const persistdStaticSchema = {
+  alert: collection(createModel<AlertConfiguration>(), {
+    indices: {
+      guildId: 'primary',
+    },
+  }),
+  dispatchedAlert: collection(createModel<DispatchedAlert>(), {
+    indices: {
+      dispatchEventId: 'primary',
+    },
+  }),
+  consumedDispatchedAlert: collection(createModel<ConsumedDispatchAlert>(), {
+    indices: {
+      guildId: 'secondary',
+      dispatchEventId: 'secondary',
+    },
+  }),
   component: collection(createModel<Component>(), {
     indices: {
       callbackId: 'primary',

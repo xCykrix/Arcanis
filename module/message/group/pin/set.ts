@@ -47,7 +47,7 @@ export default class extends AsyncInitializable {
               embeds: Responses.error.make()
                 .setDescription(getLang('global', 'channel', 'permission.bot.missing'))
                 .addField('Channel', `<#${args.channel.id}>`)
-                .addField('Missing', botPermissions.join('\n')),
+                .addField('Required', botPermissions.join('\n')),
             });
             return;
           }

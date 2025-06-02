@@ -12,11 +12,11 @@ export default class extends AsyncInitializable {
 
       // Process Configuration to Worker State Controls Control Cache
       for (let i = 0; i < iterations; i++) {
-        const fetchStickyPin = await KVC.appd.pin.getMany({
+        const getPinned = await KVC.appd.pin.getMany({
           limit: 20,
           offset: i * 20,
         });
-        for (const entry of fetchStickyPin.result) {
+        for (const entry of getPinned.result) {
           // State: Immediate Trigger No Message Ever Sent
           if (entry.value.lastMessageId === undefined) {
             await MessagePinOp.op(entry.value, false);

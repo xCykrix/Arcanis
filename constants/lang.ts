@@ -25,6 +25,14 @@ export const lang = {
   },
   // Module: dev
   'dev': {
+    // Alert
+    'alert': {
+      'result': 'The channel, {{0}}, has been set to receive alerts and notifications.',
+    },
+    'send-alert': {
+      'invalid.message': 'Unable to validate the input message. It must not be blank or contain empty space. Please try again.',
+      'result': 'Dispatching message to all guilds configured for alerts. Delivery will begin shortly.',
+    },
     // Eval
     'eval': {
       'invalid.code': 'Unable to validate the inputted code.',
@@ -139,6 +147,7 @@ export function getLang<
   TKey1 extends keyof Lang,
   TKey2 extends keyof Lang[TKey1],
   TSubObject extends Lang[TKey1][TKey2], // Represents the object at lang[key1][key2]
+  // deno-lint-ignore no-explicit-any
   TKey3 extends TSubObject extends Readonly<Record<string, any>> ? keyof TSubObject : never,
 >(
   key1: TKey1,
@@ -156,6 +165,7 @@ export function getLang<
  * @returns A string or null.
  */
 export function getLang(
+  // deno-lint-ignore no-explicit-any
   ...args: any[]
 ): string | null {
   let pathKeys: string[];
@@ -186,6 +196,7 @@ export function getLang(
     return null;
   }
 
+  // deno-lint-ignore no-explicit-any
   let current: any = lang;
   for (const key of pathKeys) {
     if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, key)) {

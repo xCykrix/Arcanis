@@ -5,11 +5,29 @@ import { Bootstrap } from '../../mod.ts';
 
 const definition = {
   name: 'dev',
-  description: 'Developer Operations Module.',
+  description: 'Configuration and Devleopment Module.',
   options: [
     {
+      name: 'alert',
+      description: 'Set the channel used to receive global messages or alerts.',
+      type: ApplicationCommandOptionTypes.SubCommand,
+      options: [
+        {
+          name: 'channel',
+          description: 'The channel to recieve messages or alerts.',
+          type: ApplicationCommandOptionTypes.Channel,
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'send-alert',
+      description: 'Sends an alert to all tenants. Developer Only.',
+      type: ApplicationCommandOptionTypes.SubCommand,
+    },
+    {
       name: 'eval',
-      description: 'Evaluate Arbitrary Code at Runtime. Uses a Modal. Secure.',
+      description: 'Evaluate Arbitrary Code at Runtime. Developer Only.',
       type: ApplicationCommandOptionTypes.SubCommand,
       options: [
         {
