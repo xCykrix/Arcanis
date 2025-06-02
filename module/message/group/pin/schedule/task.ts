@@ -23,6 +23,12 @@ export default class extends AsyncInitializable {
             continue;
           }
 
+          // Timeout
+          if (entry.value.lastMessageAt !== undefined && (Date.now() < (entry.value.lastMessageAt + ((entry.value.every ?? 5) * 1000)))) {
+            Optic.f.warn('Skipped event due to being too soon.');
+            return;
+          }
+
           // (Heavy Check): Poll Messages to Verify Consensus.
           const messages = await Bootstrap.bot.helpers.getMessages(entry.value.channelId, {
             after: entry.value.lastMessageId,
@@ -35,6 +41,6 @@ export default class extends AsyncInitializable {
           if (messages.length >= 1) await MessagePinOp.op(entry.value, false);
         }
       }
-    }, 5000);
+    }, 15000);
   }
 }

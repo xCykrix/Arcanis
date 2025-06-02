@@ -2,6 +2,7 @@ import { ChannelTypes, type MessageComponent, MessageComponentTypes, TextStyles 
 import { getLang } from '../../../constants/lang.ts';
 import { GroupBuilder } from '../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
+import { KVC } from '../../../lib/kvc/kvc.ts';
 import { stringify } from '../../../lib/util/helper/stringify.ts';
 import { Optic } from '../../../lib/util/optic.ts';
 import type { DevDefinition } from '../definition.ts';
@@ -9,6 +10,8 @@ import type { DevDefinition } from '../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
+    KVC;
+
     GroupBuilder.builder<
       DevDefinition['eval'],
       DevDefinition
