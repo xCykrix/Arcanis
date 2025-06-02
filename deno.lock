@@ -6,15 +6,14 @@
     "jsr:@onjara/optic@2.0.3": "2.0.3",
     "jsr:@std/bytes@^1.0.4": "1.0.6",
     "jsr:@std/cli@1.0.12": "1.0.12",
-    "jsr:@std/collections@^1.0.9": "1.1.0",
+    "jsr:@std/collections@^1.0.9": "1.1.1",
     "jsr:@std/fmt@^1.0.2": "1.0.8",
-    "jsr:@std/fs@1.0.17": "1.0.17",
-    "jsr:@std/path@^1.0.6": "1.0.9",
-    "jsr:@std/path@^1.0.9": "1.0.9",
+    "jsr:@std/fs@1.0.18": "1.0.18",
+    "jsr:@std/path@^1.0.6": "1.1.0",
+    "jsr:@std/path@^1.1.0": "1.1.0",
     "jsr:@std/ulid@1": "1.0.0",
     "jsr:@std/ulid@1.0.0": "1.0.0",
     "npm:@discordeno/bot@next": "21.0.0-next.2eace55",
-    "npm:@discordjs/builders@dev": "2.0.0-dev.1747613683-8605fc81f_zod@3.25.23",
     "npm:@types/node@*": "22.15.15",
     "npm:dd-cache-proxy@latest": "2.6.4_@discordeno+bot@21.0.0-next.2eace55",
     "npm:url-regex-safe@*": "4.0.0",
@@ -50,17 +49,23 @@
     "@std/collections@1.1.0": {
       "integrity": "2ee8761c84c3d203f7a4ecd376f9ca88a0c559817a4a54c9150f28c0b948027c"
     },
+    "@std/collections@1.1.1": {
+      "integrity": "eff6443fbd9d5a6697018fb39c5d13d5f662f0045f21392d640693d0008ab2af"
+    },
     "@std/fmt@1.0.8": {
       "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
     },
-    "@std/fs@1.0.17": {
-      "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b",
+    "@std/fs@1.0.18": {
+      "integrity": "24bcad99eab1af4fde75e05da6e9ed0e0dce5edb71b7e34baacf86ffe3969f3a",
       "dependencies": [
-        "jsr:@std/path@^1.0.9"
+        "jsr:@std/path@^1.1.0"
       ]
     },
     "@std/path@1.0.9": {
       "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
+    },
+    "@std/path@1.1.0": {
+      "integrity": "ddc94f8e3c275627281cbc23341df6b8bcc874d70374f75fec2533521e3d6886"
     },
     "@std/ulid@1.0.0": {
       "integrity": "d41c3d27a907714413649fee864b7cde8d42ee68437d22b79d5de4f81d808780"
@@ -103,20 +108,6 @@
         "@discordeno/types"
       ]
     },
-    "@discordjs/builders@2.0.0-dev.1747613683-8605fc81f_zod@3.25.23": {
-      "integrity": "sha512-oo371txw2UFV36Y+WoqrlcW95Z/lQxAzfXSixJKlxdlKPoyrz+JeyYZCAWq2c7ekCKPcEb4eYmGyrjplDD7THw==",
-      "dependencies": [
-        "@discordjs/util",
-        "discord-api-types",
-        "ts-mixer",
-        "tslib",
-        "zod",
-        "zod-validation-error"
-      ]
-    },
-    "@discordjs/util@1.1.1": {
-      "integrity": "sha512-eddz6UnOBEB1oITPinyrB2Pttej49M9FZQY8NxgEvc3tq6ZICZ19m70RsmzRdDHk80O9NoYN/25AqJl8vPVf/g=="
-    },
     "@types/node@22.15.15": {
       "integrity": "sha512-R5muMcZob3/Jjchn5LcO8jdKwSCbzqmPB6ruBxMcf9kbxtniZHP327s6C37iOfuw8mbKK3cAQa7sEl7afLrQ8A==",
       "dependencies": [
@@ -129,9 +120,6 @@
         "@discordeno/bot"
       ]
     },
-    "discord-api-types@0.38.8": {
-      "integrity": "sha512-xuRXPD44FcbKHrQK15FS1HFlMRNJtsaZou/SVws18vQ7zHqmlxyDktMkZpyvD6gE2ctGOVYC/jUyoMMAyBWfcw=="
-    },
     "fzstd@0.1.1": {
       "integrity": "sha512-dkuVSOKKwh3eas5VkJy1AW1vFpet8TA/fGmVA5krThl8YcOVE/8ZIoEA1+U1vEn5ckxxhLirSdY837azmbaNHA=="
     },
@@ -141,12 +129,6 @@
     "tlds@1.259.0": {
       "integrity": "sha512-AldGGlDP0PNgwppe2quAvuBl18UcjuNtOnDuUkqhd6ipPqrYYBt3aTxK1QTsBVknk97lS2JcafWMghjGWFtunw==",
       "bin": true
-    },
-    "ts-mixer@6.0.4": {
-      "integrity": "sha512-ufKpbmrugz5Aou4wcr5Wc1UUFWOLhq+Fm6qa6P0w0K5Qw2yhaUoiWszhCVuNQyNwrlGiscHOmqYoAox1PtvgjA=="
-    },
-    "tslib@2.8.1": {
-      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
     "undici-types@6.21.0": {
       "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
@@ -161,12 +143,6 @@
     "ws@8.18.2": {
       "integrity": "sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ=="
     },
-    "zod-validation-error@3.4.1_zod@3.25.23": {
-      "integrity": "sha512-1KP64yqDPQ3rupxNv7oXhf7KdhHHgaqbKuspVoiN93TT0xrBjql+Svjkdjq/Qh/7GSMmgQs3AfvBT0heE35thw==",
-      "dependencies": [
-        "zod"
-      ]
-    },
     "zod@3.25.23": {
       "integrity": "sha512-Od2bdMosahjSrSgJtakrwjMDb1zM1A3VIHCPGveZt/3/wlrTWBya2lmEh2OYe4OIu8mPTmmr0gnLHIWQXdtWBg=="
     }
@@ -176,10 +152,9 @@
       "jsr:@amethyst/discord-emoji@*",
       "jsr:@olli/kvdex@3.4.0",
       "jsr:@onjara/optic@2.0.3",
-      "jsr:@std/fs@1.0.17",
+      "jsr:@std/fs@1.0.18",
       "jsr:@std/ulid@1.0.0",
       "npm:@discordeno/bot@next",
-      "npm:@discordjs/builders@dev",
       "npm:dd-cache-proxy@latest",
       "npm:url-regex-safe@*"
     ]

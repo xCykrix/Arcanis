@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, type InputTextComponent, type MessageComponent, MessageComponentTypes, TextStyles } from '@discordeno';
+import { ButtonStyles, ChannelTypes, type MessageComponent, MessageComponentTypes, type TextInputComponent, TextStyles } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -38,8 +38,8 @@ export default class extends AsyncInitializable {
           if (args === null) return; // Assertion
 
           // Fetch Database
-          const input: InputTextComponent = {
-            type: MessageComponentTypes.InputText,
+          const input: TextInputComponent = {
+            type: MessageComponentTypes.TextInput,
             customId: 'text',
             label: 'Message Text',
             style: TextStyles.Paragraph,
@@ -182,7 +182,7 @@ export default class extends AsyncInitializable {
                 type: MessageComponentTypes.ActionRow,
                 components: [
                   {
-                    type: MessageComponentTypes.InputText,
+                    type: MessageComponentTypes.TextInput,
                     customId: 'text',
                     label: 'Message Text',
                     style: TextStyles.Paragraph,

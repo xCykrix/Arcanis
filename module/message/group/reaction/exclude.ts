@@ -87,7 +87,7 @@ export default class extends AsyncInitializable {
                 type: MessageComponentTypes.ActionRow,
                 components: [
                   {
-                    type: MessageComponentTypes.SelectMenuUsers,
+                    type: MessageComponentTypes.UserSelect,
                     customId: await assistant.makeComponentCallback({
                       ref: 'user',
                       timeToLive: 300,
@@ -107,7 +107,7 @@ export default class extends AsyncInitializable {
                 type: MessageComponentTypes.ActionRow,
                 components: [
                   {
-                    type: MessageComponentTypes.SelectMenuRoles,
+                    type: MessageComponentTypes.RoleSelect,
                     customId: await assistant.makeComponentCallback({
                       ref: 'role',
                       timeToLive: 300,

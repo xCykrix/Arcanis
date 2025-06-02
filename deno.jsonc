@@ -6,9 +6,8 @@
     // Core Library
     "@discordeno": "npm:@discordeno/bot@next",
     "@discordeno-cache": "npm:dd-cache-proxy@latest",
-    "@builders": "npm:@discordjs/builders@dev",
     // Standard
-    "@fs": "jsr:@std/fs@1.0.17",
+    "@fs": "jsr:@std/fs@1.0.18",
     "@ulid": "jsr:@std/ulid@1.0.0",
     // Libraries
     "@optic": "jsr:@onjara/optic@2.0.3",

@@ -54,7 +54,7 @@ export default class extends AsyncInitializable {
                 type: MessageComponentTypes.ActionRow,
                 components: [
                   {
-                    type: MessageComponentTypes.InputText,
+                    type: MessageComponentTypes.TextInput,
                     customId: 'typescript',
                     label: 'TypeScript',
                     style: TextStyles.Paragraph,
