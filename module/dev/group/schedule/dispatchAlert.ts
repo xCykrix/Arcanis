@@ -56,16 +56,4 @@ export default class extends AsyncInitializable {
       }
     }, 5000);
   }
-
-  /*
-           // Get List of Alerts
-          let dispatched = 0;
-          await KVC.persistd.alert.forEach(async (v) => {
-            dispatched++;
-
-            // Get Channel
-
-
-
-          });*/
 }
