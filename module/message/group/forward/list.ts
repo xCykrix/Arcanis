@@ -160,7 +160,7 @@ export default class extends AsyncInitializable {
           embeds.addField('Search Channel', `<#${channel}>`);
 
           // Respond
-          await interaction.respond({
+          await interaction.edit({
             embeds,
             components: [
               {
