@@ -50,7 +50,7 @@ export default class extends AsyncInitializable {
                 type: MessageComponentTypes.ActionRow,
                 components: [
                   {
-                    type: MessageComponentTypes.InputText,
+                    type: MessageComponentTypes.TextInput,
                     customId: 'text',
                     label: 'Message Text',
                     style: TextStyles.Paragraph,
