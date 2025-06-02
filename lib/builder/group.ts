@@ -1,4 +1,4 @@
-import { type ApplicationCommandOptionChoice, type ApplicationCommandOptionTypes, type Camelize, ChannelTypes, commandOptionsParser, type DiscordApplicationCommandOption, InteractionDataOption, InteractionTypes, type MessageComponent, type PermissionStrings } from '@discordeno';
+import { type ApplicationCommandOptionChoice, type ApplicationCommandOptionTypes, type Camelize, ChannelTypes, commandOptionsParser, type DiscordApplicationCommandOption, type InteractionDataOption, InteractionTypes, type MessageComponent, type PermissionStrings } from '@discordeno';
 import type { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
 import { ulid } from '@ulid';
 import { developerAuthorizationConst, supportAuthorizationConst } from '../../constants/const.ts';
