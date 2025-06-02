@@ -129,7 +129,7 @@ export default class extends AsyncInitializable {
       })
       .createGroupComponentHandler({
         ref: 'user',
-        handle: async ({ interaction, constants }) => {
+        handle: async ({ interaction, constants, assistant }) => {
           await interaction.deferEdit();
 
           // Index Resolved Data
@@ -159,18 +159,75 @@ export default class extends AsyncInitializable {
 
           // Get Updated and Respond
           const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants[0]);
-          await interaction.respond({
+
+          // Load Defaults
+          const defaultRole: SelectMenuDefaultValue[] = [];
+          const defaultUser: SelectMenuDefaultValue[] = [];
+          kvFindUpdate?.value.exclusion?.role?.forEach((v) =>
+            defaultRole.push({
+              type: 'role',
+              id: BigInt(v),
+            })
+          );
+          kvFindUpdate?.value?.exclusion?.user?.forEach((v) =>
+            defaultUser.push({
+              type: 'user',
+              id: BigInt(v),
+            })
+          );
+
+          await interaction.edit({
             embeds: Responses.success.make()
               .setDescription(getLang('message', 'reaction.exclude', 'submit'))
-              .addField('Channel', `<#${kvFindUpdate!.value.channelId}>`)
-              .addField('Users', ((kvFindUpdate?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
-              .addField('Roles', ((kvFindUpdate?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
+              .addField('Channel', `<#${kvFindUpdate!.value.channelId}>`),
+            components: [
+              {
+                type: MessageComponentTypes.ActionRow,
+                components: [
+                  {
+                    type: MessageComponentTypes.UserSelect,
+                    customId: await assistant.makeComponentCallback({
+                      ref: 'user',
+                      timeToLive: 300,
+                      userId: interaction.user.id,
+                      constants: [
+                        kvFind.id,
+                      ],
+                    }),
+                    placeholder: 'Select up to 25 Users',
+                    minValues: 0,
+                    maxValues: 25,
+                    defaultValues: defaultUser,
+                  },
+                ],
+              },
+              {
+                type: MessageComponentTypes.ActionRow,
+                components: [
+                  {
+                    type: MessageComponentTypes.RoleSelect,
+                    customId: await assistant.makeComponentCallback({
+                      ref: 'role',
+                      timeToLive: 300,
+                      userId: interaction.user.id,
+                      constants: [
+                        kvFind.id,
+                      ],
+                    }),
+                    placeholder: 'Select up to 25 Roles',
+                    minValues: 0,
+                    maxValues: 25,
+                    defaultValues: defaultRole,
+                  },
+                ],
+              },
+            ],
           });
         },
       })
       .createGroupComponentHandler({
         ref: 'role',
-        handle: async ({ interaction, constants }) => {
+        handle: async ({ interaction, constants, assistant }) => {
           await interaction.deferEdit();
 
           // Index Resolved Data
@@ -200,12 +257,69 @@ export default class extends AsyncInitializable {
 
           // Get Updated and Respond
           const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants[0]);
-          await interaction.respond({
+
+          // Load Defaults
+          const defaultRole: SelectMenuDefaultValue[] = [];
+          const defaultUser: SelectMenuDefaultValue[] = [];
+          kvFindUpdate?.value.exclusion?.role?.forEach((v) =>
+            defaultRole.push({
+              type: 'role',
+              id: BigInt(v),
+            })
+          );
+          kvFindUpdate?.value?.exclusion?.user?.forEach((v) =>
+            defaultUser.push({
+              type: 'user',
+              id: BigInt(v),
+            })
+          );
+
+          await interaction.edit({
             embeds: Responses.success.make()
               .setDescription(getLang('message', 'reaction.exclude', 'submit'))
-              .addField('Channel', `<#${kvFindUpdate!.value.channelId}>`)
-              .addField('Users', ((kvFindUpdate?.value.exclusion?.user?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.user ?? null)?.map((v) => `<@${v}>`).join(' ') ?? 'None')
-              .addField('Roles', ((kvFindUpdate?.value.exclusion?.role?.length ?? 0) === 0) ? 'None' : (kvFindUpdate?.value.exclusion?.role ?? null)?.map((v) => `<@&${v}>`).join(' ') ?? 'None'),
+              .addField('Channel', `<#${kvFindUpdate!.value.channelId}>`),
+            components: [
+              {
+                type: MessageComponentTypes.ActionRow,
+                components: [
+                  {
+                    type: MessageComponentTypes.UserSelect,
+                    customId: await assistant.makeComponentCallback({
+                      ref: 'user',
+                      timeToLive: 300,
+                      userId: interaction.user.id,
+                      constants: [
+                        kvFind.id,
+                      ],
+                    }),
+                    placeholder: 'Select up to 25 Users',
+                    minValues: 0,
+                    maxValues: 25,
+                    defaultValues: defaultUser,
+                  },
+                ],
+              },
+              {
+                type: MessageComponentTypes.ActionRow,
+                components: [
+                  {
+                    type: MessageComponentTypes.RoleSelect,
+                    customId: await assistant.makeComponentCallback({
+                      ref: 'role',
+                      timeToLive: 300,
+                      userId: interaction.user.id,
+                      constants: [
+                        kvFind.id,
+                      ],
+                    }),
+                    placeholder: 'Select up to 25 Roles',
+                    minValues: 0,
+                    maxValues: 25,
+                    defaultValues: defaultRole,
+                  },
+                ],
+              },
+            ],
           });
         },
       });

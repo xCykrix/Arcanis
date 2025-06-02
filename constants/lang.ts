@@ -99,7 +99,7 @@ export const lang = {
     },
     'reaction.exclude': {
       'result': 'Please use the following drop-downs to configure the exclusion.',
-      'submit': 'The auto reaction exclusions have been updated for the specified channel',
+      'submit': 'The auto reaction exclusions have been updated for the specified channel. You can continue to make changes as needed.',
     },
   },
 } as const;
