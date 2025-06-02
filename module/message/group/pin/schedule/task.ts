@@ -25,7 +25,6 @@ export default class extends AsyncInitializable {
 
           // Timeout
           if (entry.value.lastMessageAt !== undefined && (Date.now() < (entry.value.lastMessageAt + ((entry.value.every ?? 5) * 1000)))) {
-            Optic.f.warn('Skipped event due to being too soon.');
             return;
           }
 

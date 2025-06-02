@@ -11,7 +11,6 @@ export class MessagePinOp {
   public static async op(pin: PinModuleConfiguration, fromMessageEvent = false): Promise<void> {
     // Date Lockout
     if (!fromMessageEvent && Date.now() - (pin.lastMessageAt ?? 0) < (pin.within ?? 15) * 1000) {
-      Optic.f.debug(`C:${pin.channelId} Date Lockout Guard Triggered. Too soon for schedule.`);
       return;
     }
 
@@ -26,7 +25,6 @@ export class MessagePinOp {
     // Check Lock
     const fetchLock = await KVC.persistd.locks.findByPrimaryIndex('guid', guidLock);
     if (fetchLock?.versionstamp !== undefined) {
-      Optic.f.debug(`C:${pin.channelId} Lockout Guard Triggered. Must expire before post.`);
       return;
     }
 
