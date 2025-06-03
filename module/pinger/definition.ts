@@ -384,6 +384,7 @@ const definition = {
 export type PingerDefinition = CommandOptions<typeof definition.options>;
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     Bootstrap.guildChatInputInteraction.add(definition);
   }
