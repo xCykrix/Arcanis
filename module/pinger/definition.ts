@@ -116,7 +116,7 @@ const definition = {
           ],
         },
         {
-          name: 'list-role',
+          name: 'list-roles',
           description: 'Lists the roles configured with access and restrictions to the personal pingers.',
           type: ApplicationCommandOptionTypes.SubCommand,
         },
@@ -175,8 +175,8 @@ const definition = {
           ],
         },
         {
-          name: 'set-alert',
-          description: 'The alert message for the pinger.',
+          name: 'update',
+          description: 'Update the configuration of a pinger.',
           type: ApplicationCommandOptionTypes.SubCommand,
           options: [
             {
@@ -194,7 +194,15 @@ const definition = {
               type: ApplicationCommandOptionTypes.String,
               minLength: 1,
               maxLength: 256,
-              required: true,
+              required: false,
+            },
+            {
+              name: 'cooldown',
+              description: 'The cooldown between to set for the pinger in seconds.',
+              type: ApplicationCommandOptionTypes.Integer,
+              minValue: 0,
+              maxValue: 30,
+              required: false,
             },
           ],
         },
