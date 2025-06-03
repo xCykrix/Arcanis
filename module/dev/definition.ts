@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, type CreateSlashApplicationCommand } from '@discordeno';
+import { ApplicationCommandOptionTypes, ChannelTypes, type CreateSlashApplicationCommand } from '@discordeno';
 import type { CommandOptions } from '../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../lib/generic/initializable.ts';
 import { Bootstrap } from '../../mod.ts';
@@ -16,6 +16,7 @@ const definition = {
           name: 'channel',
           description: 'The channel to recieve messages or alerts.',
           type: ApplicationCommandOptionTypes.Channel,
+          channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
           required: true,
         },
       ],
