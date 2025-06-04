@@ -102,6 +102,15 @@ export const lang = {
       'submit': 'The auto reaction exclusions have been updated for the specified channel. You can continue to make changes as needed.',
     },
   },
+  // Module: pinger
+  'pinger': {
+    'manage.add-channel': {
+      'result': 'The specified channel has been added to the approved list of {{0}} pinger channels.',
+    },
+    'manage.add-role': {
+      'result': 'The specified role has had their restrictions set or updated.',
+    },
+  },
 } as const;
 
 // Deep Read Properties (User's original type is good)
@@ -112,8 +121,6 @@ type DeepReadonly<T> = T extends object ? {
 
 // Infer the Lang type with deep readonly properties
 type Lang = DeepReadonly<typeof lang>;
-
-// --- Overloads for getLang ---
 
 /**
  * Get an indexed language string using two keys.
@@ -156,7 +163,6 @@ export function getLang<
   placeholders?: ReadonlyArray<string | number | boolean>,
 ): TSubObject[TKey3] extends string ? TSubObject[TKey3] : null;
 
-// --- Implementation of getLang ---
 /**
  * Get an indexed language id.
  * Supports 2 or 3 levels of keys.
@@ -192,7 +198,6 @@ export function getLang(
 
   // Validate number of keys (2 for 2-level access, 3 for 3-level access)
   if (pathKeys.length < 2 || pathKeys.length > 3) {
-    // console.warn(`getLang: Expected 2 or 3 keys, but received ${pathKeys.length}. Keys: ${pathKeys.join('.')}`);
     return null;
   }
 
@@ -202,8 +207,7 @@ export function getLang(
     if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, key)) {
       current = current[key];
     } else {
-      // console.warn(`getLang: Path not found. Failed at key "${key}" in path "${pathKeys.join('.')}"`);
-      return null; // Path is invalid or key does not exist
+      return null;
     }
   }
 
@@ -216,9 +220,8 @@ export function getLang(
         resultString = resultString.replace(placeholderRegex, String(pList[i]));
       }
     }
-    return resultString as string; // Cast is safe due to typeof check and overload return types
+    return resultString as string;
   } else {
-    // console.warn(`getLang: Path "${pathKeys.join('.')}" did not resolve to a string. Resolved to:`, current);
-    return null; // The final path did not lead to a string
+    return null;
   }
 }

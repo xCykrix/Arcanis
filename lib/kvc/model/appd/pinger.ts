@@ -1,13 +1,16 @@
 export type PingerSetup = {
   guildId: string;
-  allowedChannelIds: string[];
-  roleRestrictions: {
-    roleId: string;
-    maxChannels: -1 | number;
-    maxKeywords: -1 | number;
-    maxPingers: -1 | number;
-  }[];
+  serverChannelIds: string[];
+  personalChannelIds: string[];
 };
+
+export type PingerSetupRoles = {
+  guildId: string;
+  roleId: string;
+  channelLimit: -1 | number;
+  keywordLimit: -1 | number;
+  pingerLimit: -1 | number;
+}
 
 export type ServerPingerConfiguration = {
   guildId: string;

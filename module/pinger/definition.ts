@@ -89,7 +89,7 @@ const definition = {
               description: 'Set the maximum channels per pinger for this role.',
               type: ApplicationCommandOptionTypes.Integer,
               minValue: 0,
-              maxValue: 500,
+              maxValue: 200,
               required: true,
             },
             {

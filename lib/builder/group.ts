@@ -426,7 +426,7 @@ export type CommandOptions<T extends Camelize<DiscordApplicationCommandOption>[]
     : K['type'] extends ApplicationCommandOptionTypes.String ? string
     : K['type'] extends ApplicationCommandOptionTypes.User ? typeof Bootstrap.bot.transformers.$inferredTypes.user
     : K['type'] extends ApplicationCommandOptionTypes.Channel ? typeof Bootstrap.bot.transformers.$inferredTypes.channel
-    : K['type'] extends ApplicationCommandOptionTypes.Role ? string
+    : K['type'] extends ApplicationCommandOptionTypes.Role ? typeof Bootstrap.bot.transformers.$inferredTypes.role
     : K['type'] extends ApplicationCommandOptionTypes.Mentionable ? string
     : K['type'] extends ApplicationCommandOptionTypes.Attachment ? string
     : K['type'] extends ApplicationCommandOptionTypes.SubCommandGroup ? CommandOptions<Extract<K, { options: Camelize<DiscordApplicationCommandOption>[] }>['options']>

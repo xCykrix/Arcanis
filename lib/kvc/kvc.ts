@@ -2,6 +2,7 @@ import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/appd/alert.ts';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
 import type { PinModuleConfiguration, PinModuleTemplate } from './model/appd/pin.ts';
+import type { PingerSetup, PingerSetupRoles } from './model/appd/pinger.ts';
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
 import type { Component } from './model/persistd/component.ts';
 import type { Lock } from './model/persistd/lock.ts';
@@ -25,6 +26,20 @@ const rconfStaticSchema = {
 
 /** appdStaticSchema */
 const appdStaticSchema = {
+  // Pinger: Manage Collections
+  pingerSetup: collection(createModel<PingerSetup>(), {
+    indices: {
+      guildId: 'primary',
+    },
+  }),
+  pingerSetupRoles: collection(createModel<PingerSetupRoles>(), {
+    indices: {
+      guildId: 'secondary',
+      roleId: 'primary',
+    },
+  }),
+
+  // Message: Forward Collections
   forward: collection(createModel<ReactionModuleForwardConfiguration>(), {
     indices: {
       guid: 'primary',
@@ -37,8 +52,8 @@ const appdStaticSchema = {
   // Message: Pin Collections
   pin: collection(createModel<PinModuleConfiguration>(), {
     indices: {
-      channelId: 'primary',
       guildId: 'secondary',
+      channelId: 'primary',
     },
   }),
   pinTemplate: collection(createModel<PinModuleTemplate>(), {
@@ -58,14 +73,15 @@ const appdStaticSchema = {
   }),
   reactionExclusion: collection(createModel<ReactionModuleExclusionConfiguration>(), {
     indices: {
-      channelId: 'primary',
       guildId: 'secondary',
+      channelId: 'primary',
     },
   }),
 };
 
 /** persistdStaticSchema */
 const persistdStaticSchema = {
+  // Alert Module
   alert: collection(createModel<AlertConfiguration>(), {
     indices: {
       guildId: 'primary',
@@ -82,6 +98,8 @@ const persistdStaticSchema = {
       dispatchEventId: 'secondary',
     },
   }),
+
+  // Internal Processing
   component: collection(createModel<Component>(), {
     indices: {
       callbackId: 'primary',
