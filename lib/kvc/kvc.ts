@@ -1,11 +1,12 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
-import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/appd/alert.ts';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
 import type { PinModuleConfiguration, PinModuleTemplate } from './model/appd/pin.ts';
-import type { PingerSetup, PingerSetupRoles } from './model/appd/pinger.ts';
+import { PersonalPinger, PingerChannelMap, type PingerSetup, type PingerSetupRole, ServerPinger } from './model/appd/pinger.ts';
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
+import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/persistd/alert.ts';
 import type { Component } from './model/persistd/component.ts';
 import type { Lock } from './model/persistd/lock.ts';
+import { TemporaryDispatch } from './model/persistd/temporary.ts';
 import type { Application } from './model/rconf/application.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
@@ -27,15 +28,31 @@ const rconfStaticSchema = {
 /** appdStaticSchema */
 const appdStaticSchema = {
   // Pinger: Manage Collections
-  pingerSetup: collection(createModel<PingerSetup>(), {
+  guildPingerSetup: collection(createModel<PingerSetup>(), {
     indices: {
       guildId: 'primary',
     },
   }),
-  pingerSetupRoles: collection(createModel<PingerSetupRoles>(), {
+  guildPingerSetupRole: collection(createModel<PingerSetupRole>(), {
     indices: {
       guildId: 'secondary',
       roleId: 'primary',
+    },
+  }),
+  pingerChannelMap: collection(createModel<PingerChannelMap>(), {
+    indices: {
+      guidOfPinger: 'primary',
+      channelId: 'secondary',
+    },
+  }),
+  serverPinger: collection(createModel<ServerPinger>(), {
+    indices: {
+      guid: 'primary',
+    },
+  }),
+  personalPinger: collection(createModel<PersonalPinger>(), {
+    indices: {
+      guid: 'primary',
     },
   }),
 
@@ -108,6 +125,14 @@ const persistdStaticSchema = {
   locks: collection(createModel<Lock>(), {
     indices: {
       guid: 'primary',
+    },
+  }),
+
+  // Temporary: Cached Messages for PC
+  tds: collection(createModel<TemporaryDispatch>(), {
+    indices: {
+      guildId: 'secondary',
+      messageId: 'primary',
     },
   }),
 };

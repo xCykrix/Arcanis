@@ -37,14 +37,14 @@ export default class extends AsyncInitializable {
           if (args === null) return;
 
           // Fetch current configuration or upsert defaults.
-          let kvFind = await KVC.appd.pingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
+          let kvFind = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
           if (kvFind?.versionstamp === undefined) {
-            await KVC.appd.pingerSetup.add({
+            await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
               serverChannelIds: [],
               personalChannelIds: [],
             });
-            kvFind = await KVC.appd.pingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
+            kvFind = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
             if (kvFind?.versionstamp === undefined) return;
           }
 
@@ -52,7 +52,7 @@ export default class extends AsyncInitializable {
           if (args.type === 'server' || args.type === 'both') {
             if (!kvFind.value.serverChannelIds.includes(args.channel.id.toString())) {
               kvFind.value.serverChannelIds.push(args.channel.id.toString());
-              await KVC.appd.pingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
+              await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
                 serverChannelIds: kvFind.value.serverChannelIds,
               }, {
                 strategy: 'merge-shallow',
@@ -63,7 +63,7 @@ export default class extends AsyncInitializable {
           if (args.type === 'personal' || args.type === 'both') {
             if (!kvFind.value.personalChannelIds.includes(args.channel.id.toString())) {
               kvFind.value.personalChannelIds.push(args.channel.id.toString());
-              await KVC.appd.pingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
+              await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
                 personalChannelIds: kvFind.value.personalChannelIds,
               }, {
                 strategy: 'merge-shallow',

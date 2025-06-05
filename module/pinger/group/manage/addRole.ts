@@ -37,19 +37,19 @@ export default class extends AsyncInitializable {
           if (args === null) return;
 
           // Fetch current configuration or upsert defaults.
-          let kvFind = await KVC.appd.pingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
+          let kvFind = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
           if (kvFind?.versionstamp === undefined) {
-            await KVC.appd.pingerSetup.add({
+            await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
               serverChannelIds: [],
               personalChannelIds: [],
             });
-            kvFind = await KVC.appd.pingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
+            kvFind = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
             if (kvFind?.versionstamp === undefined) return;
           }
 
           // Upsert to role configuration.
-          await KVC.appd.pingerSetupRoles.upsertByPrimaryIndex({
+          await KVC.appd.guildPingerSetupRole.upsertByPrimaryIndex({
             index: ['roleId', args.role.id.toString()],
             update: {
               channelLimit: args.channels,

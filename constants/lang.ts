@@ -108,8 +108,14 @@ export const lang = {
       'result': 'The specified channel has been added to the approved list of {{0}} pinger channels.',
     },
     'manage.add-role': {
-      'result': 'The specified role has had their restrictions set or updated.',
+      'result': 'The specified role has had their access and restrictions set or updated.',
     },
+    'manage.remove-channel': {
+      'result': 'The specified channel has been removed from the approved list of pinger channels, if configured. You must re-add this channel to the server or personal category, if needed.',
+    },
+    'manage.remove-role': {
+      'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to installed tools unless another role is set on this user.'
+    }
   },
 } as const;
 

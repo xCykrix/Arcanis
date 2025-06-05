@@ -4,23 +4,30 @@ export type PingerSetup = {
   personalChannelIds: string[];
 };
 
-export type PingerSetupRoles = {
+export type PingerSetupRole = {
   guildId: string;
   roleId: string;
   channelLimit: -1 | number;
   keywordLimit: -1 | number;
   pingerLimit: -1 | number;
-}
+};
 
-export type ServerPingerConfiguration = {
+export type PingerChannelMap = {
+  channelId: string;
+  guidOfPinger: string;
+};
+
+export type ServerPinger = {
+  guid: string;
   guildId: string;
-  channelIds: string[];
+  name: string;
   keywords: string;
 };
 
-export type PersonalPingerConfiguration = {
+export type PersonalPinger = {
+  guid: string;
   guildId: string;
+  name: string;
   userId: string;
-  channelIds: string[];
   keywords: string;
 };
