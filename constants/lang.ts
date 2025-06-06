@@ -115,7 +115,13 @@ export const lang = {
     },
     'manage.remove-role': {
       'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to installed tools unless another role is set on this user.'
-    }
+    },
+
+    'server.create': {
+      'exists': 'A pinger with the name of {{0}} alreadt exists in this server. Please choose a different name.',
+      'result': 'Pinger has been created. Keywords will default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
+    },
+
   },
 } as const;
 
