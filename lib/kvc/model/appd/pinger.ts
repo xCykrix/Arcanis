@@ -21,13 +21,14 @@ export type ServerPinger = {
   guid: string;
   guildId: string;
   name: string;
+  message: string;
   keywords: string;
 };
 
 export type PersonalPinger = {
   guid: string;
   guildId: string;
-  name: string;
   userId: string;
+  name: string;
   keywords: string;
 };

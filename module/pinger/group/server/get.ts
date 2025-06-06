@@ -1,6 +1,10 @@
 import { ChannelTypes } from '@discordeno';
+import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { GUID } from '../../../../lib/kvc/guid.ts';
+import { KVC } from '../../../../lib/kvc/kvc.ts';
+import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { PingerDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
@@ -29,8 +33,47 @@ export default class extends AsyncInitializable {
             pick: args.server?.get ?? null,
           };
         },
-        handle: async ({ interaction, args }) => {
+        handle: async ({ interaction, args, assistant }) => {
           if (args === null) return;
+
+          // Make GUID
+          const guid = GUID.make({
+            moduleId: assistant['assurance'].guidTopLevel!,
+            guildId: interaction.guildId!.toString(),
+            constants: [
+              args.name,
+            ],
+          });
+
+          // Fetch Pinger
+          const kvFind = await KVC.appd.serverPinger.findByPrimaryIndex('guid', guid);
+          if (kvFind?.versionstamp === undefined) {
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('pinger', 'none-found')),
+            });
+            return;
+          }
+
+          // Fetch Channels
+          const kvChannels = await KVC.appd.pingerChannelMap.findBySecondaryIndex('guidOfPinger', guid);
+          const channelList = kvChannels.result.map((v) => v.value.channelId);
+
+          // Respond
+          await interaction.respond({
+            embeds: Responses.success.make()
+              .setTitle(args.name)
+              .setDescription(getLang('pinger', 'server.get', 'result'))
+              .addField('Channels', channelList.length > 0 ? channelList.join(' ') : 'No Channels Configured')
+              .addField(
+                'Keywords',
+                [
+                  '```',
+                  kvFind.value.keywords,
+                  '```',
+                ].join('\n'),
+              ),
+          });
         },
       });
   }

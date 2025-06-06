@@ -39,12 +39,7 @@ const appdStaticSchema = {
       roleId: 'primary',
     },
   }),
-  pingerChannelMap: collection(createModel<PingerChannelMap>(), {
-    indices: {
-      guidOfPinger: 'primary',
-      channelId: 'secondary',
-    },
-  }),
+
   serverPinger: collection(createModel<ServerPinger>(), {
     indices: {
       guid: 'primary',
@@ -53,6 +48,12 @@ const appdStaticSchema = {
   personalPinger: collection(createModel<PersonalPinger>(), {
     indices: {
       guid: 'primary',
+    },
+  }),
+  pingerChannelMap: collection(createModel<PingerChannelMap>(), {
+    indices: {
+      guidOfPinger: 'secondary',
+      channelId: 'secondary',
     },
   }),
 

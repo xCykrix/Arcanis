@@ -1,6 +1,10 @@
 import { ChannelTypes } from '@discordeno';
+import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { GUID } from '../../../../lib/kvc/guid.ts';
+import { KVC } from '../../../../lib/kvc/kvc.ts';
+import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { PingerDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
@@ -29,8 +33,37 @@ export default class extends AsyncInitializable {
             pick: args.server?.delete ?? null,
           };
         },
-        handle: async ({ interaction, args }) => {
+        handle: async ({ interaction, args, assistant }) => {
           if (args === null) return;
+
+          // Make GUID
+          const guid = GUID.make({
+            moduleId: assistant['assurance'].guidTopLevel!,
+            guildId: interaction.guildId!.toString(),
+            constants: [
+              args.name,
+            ],
+          });
+
+          // Check Exists
+          const kvFind = await KVC.appd.serverPinger.findByPrimaryIndex('guid', guid);
+          if (kvFind?.versionstamp === undefined) {
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('pinger', 'none-found')),
+            });
+            return;
+          }
+
+          // Delete Pinger
+          await KVC.appd.pingerChannelMap.deleteBySecondaryIndex('guidOfPinger', guid);
+          await KVC.appd.serverPinger.deleteByPrimaryIndex('guid', guid);
+
+          // Respond
+          await interaction.respond({
+            embeds: Responses.success.make()
+              .setDescription(getLang('pinger', 'server.delete', 'result')),
+          });
         },
       });
   }

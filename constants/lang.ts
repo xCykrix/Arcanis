@@ -104,6 +104,10 @@ export const lang = {
   },
   // Module: pinger
   'pinger': {
+    // Common
+    'none-found': 'The specified pinger was not found. Please check the provided information and try again.',
+
+    // Manage
     'manage.add-channel': {
       'result': 'The specified channel has been added to the approved list of {{0}} pinger channels.',
     },
@@ -114,14 +118,24 @@ export const lang = {
       'result': 'The specified channel has been removed from the approved list of pinger channels, if configured. You must re-add this channel to the server or personal category, if needed.',
     },
     'manage.remove-role': {
-      'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to installed tools unless another role is set on this user.'
+      'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to installed tools unless another role is set on this user.',
     },
 
+    // Create
     'server.create': {
       'exists': 'A pinger with the name of {{0}} alreadt exists in this server. Please choose a different name.',
       'result': 'Pinger has been created. Keywords will default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
     },
-
+    'server.delete': {
+      'result': 'The specified pinger has been deleted. All channels and keywords have been removed.',
+    },
+    'server.get': {
+      'result': 'The specified pinger is configured with the following channels and keywords.',
+    },
+    'server.add-channels': {
+      'invalid-channel-type': 'The specified channel is not a valid text or announcement channel. Please choose a different channel.',
+      'result': 'The specified channel(s) have been added to the pinger, if not already present.',
+    },
   },
 } as const;
 
