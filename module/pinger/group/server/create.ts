@@ -60,6 +60,7 @@ export default class extends AsyncInitializable {
             guid,
             guildId: interaction.guildId!.toString(),
             name: args.name,
+            message: '{{role}}',
             keywords: '-all',
           });
 

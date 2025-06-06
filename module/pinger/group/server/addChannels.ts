@@ -58,6 +58,7 @@ export default class extends AsyncInitializable {
 
           // Index Channels
           const set = new Set<string>();
+          const added: string[] = [];
           const kvFindChannels = await KVC.appd.pingerChannelMap.findBySecondaryIndex('guidOfPinger', guid);
           for (const mapped of kvFindChannels.result) {
             set.add(mapped.value.channelId);
@@ -83,8 +84,38 @@ export default class extends AsyncInitializable {
                 channelId: provision.id.toString(),
               });
               set.add(provision.id.toString());
+              added.push(provision.id.toString());
             }
           }
+
+          // Respond
+          const values = added.map((v) => `<#${v}>`);
+          await interaction.respond({
+            embeds: Responses.success.make()
+              .setDescription(getLang('pinger', 'server.add-channels', 'result'))
+              .addField('Channels', values.length > 0 ? values.join(' ') : 'No Channels Added'),
+          });
+        },
+      })
+      .createAutoCompleteHandler({
+        pick: ({ interaction, assistant }) => {
+          return assistant.parseAutoComplete(interaction, ['server', 'add-channels', 'name']);
+        },
+        generate: async ({ interaction, pick }) => {
+          if (pick === null) return [];
+
+          // Query KVC
+          const kvFind = await KVC.appd.serverPinger.findBySecondaryIndex('guildId', interaction.guild!.id.toString(), {
+            filter: (v) => v.value.name.toLowerCase().includes(`${pick.value?.toString().toLowerCase()}`),
+          });
+          if (kvFind.result.length === 0) return [];
+
+          return kvFind.result?.map((v) => {
+            return {
+              name: `${v.value.name}`,
+              value: v.value.name,
+            };
+          });
         },
       });
   }

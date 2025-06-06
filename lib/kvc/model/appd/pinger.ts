@@ -1,6 +1,5 @@
 export type PingerSetup = {
   guildId: string;
-  serverChannelIds: string[];
   personalChannelIds: string[];
 };
 

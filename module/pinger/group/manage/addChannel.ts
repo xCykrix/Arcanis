@@ -41,40 +41,25 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
-              serverChannelIds: [],
               personalChannelIds: [],
             });
             kvFind = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
             if (kvFind?.versionstamp === undefined) return;
           }
 
-          // Attempt to add the channel to the specified type.
-          if (args.type === 'server' || args.type === 'both') {
-            if (!kvFind.value.serverChannelIds.includes(args.channel.id.toString())) {
-              kvFind.value.serverChannelIds.push(args.channel.id.toString());
-              await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
-                serverChannelIds: kvFind.value.serverChannelIds,
-              }, {
-                strategy: 'merge-shallow',
-              });
-            }
-          }
-
-          if (args.type === 'personal' || args.type === 'both') {
-            if (!kvFind.value.personalChannelIds.includes(args.channel.id.toString())) {
-              kvFind.value.personalChannelIds.push(args.channel.id.toString());
-              await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
-                personalChannelIds: kvFind.value.personalChannelIds,
-              }, {
-                strategy: 'merge-shallow',
-              });
-            }
+          if (!kvFind.value.personalChannelIds.includes(args.channel.id.toString())) {
+            kvFind.value.personalChannelIds.push(args.channel.id.toString());
+            await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
+              personalChannelIds: kvFind.value.personalChannelIds,
+            }, {
+              strategy: 'merge-shallow',
+            });
           }
 
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'manage.add-channel', 'result', [args.type])),
+              .setDescription(getLang('pinger', 'manage.add-channel', 'result')),
           });
         },
       });

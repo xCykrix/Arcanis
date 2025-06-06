@@ -261,6 +261,7 @@ export class GroupBuilder<Packet, RawPacket> {
         assistant: this.assistant,
       });
       if (pick === null) return;
+      console.info('pick', pick, handler.pick.toString());
 
       // Run Handle
       const choices = await handler.generate({
@@ -280,7 +281,7 @@ export class GroupBuilder<Packet, RawPacket> {
           choices: [
             {
               name: getLang('global', 'autocomplete', 'lt-1-found'),
-              value: 'autocomplete.notfound',
+              value: 'autocomplete.notfound.' + Math.random(),
             },
           ],
         });
@@ -319,25 +320,23 @@ class InteractionHandlerAssistant<RawPacket> {
 
     // Get Focused
     for (const a of interaction.data?.options ?? []) {
-      if (a.focused && a.name === (path[0] ?? '0xA1')) {
+      if (a.focused && a.name === (path[0] ?? '0x')) {
         focus = a;
         break;
       }
       for (const b of a.options ?? []) {
-        if (b.focused && b.name === (path[1] ?? '0xA2')) {
+        if (b.focused && b.name === (path[1] ?? '0x') && a.name === (path[0] ?? '0x')) {
           focus = b;
           break;
         }
         for (const c of b.options ?? []) {
-          if (c.focused && c.name === (path[2] ?? '0xA3')) {
+          if (c.focused && c.name === (path[2] ?? '0x') && b.name === (path[1] ?? '0x') && a.name === (path[0] ?? '0x')) {
             focus = c;
             break;
           }
         }
       }
     }
-
-    console.info(focus);
 
     return focus;
   }

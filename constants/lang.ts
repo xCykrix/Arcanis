@@ -109,7 +109,7 @@ export const lang = {
 
     // Manage
     'manage.add-channel': {
-      'result': 'The specified channel has been added to the approved list of {{0}} pinger channels.',
+      'result': 'The specified channel has been added to the approved list of personal pinger channels.',
     },
     'manage.add-role': {
       'result': 'The specified role has had their access and restrictions set or updated.',
@@ -136,6 +136,9 @@ export const lang = {
       'invalid-channel-type': 'The specified channel is not a valid text or announcement channel. Please choose a different channel.',
       'result': 'The specified channel(s) have been added to the pinger, if not already present.',
     },
+    'server.remove-channel': {
+      'result': 'The specified channel has been removed from the specified pinger, if it was already present.',
+    }
   },
 } as const;
 

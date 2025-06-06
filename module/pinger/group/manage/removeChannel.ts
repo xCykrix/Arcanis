@@ -41,18 +41,10 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
-              serverChannelIds: [],
               personalChannelIds: [],
             });
             kvFind = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
             if (kvFind?.versionstamp === undefined) return;
-          }
-
-          // Set the serverChannelIds with deleted entry.
-          if (kvFind.value.serverChannelIds.includes(args.channel.id.toString())) {
-            const channelIds = new Set<string>(kvFind.value.serverChannelIds);
-            channelIds.delete(args.channel.id.toString());
-            kvFind.value.serverChannelIds = channelIds.values().toArray();
           }
 
           // Set the personalChannelIds with deleted entry.
@@ -64,7 +56,6 @@ export default class extends AsyncInitializable {
 
           // Write database.
           await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
-            serverChannelIds: kvFind.value.serverChannelIds,
             personalChannelIds: kvFind.value.personalChannelIds,
           }, {
             strategy: 'merge-shallow',

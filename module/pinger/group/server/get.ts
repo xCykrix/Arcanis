@@ -65,6 +65,7 @@ export default class extends AsyncInitializable {
               .setTitle(args.name)
               .setDescription(getLang('pinger', 'server.get', 'result'))
               .addField('Channels', channelList.length > 0 ? channelList.join(' ') : 'No Channels Configured')
+              .addField('Message', kvFind.value.message)
               .addField(
                 'Keywords',
                 [
@@ -73,6 +74,27 @@ export default class extends AsyncInitializable {
                   '```',
                 ].join('\n'),
               ),
+          });
+        },
+      })
+      .createAutoCompleteHandler({
+        pick: ({ interaction, assistant }) => {
+          return assistant.parseAutoComplete(interaction, ['server', 'get', 'name']);
+        },
+        generate: async ({ interaction, pick }) => {
+          if (pick === null) return [];
+
+          // Query KVC
+          const kvFind = await KVC.appd.serverPinger.findBySecondaryIndex('guildId', interaction.guild!.id.toString(), {
+            filter: (v) => v.value.name.toLowerCase().includes(`${pick.value?.toString().toLowerCase()}`),
+          });
+          if (kvFind.result.length === 0) return [];
+
+          return kvFind.result?.map((v) => {
+            return {
+              name: `${v.value.name}`,
+              value: v.value.name,
+            };
           });
         },
       });

@@ -1,12 +1,12 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
 import type { PinModuleConfiguration, PinModuleTemplate } from './model/appd/pin.ts';
-import { PersonalPinger, PingerChannelMap, type PingerSetup, type PingerSetupRole, ServerPinger } from './model/appd/pinger.ts';
+import type { PersonalPinger, PingerChannelMap, PingerSetup, PingerSetupRole, ServerPinger } from './model/appd/pinger.ts';
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
 import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/persistd/alert.ts';
 import type { Component } from './model/persistd/component.ts';
 import type { Lock } from './model/persistd/lock.ts';
-import { TemporaryDispatch } from './model/persistd/temporary.ts';
+import type { TemporaryDispatch } from './model/persistd/temporary.ts';
 import type { Application } from './model/rconf/application.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
@@ -43,6 +43,7 @@ const appdStaticSchema = {
   serverPinger: collection(createModel<ServerPinger>(), {
     indices: {
       guid: 'primary',
+      guildId: 'secondary',
     },
   }),
   personalPinger: collection(createModel<PersonalPinger>(), {

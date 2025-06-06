@@ -14,29 +14,9 @@ const definition = {
       options: [
         {
           name: 'add-channel',
-          description: 'Add a channel to the available pinger list.',
+          description: 'Add a channel to the available personal pinger list.',
           type: ApplicationCommandOptionTypes.SubCommand,
           options: [
-            {
-              name: 'type',
-              description: 'The types of pinger this channel is available to.',
-              type: ApplicationCommandOptionTypes.String,
-              choices: [
-                {
-                  name: 'Server Only',
-                  value: 'server',
-                },
-                {
-                  name: 'Personal Only',
-                  value: 'personal',
-                },
-                {
-                  name: 'Both Server and Personal',
-                  value: 'both',
-                },
-              ],
-              required: true,
-            },
             {
               name: 'channel',
               description: 'The channel to add.',
@@ -48,7 +28,7 @@ const definition = {
         },
         {
           name: 'remove-channel',
-          description: 'Remove a channel from the available pinger list.',
+          description: 'Remove a channel from the available personal pinger list.',
           type: ApplicationCommandOptionTypes.SubCommand,
           options: [
             {
@@ -198,7 +178,7 @@ const definition = {
             },
             {
               name: 'cooldown',
-              description: 'The cooldown between to set for the pinger in seconds.',
+              description: 'The cooldown between each alert for the pinger, in seconds.',
               type: ApplicationCommandOptionTypes.Integer,
               minValue: 0,
               maxValue: 30,
@@ -271,122 +251,122 @@ const definition = {
         },
       ],
     },
-    {
-      name: 'personal',
-      description: 'Manage personal pinger notification groups.',
-      type: ApplicationCommandOptionTypes.SubCommandGroup,
-      options: [
-        {
-          name: 'create',
-          description: 'Create a pinger.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The unique name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-            },
-          ],
-        },
-        {
-          name: 'get',
-          description: 'Get the current configuration of a pinger.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-          ],
-        },
-        {
-          name: 'keywords',
-          description: 'Open a editor for the pinger keywords.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-          ],
-        },
-        {
-          name: 'delete',
-          description: 'Delete a in-server pinger notification group.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-          ],
-        },
-        {
-          name: 'add-channel',
-          description: 'Adds a channel to be watched by a pinger.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-            {
-              name: 'channel',
-              description: 'The channel to add to the pinger.',
-              type: ApplicationCommandOptionTypes.Channel,
-              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
-              required: true,
-            },
-          ],
-        },
-        {
-          name: 'remove-channel',
-          description: 'Remove a specific channel being watched by a pinger.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-            {
-              name: 'channel',
-              description: 'The channel to remove from the pinger.',
-              type: ApplicationCommandOptionTypes.Channel,
-              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
-              required: true,
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: 'personal',
+    //   description: 'Manage personal pinger notification groups.',
+    //   type: ApplicationCommandOptionTypes.SubCommandGroup,
+    //   options: [
+    //     {
+    //       name: 'create',
+    //       description: 'Create a pinger.',
+    //       type: ApplicationCommandOptionTypes.SubCommand,
+    //       options: [
+    //         {
+    //           name: 'name',
+    //           description: 'The unique name of the pinger.',
+    //           type: ApplicationCommandOptionTypes.String,
+    //           minLength: 1,
+    //           maxLength: 100,
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'get',
+    //       description: 'Get the current configuration of a pinger.',
+    //       type: ApplicationCommandOptionTypes.SubCommand,
+    //       options: [
+    //         {
+    //           name: 'name',
+    //           description: 'The name of the pinger.',
+    //           type: ApplicationCommandOptionTypes.String,
+    //           minLength: 1,
+    //           maxLength: 100,
+    //           required: true,
+    //           autocomplete: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'keywords',
+    //       description: 'Open a editor for the pinger keywords.',
+    //       type: ApplicationCommandOptionTypes.SubCommand,
+    //       options: [
+    //         {
+    //           name: 'name',
+    //           description: 'The name of the pinger.',
+    //           type: ApplicationCommandOptionTypes.String,
+    //           minLength: 1,
+    //           maxLength: 100,
+    //           required: true,
+    //           autocomplete: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'delete',
+    //       description: 'Delete a in-server pinger notification group.',
+    //       type: ApplicationCommandOptionTypes.SubCommand,
+    //       options: [
+    //         {
+    //           name: 'name',
+    //           description: 'The name of the pinger.',
+    //           type: ApplicationCommandOptionTypes.String,
+    //           minLength: 1,
+    //           maxLength: 100,
+    //           required: true,
+    //           autocomplete: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'add-channel',
+    //       description: 'Adds a channel to be watched by a pinger.',
+    //       type: ApplicationCommandOptionTypes.SubCommand,
+    //       options: [
+    //         {
+    //           name: 'name',
+    //           description: 'The name of the pinger.',
+    //           type: ApplicationCommandOptionTypes.String,
+    //           minLength: 1,
+    //           maxLength: 100,
+    //           required: true,
+    //           autocomplete: true,
+    //         },
+    //         {
+    //           name: 'channel',
+    //           description: 'The channel to add to the pinger.',
+    //           type: ApplicationCommandOptionTypes.Channel,
+    //           channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       name: 'remove-channel',
+    //       description: 'Remove a specific channel being watched by a pinger.',
+    //       type: ApplicationCommandOptionTypes.SubCommand,
+    //       options: [
+    //         {
+    //           name: 'name',
+    //           description: 'The name of the pinger.',
+    //           type: ApplicationCommandOptionTypes.String,
+    //           minLength: 1,
+    //           maxLength: 100,
+    //           required: true,
+    //           autocomplete: true,
+    //         },
+    //         {
+    //           name: 'channel',
+    //           description: 'The channel to remove from the pinger.',
+    //           type: ApplicationCommandOptionTypes.Channel,
+    //           channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
   ],
 } as const satisfies CreateSlashApplicationCommand;
 export type PingerDefinition = CommandOptions<typeof definition.options>;
