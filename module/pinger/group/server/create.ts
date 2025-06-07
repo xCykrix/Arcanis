@@ -8,6 +8,7 @@ import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { PingerDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<
       PingerDefinition['server']['create'],
@@ -60,7 +61,6 @@ export default class extends AsyncInitializable {
             guid,
             guildId: interaction.guildId!.toString(),
             name: args.name,
-            message: '{{role}}',
             keywords: '-all',
           });
 

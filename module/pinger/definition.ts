@@ -100,6 +100,29 @@ const definition = {
           description: 'Lists the roles configured with access and restrictions to the personal pingers.',
           type: ApplicationCommandOptionTypes.SubCommand,
         },
+        {
+          name: 'configure',
+          description: 'Set the cooldown for the server and personal pingers by product title and/or SKU.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'cooldown',
+              description: 'The time in seconds between alerts from the pingers by product. 0 will disable. Default 5.',
+              type: ApplicationCommandOptionTypes.Integer,
+              minValue: 0,
+              maxValue: 30,
+              required: true,
+            },
+            {
+              name: 'delete-after',
+              description: 'The time in seconds to delete the alert after it has been sent. 0 will disable. Default 120.',
+              type: ApplicationCommandOptionTypes.Integer,
+              minValue: 0,
+              maxValue: 900,
+              required: true,
+            },
+          ],
+        },
       ],
     },
     {
@@ -120,6 +143,7 @@ const definition = {
               maxLength: 100,
               required: true,
             },
+            // TODO: Add Options from Update Command
           ],
         },
         {
@@ -135,54 +159,6 @@ const definition = {
               maxLength: 100,
               required: true,
               autocomplete: true,
-            },
-          ],
-        },
-        {
-          name: 'keywords',
-          description: 'Open a editor for the pinger keywords.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-          ],
-        },
-        {
-          name: 'update',
-          description: 'Update the configuration of a pinger.',
-          type: ApplicationCommandOptionTypes.SubCommand,
-          options: [
-            {
-              name: 'name',
-              description: 'The name of the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 100,
-              required: true,
-              autocomplete: true,
-            },
-            {
-              name: 'alert',
-              description: 'The alert to set for the pinger.',
-              type: ApplicationCommandOptionTypes.String,
-              minLength: 1,
-              maxLength: 256,
-              required: false,
-            },
-            {
-              name: 'cooldown',
-              description: 'The cooldown between each alert for the pinger, in seconds.',
-              type: ApplicationCommandOptionTypes.Integer,
-              minValue: 0,
-              maxValue: 30,
-              required: false,
             },
           ],
         },
@@ -204,7 +180,7 @@ const definition = {
         },
         {
           name: 'add-channels',
-          description: 'Adds a list of channels to be watched by a pinger.',
+          description: 'Adds a channel to be watched by a pinger.',
           type: ApplicationCommandOptionTypes.SubCommand,
           options: [
             {
@@ -246,6 +222,22 @@ const definition = {
               type: ApplicationCommandOptionTypes.Channel,
               channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
               required: true,
+            },
+          ],
+        },
+        {
+          name: 'keywords',
+          description: 'Open a editor for the pinger keywords.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'name',
+              description: 'The name of the pinger.',
+              type: ApplicationCommandOptionTypes.String,
+              minLength: 1,
+              maxLength: 100,
+              required: true,
+              autocomplete: true,
             },
           ],
         },

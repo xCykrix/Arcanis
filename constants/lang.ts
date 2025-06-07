@@ -120,11 +120,21 @@ export const lang = {
     'manage.remove-role': {
       'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to installed tools unless another role is set on this user.',
     },
+    'manage.configure': {
+      'result': 'The global pinger configuration has been updated with the specified options.',
+    },
 
     // Create
     'server.create': {
       'exists': 'A pinger with the name of {{0}} alreadt exists in this server. Please choose a different name.',
-      'result': 'Pinger has been created. Keywords will default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
+      'result': [
+        'The pinger has been created. Keywords will default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
+        '',
+        'This pinger has a cooldown of {{0}} second(s) and messages will automatically delete after {{1}} second(s) .',
+        '',
+        'To add channels, use `/pinger server add-channels`.',
+        'To update keywords or options, use `/pinger server update`.',
+      ].join('\n'),
     },
     'server.delete': {
       'result': 'The specified pinger has been deleted. All channels and keywords have been removed.',
@@ -138,7 +148,7 @@ export const lang = {
     },
     'server.remove-channel': {
       'result': 'The specified channel has been removed from the specified pinger, if it was already present.',
-    }
+    },
   },
 } as const;
 

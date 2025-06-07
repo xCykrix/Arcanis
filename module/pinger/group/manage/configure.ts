@@ -10,13 +10,13 @@ export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<
-      PingerDefinition['manage']['remove-channel'],
+      PingerDefinition['manage']['configure'],
       PingerDefinition
     >()
       .createGroupHandler({
         assurance: {
           interactionTopLevel: 'pinger',
-          componentTopLevel: 'pinger.manage.remove-channel',
+          componentTopLevel: 'pinger.manage.configure',
           guidTopLevel: 'pinger.manage',
           supportedChannelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
           requireGuild: true,
@@ -29,8 +29,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.manage?.['remove-channel'] === undefined,
-            pick: args.manage?.['remove-channel'] ?? null,
+            inhibit: args.manage?.configure === undefined,
+            pick: args.manage?.configure ?? null,
           };
         },
         handle: async ({ interaction, args }) => {
@@ -49,24 +49,16 @@ export default class extends AsyncInitializable {
             if (kvFind?.versionstamp === undefined) return;
           }
 
-          // Set the personalChannelIds with deleted entry.
-          if (kvFind.value.personalChannelIds.includes(args.channel.id.toString())) {
-            const channelIds = new Set<string>(kvFind.value.personalChannelIds);
-            channelIds.delete(args.channel.id.toString());
-            kvFind.value.personalChannelIds = channelIds.values().toArray();
-          }
-
           // Write database.
           await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
-            personalChannelIds: kvFind.value.personalChannelIds,
-          }, {
-            strategy: 'merge-shallow',
+            alertCooldownByProduct: args.cooldown ?? kvFind.value.alertCooldownByProduct ?? 5,
+            deleteAlertAfter: args['delete-after'] ?? kvFind.value.deleteAlertAfter ?? 120,
           });
 
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'manage.remove-channel', 'result')),
+              .setDescription(getLang('pinger', 'manage.configure', 'result')),
           });
         },
       });

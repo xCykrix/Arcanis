@@ -1,7 +1,7 @@
 import { collection, type Database, kvdex, type Model, model } from '@kvdex';
 import type { ReactionModuleForwardConfiguration } from './model/appd/forward.ts';
 import type { PinModuleConfiguration, PinModuleTemplate } from './model/appd/pin.ts';
-import type { PersonalPinger, PingerChannelMap, PingerSetup, PingerSetupRole, ServerPinger } from './model/appd/pinger.ts';
+import type { PersonalPinger, PingerChannelMap, PingerSetup, PingerSetupRole, ServerPinger, ServerPingerRoleMap } from './model/appd/pinger.ts';
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
 import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/persistd/alert.ts';
 import type { Component } from './model/persistd/component.ts';
@@ -56,6 +56,12 @@ const appdStaticSchema = {
       guidOfPinger: 'secondary',
       channelId: 'secondary',
     },
+  }),
+  pingerRoleMap: collection(createModel<ServerPingerRoleMap>(), {
+    indices: {
+      guidOfPinger: 'secondary',
+      roleId: 'secondary',
+    }
   }),
 
   // Message: Forward Collections

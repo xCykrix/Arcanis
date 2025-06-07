@@ -8,6 +8,7 @@ import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { PingerDefinition } from '../../definition.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     GroupBuilder.builder<
       PingerDefinition['server']['get'],
@@ -65,7 +66,6 @@ export default class extends AsyncInitializable {
               .setTitle(args.name)
               .setDescription(getLang('pinger', 'server.get', 'result'))
               .addField('Channels', channelList.length > 0 ? channelList.join(' ') : 'No Channels Configured')
-              .addField('Message', kvFind.value.message)
               .addField(
                 'Keywords',
                 [
