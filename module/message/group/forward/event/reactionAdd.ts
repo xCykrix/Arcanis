@@ -76,12 +76,14 @@ export default class extends AsyncInitializable {
       // Check Count of Reactions
       const count = reactionFromMessage.count - (reactionFromMessage.me ? 1 : 0);
       if (count < forwarder.value.threshold) {
+        Optic.f.debug('Bounced forward due to not meeting threshold.');
         await KVC.persistd.locks.deleteByPrimaryIndex('guid', lockGuid);
         return;
       }
 
       // Check Age of Message
       if (message.timestamp < (Date.now() - (forwarder.value.within * 1000))) {
+        Optic.f.debug('Bounced forward due to message being too old.');
         await KVC.persistd.locks.deleteByPrimaryIndex('guid', lockGuid);
         return;
       }
