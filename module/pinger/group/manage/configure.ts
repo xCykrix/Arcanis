@@ -58,7 +58,9 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'manage.configure', 'result')),
+              .setDescription(getLang('pinger', 'manage.configure', 'result'))
+              .addField('Cooldown', `${args.cooldown ?? kvFind.value.alertCooldownByProduct ?? 5} Seconds`)
+              .addField('Delete Alert After', `${args['delete-after'] ?? kvFind.value.deleteAlertAfter ?? 120} Seconds`),
           });
         },
       });
