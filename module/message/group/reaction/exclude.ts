@@ -49,8 +49,8 @@ export default class extends AsyncInitializable {
                 guildId: args.channel.guildId!.toString(),
                 channelId: args.channel.id.toString(),
                 exclusion: {
-                  role: [],
-                  user: [],
+                  role: new Set(),
+                  user: new Set(),
                 },
               },
             });
@@ -92,9 +92,9 @@ export default class extends AsyncInitializable {
                       ref: 'user',
                       timeToLive: 300,
                       userId: interaction.user.id,
-                      constants: [
+                      constants: new Set([
                         kvFind.id,
-                      ],
+                      ]),
                     }),
                     placeholder: 'Select up to 25 Users',
                     minValues: 0,
@@ -112,9 +112,9 @@ export default class extends AsyncInitializable {
                       ref: 'role',
                       timeToLive: 300,
                       userId: interaction.user.id,
-                      constants: [
+                      constants: new Set([
                         kvFind.id,
-                      ],
+                      ]),
                     }),
                     placeholder: 'Select up to 25 Roles',
                     minValues: 0,
@@ -138,7 +138,7 @@ export default class extends AsyncInitializable {
           })?.members?.map((v) => v.id.toString()) ?? null;
 
           // Exist Check
-          const kvFind = await KVC.appd.reactionExclusion.find(constants[0]);
+          const kvFind = await KVC.appd.reactionExclusion.find(constants.values().toArray()[0]);
           if (kvFind?.versionstamp === undefined) {
             await interaction.edit({
               embeds: Responses.error.make()
@@ -150,7 +150,7 @@ export default class extends AsyncInitializable {
           // Update Database
           await KVC.appd.reactionExclusion.update(kvFind.id, {
             exclusion: {
-              user: (members === null ? [] : members) ?? kvFind.value.exclusion?.user ?? [],
+              user: new Set((members === null ? [] : members) ?? kvFind.value.exclusion?.user ?? []),
               role: kvFind.value.exclusion?.role ?? [],
             },
           }, {
@@ -158,7 +158,7 @@ export default class extends AsyncInitializable {
           });
 
           // Get Updated and Respond
-          const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants[0]);
+          const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants.values().toArray()[0]);
 
           // Load Defaults
           const defaultRole: SelectMenuDefaultValue[] = [];
@@ -190,9 +190,9 @@ export default class extends AsyncInitializable {
                       ref: 'user',
                       timeToLive: 300,
                       userId: interaction.user.id,
-                      constants: [
+                      constants: new Set([
                         kvFind.id,
-                      ],
+                      ]),
                     }),
                     placeholder: 'Select up to 25 Users',
                     minValues: 0,
@@ -210,9 +210,9 @@ export default class extends AsyncInitializable {
                       ref: 'role',
                       timeToLive: 300,
                       userId: interaction.user.id,
-                      constants: [
+                      constants: new Set([
                         kvFind.id,
-                      ],
+                      ]),
                     }),
                     placeholder: 'Select up to 25 Roles',
                     minValues: 0,
@@ -236,7 +236,7 @@ export default class extends AsyncInitializable {
           })?.roles?.map((v) => v.id.toString()) ?? null;
 
           // Exist Check
-          const kvFind = await KVC.appd.reactionExclusion.find(constants[0]);
+          const kvFind = await KVC.appd.reactionExclusion.find(constants.values().toArray()[0]);
           if (kvFind?.versionstamp === undefined) {
             await interaction.edit({
               embeds: Responses.error.make()
@@ -249,14 +249,14 @@ export default class extends AsyncInitializable {
           await KVC.appd.reactionExclusion.update(kvFind.id, {
             exclusion: {
               user: kvFind.value.exclusion?.user ?? [],
-              role: (roles === null ? [] : roles) ?? kvFind.value.exclusion?.role ?? [],
+              role: new Set((roles === null ? [] : roles) ?? kvFind.value.exclusion?.role ?? []),
             },
           }, {
             strategy: 'merge-shallow',
           });
 
           // Get Updated and Respond
-          const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants[0]);
+          const kvFindUpdate = await KVC.appd.reactionExclusion.find(constants.values().toArray()[0]);
 
           // Load Defaults
           const defaultRole: SelectMenuDefaultValue[] = [];
@@ -288,9 +288,9 @@ export default class extends AsyncInitializable {
                       ref: 'user',
                       timeToLive: 300,
                       userId: interaction.user.id,
-                      constants: [
+                      constants: new Set([
                         kvFind.id,
-                      ],
+                      ]),
                     }),
                     placeholder: 'Select up to 25 Users',
                     minValues: 0,
@@ -308,9 +308,9 @@ export default class extends AsyncInitializable {
                       ref: 'role',
                       timeToLive: 300,
                       userId: interaction.user.id,
-                      constants: [
+                      constants: new Set([
                         kvFind.id,
-                      ],
+                      ]),
                     }),
                     placeholder: 'Select up to 25 Roles',
                     minValues: 0,

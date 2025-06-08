@@ -202,7 +202,7 @@ export class GroupBuilder<Packet, RawPacket> {
     ref: string;
     handle: (passthrough: {
       interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
-      constants: string[];
+      constants: Set<string>;
       assistant: InteractionHandlerAssistant<RawPacket>;
     }) => Promise<void>;
   }): Omit<GroupBuilder<Packet, RawPacket>, 'createGroupHandler'> {
@@ -364,7 +364,7 @@ class InteractionHandlerAssistant<RawPacket> {
     /** Time to Live, in Seconds. */
     timeToLive: number;
     userId: string | bigint;
-    constants: string[];
+    constants: Set<string>;
   }): Promise<string> {
     let culid: string | null = null;
     let result: DenoKvCommitResult | DenoKvCommitError | null = null;
@@ -385,7 +385,7 @@ class InteractionHandlerAssistant<RawPacket> {
   /** */
   public async getComponentCallback(cluid: string, userId: string | bigint): Promise<
     {
-      constants: string[];
+      constants: Set<string>;
     } | null
   > {
     const fbpi = await KVC.persistd.component.findByPrimaryIndex('callbackId', cluid);

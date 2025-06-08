@@ -4,7 +4,7 @@ export type ReactionModuleConfiguration = {
   guildId: string;
   channelId: string;
 
-  reaction: string[];
+  reaction: Set<string>
   type: ReactionType;
 
   self?: boolean;
@@ -16,8 +16,8 @@ export type ReactionModuleExclusionConfiguration = {
   channelId: string;
 
   exclusion: {
-    user: string[];
-    role: string[];
+    user: Set<string>;
+    role: Set<string>;
   };
 };
 

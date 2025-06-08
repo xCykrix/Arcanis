@@ -54,7 +54,7 @@ export default class extends AsyncInitializable {
           }
 
           // Build Reaction List
-          const reactions = args.reactions.split('\u0020').filter((v) => v.trim().length !== 0);
+          const reactions = new Set(args.reactions.split('\u0020').filter((v) => v.trim().length !== 0));
 
           // Validate Reactions
           for (const v of reactions) {
@@ -71,14 +71,14 @@ export default class extends AsyncInitializable {
           const kvFind = await KVC.appd.reaction.findBySecondaryIndex('channelId', args.channel.id.toString());
           const count = kvFind.result.reduce((acc, v) => {
             if (v.value.type === args.type) return acc;
-            return acc + v.value.reaction.length;
+            return acc + v.value.reaction.size;
           }, 0);
 
           // Check Reaction Hard Limit
-          if (reactions.length + count > 20) {
+          if (reactions.size + count > 20) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('message', 'reaction.set', 'exceed', [count, reactions.length])),
+                .setDescription(getLang('message', 'reaction.set', 'exceed', [count, reactions.size])),
             });
             return;
           }

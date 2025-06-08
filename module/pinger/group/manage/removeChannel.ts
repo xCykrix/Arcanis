@@ -41,7 +41,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
-              personalChannelIds: [],
+              personalChannelIds: new Set(),
               alertCooldownByProduct: 5,
               deleteAlertAfter: 120,
             });
@@ -50,10 +50,10 @@ export default class extends AsyncInitializable {
           }
 
           // Set the personalChannelIds with deleted entry.
-          if (kvFind.value.personalChannelIds.includes(args.channel.id.toString())) {
+          if (kvFind.value.personalChannelIds.has(args.channel.id.toString())) {
             const channelIds = new Set<string>(kvFind.value.personalChannelIds);
             channelIds.delete(args.channel.id.toString());
-            kvFind.value.personalChannelIds = channelIds.values().toArray();
+            kvFind.value.personalChannelIds = channelIds;
           }
 
           // Write database.

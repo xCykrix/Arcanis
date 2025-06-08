@@ -82,12 +82,12 @@ export default class extends AsyncInitializable {
                         ref: 'modalConfirm',
                         timeToLive: 300,
                         userId: interaction.user.id.toString(),
-                        constants: [
+                        constants: new Set([
                           args.channel.guildId!.toString(),
                           args.channel.id.toString(),
                           `${args.every}`,
                           `${args.within}`,
-                        ],
+                        ]),
                       }),
                       style: ButtonStyles.Primary,
                       label: 'Save',
@@ -98,13 +98,13 @@ export default class extends AsyncInitializable {
                         ref: 'modalEdit',
                         timeToLive: 300,
                         userId: interaction.user.id.toString(),
-                        constants: [
+                        constants: new Set([
                           args.channel.guildId!.toString(),
                           args.channel.id.toString(),
                           `${args.every}`,
                           `${args.within}`,
                           kvFind?.value.message,
-                        ],
+                        ]),
                       }),
                       style: ButtonStyles.Secondary,
                       label: 'Edit',
@@ -139,12 +139,12 @@ export default class extends AsyncInitializable {
                 ref: 'consumeModal',
                 timeToLive: 900,
                 userId: interaction.user.id,
-                constants: [
+                constants: new Set([
                   args.channel.guildId!.toString(),
                   args.channel.id.toString(),
                   `${args.every}`,
                   `${args.within}`,
-                ],
+                ]),
               }),
               title: 'Pinned Message Editor',
               components: [
@@ -171,14 +171,14 @@ export default class extends AsyncInitializable {
 
           // Trim and Validate
           if (component.text === undefined || (component.text?.length ?? 0) === 0 || (component.text ?? '').trim() === '') {
-            await interaction[constants[4] === 'editing' ? 'edit' : 'respond']({
+            await interaction[constants.values().toArray()[4] === 'editing' ? 'edit' : 'respond']({
               embeds: Responses.error.make()
                 .setDescription(getLang('message', 'pin', 'invalid.message')),
             });
             return;
           }
 
-          await interaction[constants[4] === 'editing' ? 'edit' : 'respond']({
+          await interaction[constants.values().toArray()[4] === 'editing' ? 'edit' : 'respond']({
             content: component.text,
             components: [
               {
@@ -201,10 +201,10 @@ export default class extends AsyncInitializable {
                       ref: 'modalEdit',
                       timeToLive: 300,
                       userId: interaction.user.id.toString(),
-                      constants: [
+                      constants: new Set([
                         ...constants,
                         component.text,
-                      ],
+                      ]),
                     }),
                     style: ButtonStyles.Secondary,
                     label: 'Edit',
@@ -220,13 +220,13 @@ export default class extends AsyncInitializable {
         handle: async ({ interaction, constants, assistant }) => {
           await interaction.deferEdit();
 
-          const channel = await Bootstrap.bot.cache.channels.get(BigInt(constants[1]));
+          const channel = await Bootstrap.bot.cache.channels.get(BigInt(constants.values().toArray()[1]));
           await KVC.appd.pin.upsertByPrimaryIndex({
             index: ['channelId', channel!.id.toString()],
             update: {
               message: interaction.message!.content!,
-              every: parseInt(constants[2]),
-              within: parseInt(constants[3]),
+              every: parseInt(constants.values().toArray()[2]),
+              within: parseInt(constants.values().toArray()[3]),
             },
             set: {
               guid: GUID.make({
@@ -237,8 +237,8 @@ export default class extends AsyncInitializable {
               guildId: channel!.guildId!.toString(),
               channelId: channel!.id.toString(),
               message: interaction.message!.content!,
-              every: parseInt(constants[2]),
-              within: parseInt(constants[3]),
+              every: parseInt(constants.values().toArray()[2]),
+              within: parseInt(constants.values().toArray()[3]),
             },
           });
 
@@ -246,7 +246,7 @@ export default class extends AsyncInitializable {
             content: '',
             embeds: Responses.success.make()
               .setDescription(getLang('message', 'pin.set', 'result'))
-              .addField('Channel', `<#${constants[1]}>`),
+              .addField('Channel', `<#${constants.values().toArray()[1]}>`),
             components: [],
           });
         },
@@ -259,13 +259,13 @@ export default class extends AsyncInitializable {
               ref: 'consumeModal',
               timeToLive: 900,
               userId: interaction.user.id,
-              constants: [
-                constants[0],
-                constants[1],
-                constants[2],
-                constants[3],
+              constants: new Set([
+                constants.values().toArray()[0],
+                constants.values().toArray()[1],
+                constants.values().toArray()[2],
+                constants.values().toArray()[3],
                 'editing',
-              ],
+              ]),
             }),
             title: 'Pinned Message Editor',
             components: [
@@ -279,7 +279,7 @@ export default class extends AsyncInitializable {
                     style: TextStyles.Paragraph,
                     minLength: 1,
                     maxLength: 2000,
-                    value: constants[4],
+                    value: constants.values().toArray()[4],
                     required: true,
                   },
                 ],

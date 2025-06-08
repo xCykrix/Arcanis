@@ -42,7 +42,7 @@ export default class extends AsyncInitializable {
               ref: 'alertDispatch',
               timeToLive: 900,
               userId: interaction.user.id,
-              constants: [],
+              constants: new Set(),
             }),
             title: 'Global Message Dispatch',
             components: [

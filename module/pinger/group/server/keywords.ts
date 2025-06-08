@@ -35,7 +35,7 @@ export default class extends AsyncInitializable {
 
           //
         },
-      })
-      .createGroupComponentHandler();
+      });
+    // .createGroupComponentHandler();
   }
 }

@@ -32,9 +32,9 @@ export default class extends AsyncInitializable {
       // Check Exclusions
       const kvFindExclusion = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', message.channelId.toString());
       if (kvFindExclusion?.versionstamp !== undefined) {
-        if (kvFindExclusion.value.exclusion.user?.includes(message.author.id.toString())) return;
+        if (kvFindExclusion.value.exclusion.user?.has(message.author.id.toString())) return;
         for (const role of message.member?.roles ?? []) {
-          if (kvFindExclusion.value.exclusion.role?.includes(role.toString())) return;
+          if (kvFindExclusion.value.exclusion.role?.has(role.toString())) return;
         }
       }
 

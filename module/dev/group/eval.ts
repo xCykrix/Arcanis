@@ -46,9 +46,9 @@ export default class extends AsyncInitializable {
               ref: 'eval.consume-modal',
               timeToLive: 300,
               userId: interaction.user.id,
-              constants: [
+              constants: new Set([
                 `${args.depth ?? 2}`,
-              ],
+              ]),
             }),
             title: 'Evaluation Form',
             components: [
@@ -92,7 +92,7 @@ export default class extends AsyncInitializable {
             // TODO!: Error Capture
           }
 
-          let cleaned = await stringify(result, parseInt(constants[0]!));
+          let cleaned = await stringify(result, parseInt(constants.values().toArray()[0]));
           if (cleaned === 'undefined') cleaned = getLang('dev', 'eval', 'undefined')!;
           await interaction.respond({
             content: ['```', `${cleaned}`, '```'].join('\n'),

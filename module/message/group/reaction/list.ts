@@ -51,18 +51,18 @@ export default class extends AsyncInitializable {
 
           // Optional Exclusions
           const kvFindExclusion = await KVC.appd.reactionExclusion.findByPrimaryIndex('channelId', args.channel.id.toString());
-          const user: string[] = kvFindExclusion?.value.exclusion.user ?? [];
-          const role: string[] = kvFindExclusion?.value.exclusion.user ?? [];
+          const user: Set<string> = kvFindExclusion?.value.exclusion.user ?? new Set();
+          const role: Set<string> = kvFindExclusion?.value.exclusion.user ?? new Set();
 
           // Template
           const embed = Responses.success.make()
             .setDescription(getLang('message', 'reaction.list', 'result'))
             .addField('Channel', `<#${args.channel.id}>`)
-            .addField('Exclusions', `${user.length} User(s) and ${role.length} Role(s) Excluded.`);
+            .addField('Exclusions', `${user.size} User(s) and ${role.size} Role(s) Excluded.`);
 
           // Consolidate
           for (const result of kvFind.result) {
-            embed.addField(`Type: ${lookup[result.value.type]}`, `${result.value.reaction.join(' ')} | Self React: ${result.value.self ?? false}`);
+            embed.addField(`Type: ${lookup[result.value.type]}`, `${result.value.reaction.values().toArray().join(' ')} | Self React: ${result.value.self ?? false}`);
           }
 
           // Respond Success
@@ -74,7 +74,7 @@ export default class extends AsyncInitializable {
   }
 }
 
-  /** Reverse Lookup Table. */
+/** Reverse Lookup Table. */
 const lookup = {
   'a': 'All Messages (Exclusive)',
   'e': 'Embed Only (Priority 4)',

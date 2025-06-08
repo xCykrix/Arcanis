@@ -7,5 +7,6 @@ export type ReactionModuleForwardConfiguration = {
   reaction: string;
   threshold: number;
   within: number;
+  allowListRoles?: Set<string>;
   alert?: string;
 };

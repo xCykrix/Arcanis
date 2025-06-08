@@ -41,7 +41,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp === undefined) {
             await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
-              personalChannelIds: [],
+              personalChannelIds: new Set(),
               alertCooldownByProduct: 5,
               deleteAlertAfter: 120,
             });
@@ -49,8 +49,8 @@ export default class extends AsyncInitializable {
             if (kvFind?.versionstamp === undefined) return;
           }
 
-          if (!kvFind.value.personalChannelIds.includes(args.channel.id.toString())) {
-            kvFind.value.personalChannelIds.push(args.channel.id.toString());
+          if (!kvFind.value.personalChannelIds.has(args.channel.id.toString())) {
+            kvFind.value.personalChannelIds.add(args.channel.id.toString());
             await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
               personalChannelIds: kvFind.value.personalChannelIds,
             }, {

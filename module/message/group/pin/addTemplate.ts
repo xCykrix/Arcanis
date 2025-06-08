@@ -55,9 +55,9 @@ export default class extends AsyncInitializable {
               ref: 'consumeModal',
               timeToLive: 900,
               userId: interaction.user.id,
-              constants: [
+              constants: new Set([
                 args.name,
-              ],
+              ]),
             }),
             title: 'Pinned Message Template Editor',
             components: [
@@ -83,14 +83,14 @@ export default class extends AsyncInitializable {
 
           // Trim and Validate
           if (component.text === undefined || (component.text?.length ?? 0) === 0 || (component.text ?? '').trim() === '') {
-            await interaction[constants[1] === 'editing' ? 'edit' : 'respond']({
+            await interaction[constants.values().toArray()[1] === 'editing' ? 'edit' : 'respond']({
               embeds: Responses.error.make()
                 .setDescription(getLang('message', 'pin', 'invalid.message')),
             });
             return;
           }
 
-          await interaction[constants[1] === 'editing' ? 'edit' : 'respond']({
+          await interaction[constants.values().toArray()[1] === 'editing' ? 'edit' : 'respond']({
             content: component.text,
             components: [
               {
@@ -102,10 +102,10 @@ export default class extends AsyncInitializable {
                       ref: 'modalConfirm',
                       timeToLive: 300,
                       userId: interaction.user.id.toString(),
-                      constants: [
-                        constants[0],
+                      constants: new Set([
+                        constants.values().toArray()[0],
                         component.text,
-                      ],
+                      ]),
                     }),
                     style: ButtonStyles.Primary,
                     label: 'Save',
@@ -116,10 +116,10 @@ export default class extends AsyncInitializable {
                       ref: 'modalEdit',
                       timeToLive: 300,
                       userId: interaction.user.id.toString(),
-                      constants: [
-                        constants[0],
+                      constants: new Set([
+                        constants.values().toArray()[0],
                         component.text,
-                      ],
+                      ]),
                     }),
                     style: ButtonStyles.Secondary,
                     label: 'Edit',
@@ -139,26 +139,26 @@ export default class extends AsyncInitializable {
             moduleId: assistant['assurance'].guidTopLevel!,
             guildId: interaction.guildId!.toString(),
             constants: [
-              constants[0],
+              constants.values().toArray()[0],
             ],
           });
           await KVC.appd.pinTemplate.upsertByPrimaryIndex({
             index: ['guid', guid],
             update: {
-              message: constants[1],
+              message: constants.values().toArray()[1],
             },
             set: {
               guid,
               guildId: interaction.guildId!.toString(),
-              name: constants[0],
-              message: constants[1],
+              name: constants.values().toArray()[0],
+              message: constants.values().toArray()[1],
             },
           });
 
           await interaction.edit({
             content: '',
             embeds: Responses.success.make()
-              .setDescription(getLang('message', 'pin.add-template', 'result', [constants[0]])),
+              .setDescription(getLang('message', 'pin.add-template', 'result', [constants.values().toArray()[0]])),
             components: [],
           });
         },
@@ -171,10 +171,10 @@ export default class extends AsyncInitializable {
               ref: 'consumeModal',
               timeToLive: 900,
               userId: interaction.user.id,
-              constants: [
-                constants[0],
+              constants: new Set([
+                constants.values().toArray()[0],
                 'editing',
-              ],
+              ]),
             }),
             title: 'Pinned Message Editor',
             components: [
@@ -188,7 +188,7 @@ export default class extends AsyncInitializable {
                     style: TextStyles.Paragraph,
                     minLength: 1,
                     maxLength: 2000,
-                    value: constants[1],
+                    value: constants.values().toArray()[1],
                     required: true,
                   },
                 ],

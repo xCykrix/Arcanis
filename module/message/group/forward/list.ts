@@ -95,11 +95,11 @@ export default class extends AsyncInitializable {
                         ref: 'page',
                         timeToLive: 300,
                         userId: interaction.user.id,
-                        constants: [
+                        constants: new Set([
                           args.channel.guildId!.toString(),
                           args.channel.id.toString(),
                           '1',
-                        ],
+                        ]),
                       })
                       : 'disabled.button.next',
                     style: ButtonStyles.Secondary,
@@ -117,9 +117,9 @@ export default class extends AsyncInitializable {
           await interaction.deferEdit();
 
           // Parse Constants
-          const guild = constants[0];
-          const channel = constants[1];
-          const index = parseInt(constants[2]);
+          const guild = constants.values().toArray()[0];
+          const channel = constants.values().toArray()[1];
+          const index = parseInt(constants.values().toArray()[2]);
 
           // Fetch Listing
           const kvFind = await KVC.appd.forward.findBySecondaryIndex('guildId', guild, {
@@ -173,11 +173,11 @@ export default class extends AsyncInitializable {
                         ref: 'page',
                         timeToLive: 300,
                         userId: interaction.user.id,
-                        constants: [
+                        constants: new Set([
                           guild,
                           channel,
                           `${index - 1}`,
-                        ],
+                        ]),
                       })
                       : 'disabled.button.previous',
                     style: ButtonStyles.Secondary,
@@ -191,11 +191,11 @@ export default class extends AsyncInitializable {
                         ref: 'page',
                         timeToLive: 300,
                         userId: interaction.user.id,
-                        constants: [
+                        constants: new Set([
                           guild,
                           channel,
                           `${index + 1}`,
-                        ],
+                        ]),
                       })
                       : 'disabled.button.next',
                     style: ButtonStyles.Secondary,

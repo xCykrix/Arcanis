@@ -2,7 +2,7 @@ export type PingerSetup = {
   guildId: string;
   alertCooldownByProduct: number;
   deleteAlertAfter: number;
-  personalChannelIds: string[];
+  personalChannelIds: Set<string>;
 };
 
 export type PingerSetupRole = {

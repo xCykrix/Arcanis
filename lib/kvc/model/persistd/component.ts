@@ -2,5 +2,5 @@ export type Component = {
   callbackId: string;
   userId: string | null;
   createdAt: number;
-  constants: string[];
+  constants: Set<string>;
 };
