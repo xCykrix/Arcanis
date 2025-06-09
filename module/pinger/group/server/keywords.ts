@@ -134,18 +134,23 @@ export default class extends AsyncInitializable {
           }
 
           const embeds = Responses.success.make();
+          let iter = 0;
           let description = '';
           for (let i = 0; i < keywordList.length; i++) {
+            if (iter >= 10) {
+              description += `\n`;
+              iter = 0;
+            }
             if (keywordList[i + 1] === undefined) description += `${keywordList[i].trim()} `;
             if (description.length >= 2000 || keywordList[i + 1] === undefined) {
               embeds.setDescription(`\`\`\`ansi\n${description.trim()}\n\`\`\``);
               if (keywordList[i + 1] !== undefined) embeds.newEmbed();
-              description = '';
+              description = keywordList[i].trim().startsWith('-') ? '\u001b[0;31m' : '\u001b[0;32m';
             }
             description += `${keywordList[i].trim()} `;
+            iter++;
           }
 
-          console.info(JSON.stringify(embeds[0].description), embeds[0].description.length);
           await interaction.respond({
             embeds,
           });
