@@ -149,6 +149,10 @@ export const lang = {
     'server.remove-channel': {
       'result': 'The specified channel has been removed from the specified pinger, if it was already present.',
     },
+    'server.keywords': {
+      'invalid': 'The specified keywords were invalid. Please ensure you use the correct format and try again.',
+      'parse-fail': 'The specified keywords could not be parsed. Please ensure you use the correct format and try again. You must have at least 1 positive or negative keyword.',
+    },
   },
 } as const;
 
