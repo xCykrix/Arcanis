@@ -61,6 +61,7 @@ export default class extends AsyncInitializable {
             guid,
             guildId: interaction.guildId!.toString(),
             name: args.name,
+            rolesToAlert: new Set(),
             keywords: '-all',
           });
 

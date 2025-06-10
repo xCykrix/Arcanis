@@ -42,6 +42,7 @@ export default class extends AsyncInitializable {
             await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
               personalChannelIds: new Set(),
+              alertMessage: '{{TITLE}} {{SKU}} {{ROLES}}',
               alertCooldownByProduct: 5,
               deleteAlertAfter: 120,
             });

@@ -1,4 +1,4 @@
-import { ChannelTypes, MessageComponent, MessageComponentTypes, TextStyles } from '@discordeno';
+import { ChannelTypes, MessageComponent, MessageComponentTypes, TextInputComponent, TextStyles } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -58,14 +58,28 @@ export default class extends AsyncInitializable {
           }
 
           // Respond with Modal
+          const keywords = parseKeyword(kvFind.value.keywords);
+          const textInput: TextInputComponent = {
+            type: MessageComponentTypes.TextInput,
+            customId: 'text',
+            label: 'Keywords',
+            style: TextStyles.Paragraph,
+            minLength: 1,
+            maxLength: 4000,
+            required: true,
+          };
+          if (keywords === null || keywords.length === 0) {
+            textInput.placeholder = '-all +keyword1 -keyword2 +keyword with space is ok';
+          } else {
+            textInput.value = keywords.join(' ');
+          }
           await interaction.respond({
             customId: await assistant.makeComponentCallback({
               ref: 'consumeModal',
               timeToLive: 900,
               userId: interaction.user.id,
               constants: new Set([
-                interaction.guildId!.toString(),
-                args.name,
+                kvFind.id,
               ]),
             }),
             title: 'Pinned Keywords Editor',
@@ -73,16 +87,7 @@ export default class extends AsyncInitializable {
               {
                 type: MessageComponentTypes.ActionRow,
                 components: [
-                  {
-                    type: MessageComponentTypes.TextInput,
-                    customId: 'text',
-                    label: 'Keywords',
-                    style: TextStyles.Paragraph,
-                    minLength: 1,
-                    maxLength: 4000,
-                    placeholder: '-all +keyword1 -keyword2 +keyword with space is ok',
-                    required: true,
-                  },
+                  textInput,
                 ],
               },
             ],
@@ -133,11 +138,12 @@ export default class extends AsyncInitializable {
             }
           }
 
-          const embeds = Responses.success.make();
+          const embeds = Responses.success.make()
+            .setTitle('Pinned Keywords Updated');
           let iter = 0;
           let description = '';
           for (let i = 0; i < keywordList.length; i++) {
-            if (iter >= 10) {
+            if ((description.length + (keywordList[i + 1]?.length ?? 0)) >= 1000 || iter >= 20) {
               description += `\n`;
               iter = 0;
             }
@@ -150,6 +156,10 @@ export default class extends AsyncInitializable {
             description += `${keywordList[i].trim()} `;
             iter++;
           }
+
+          await KVC.appd.serverPinger.update(constants.values().toArray()[0], {
+            keywords: keywords.join(' '),
+          });
 
           await interaction.respond({
             embeds,

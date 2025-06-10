@@ -1,5 +1,6 @@
 export type PingerSetup = {
   guildId: string;
+  alertMessage: string;
   alertCooldownByProduct: number;
   deleteAlertAfter: number;
   personalChannelIds: Set<string>;
@@ -22,10 +23,11 @@ export type ServerPinger = {
   guid: string;
   guildId: string;
   name: string;
+  rolesToAlert: Set<string>;
   keywords: string;
 };
 
-export type ServerPingerRoleMap = {
+export type ServerPersonalPingerRoleMap = {
   roleId: string;
   guidOfPinger: string;
 };

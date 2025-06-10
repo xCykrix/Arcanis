@@ -7,31 +7,7 @@ export default class extends AsyncInitializable {
     Bootstrap.event.add('messageCreate', async (message) => {
       if (message.guildId === undefined) return;
 
-      // Parse and Rebuild Message
-      const text: string[] = [];
 
-      if (message.content !== undefined) text.push(message.content.toLowerCase());
-      for (const embed of message.embeds ?? []) {
-        if (embed.title !== undefined) text.push(embed.title.toLowerCase());
-        if (embed.description !== undefined) text.push(embed.description.toLowerCase());
-        for (const field of embed.fields ?? []) {
-          text.push(field.value.toLowerCase());
-        }
-      }
-
-      if (message.messageReference !== undefined) {
-        const followFetch = await Bootstrap.bot.helpers.getMessage(message.messageReference.channelId!, message.messageReference.messageId!).catch(() => null);
-        if (followFetch !== null) {
-          if (followFetch.content !== undefined) text.push(followFetch.content.toLowerCase());
-          for (const embed of followFetch.embeds ?? []) {
-            if (embed.title !== undefined) text.push(embed.title.toLowerCase());
-            if (embed.description !== undefined) text.push(embed.description.toLowerCase());
-            for (const field of embed.fields ?? []) {
-              text.push(field.value.toLowerCase());
-            }
-          }
-        }
-      }
 
       // Write to database.
       await KVC.persistd.tds.add({

@@ -42,6 +42,7 @@ export default class extends AsyncInitializable {
             await KVC.appd.guildPingerSetup.add({
               guildId: interaction.guildId!.toString(),
               personalChannelIds: new Set(),
+              alertMessage: '{{TITLE}} {{SKU}} {{ROLES}}',
               alertCooldownByProduct: 5,
               deleteAlertAfter: 120,
             });
@@ -51,6 +52,7 @@ export default class extends AsyncInitializable {
 
           // Write database.
           await KVC.appd.guildPingerSetup.updateByPrimaryIndex('guildId', interaction.guildId!.toString(), {
+            alertMessage: args['alert-message'] ?? kvFind.value.alertMessage ?? '{{TITLE}} {{SKU}} {{ROLES}}',
             alertCooldownByProduct: args.cooldown ?? kvFind.value.alertCooldownByProduct ?? 5,
             deleteAlertAfter: args['delete-after'] ?? kvFind.value.deleteAlertAfter ?? 120,
           });
@@ -59,8 +61,9 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setDescription(getLang('pinger', 'manage.configure', 'result'))
-              .addField('Cooldown', `${args.cooldown ?? kvFind.value.alertCooldownByProduct ?? 5} Seconds`)
-              .addField('Delete Alert After', `${args['delete-after'] ?? kvFind.value.deleteAlertAfter ?? 120} Seconds`),
+              .addField('Alert Message', args['alert-message'] ?? kvFind.value.alertMessage ?? '{{TITLE}} {{SKU}} {{ROLES}}', false)
+              .addField('Cooldown', `${args.cooldown ?? kvFind.value.alertCooldownByProduct ?? 5} Seconds`, true)
+              .addField('Delete After', `${args['delete-after'] ?? kvFind.value.deleteAlertAfter ?? 120} Seconds`, true),
           });
         },
       });
