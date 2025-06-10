@@ -3,12 +3,15 @@ import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
+import { parseKeyword, runKeywordStateMachine } from '../logic/parseKeyword.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     Bootstrap.event.add('messageCreate', async (message) => {
       if (message.guildId === undefined) return;
+      const kvFindGlobal = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', message.guildId.toString());
+      if (kvFindGlobal?.versionstamp === undefined) return;
 
       const mapping = await KVC.appd.pingerChannelMap.findBySecondaryIndex('channelId', message.channelId.toString());
       for (const map of mapping.result) {
@@ -19,8 +22,16 @@ export default class extends AsyncInitializable {
           continue;
         }
 
+        // Validate Keywords
+        const keywords = parseKeyword(kvFind.value.keywords);
+        if (keywords === null || keywords.length === 0) {
+          Optic.f.info('Keywords was blank or otherwise invalid. Skipped pinger.');
+          return;
+        }
+
         // Parse and Rebuild Message
         const texts: string[] = [];
+        let properTitle = '';
         let title = '';
         let sku = '';
 
@@ -28,6 +39,7 @@ export default class extends AsyncInitializable {
         const embed = (message.embeds ?? [])[0];
         if (embed !== undefined) {
           if (embed.title !== undefined) {
+            properTitle = embed.title;
             title = embed.title.toLowerCase();
             texts.push(embed.title.toLowerCase());
           }
@@ -47,8 +59,9 @@ export default class extends AsyncInitializable {
             const followFetchEmbed = (followFetch.embeds ?? [])[0];
             if (followFetchEmbed !== undefined) {
               if (followFetchEmbed.title !== undefined) {
-                texts.push(followFetchEmbed.title.toLowerCase());
+                properTitle = followFetchEmbed.title;
                 title = followFetchEmbed.title.toLowerCase();
+                texts.push(followFetchEmbed.title.toLowerCase());
               }
               if (followFetchEmbed.description !== undefined) texts.push(followFetchEmbed.description.toLowerCase());
               for (const field of followFetchEmbed.fields ?? []) {
@@ -63,19 +76,46 @@ export default class extends AsyncInitializable {
 
         if (title !== '' || sku !== '') {
           const guid = GUID.make({
-            moduleId: 'pinger.group.event.onMessage.cooldown',
+            moduleId: 'pinger.group.event.onMessage.lockout',
             guildId: message.guildId.toString(),
             channelId: message.channelId.toString(),
             constants: [
-              title,
-              sku
-            ]
+              sku !== '' ? sku : title,
+            ],
           });
-          const kvc = await KVC.
-          await KVC.persistd.locks.add()
+          const lockFind = await KVC.persistd.locks.findByPrimaryIndex('guid', guid);
+          if (lockFind?.versionstamp !== undefined) {
+            if (lockFind.value.lockedAt + (kvFindGlobal.value.alertCooldownByProduct * 1000) > message.timestamp) {
+              Optic.f.info(`[Pinger/Server] Lockout spam protection has triggered for ${message.guildId}/${message.channelId}/${message.id}.`);
+              return;
+            }
+          }
+          await KVC.persistd.locks.upsertByPrimaryIndex({
+            index: ['guid', guid],
+            set: {
+              guid,
+              locked: true,
+              lockedAt: message.timestamp,
+            },
+            update: {
+              lockedAt: message.timestamp,
+            },
+          }, {
+            expireIn: kvFindGlobal.value.alertCooldownByProduct * 1000,
+          });
 
+          // Check Keyword Hit
+          const keywordHit = runKeywordStateMachine(keywords, texts, false);
+
+          // Dispatch Alert
+          if (keywordHit) {
+            Optic.f.info('would have triggered!');
+            const roles = kvFind.value.rolesToAlert.values().map((v) => `<@&${v}>`).toArray().join(' ');
+            await Bootstrap.bot.helpers.sendMessage(message.channelId, {
+              content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle).replace('{{SKU}}', sku).replace('{{ROLES}}', roles),
+            });
+          }
         }
-
       }
     });
   }

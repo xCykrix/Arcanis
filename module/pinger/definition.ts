@@ -234,6 +234,50 @@ const definition = {
           ],
         },
         {
+          name: 'add-alert-role',
+          description: 'Adds a role to be alerted by the pinger.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'name',
+              description: 'The name of the pinger.',
+              type: ApplicationCommandOptionTypes.String,
+              minLength: 1,
+              maxLength: 100,
+              required: true,
+              autocomplete: true,
+            },
+            {
+              name: 'role',
+              description: 'A role to add to the pinger alert.',
+              type: ApplicationCommandOptionTypes.Role,
+              required: true,
+            },
+          ],
+        },
+        {
+          name: 'remove-alert-role',
+          description: 'Remove a specific channel being watched by a pinger.',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'name',
+              description: 'The name of the pinger.',
+              type: ApplicationCommandOptionTypes.String,
+              minLength: 1,
+              maxLength: 100,
+              required: true,
+              autocomplete: true,
+            },
+            {
+              name: 'role',
+              description: 'A role to remove from the pinger alert.',
+              type: ApplicationCommandOptionTypes.Role,
+              required: true,
+            },
+          ],
+        },
+        {
           name: 'keywords',
           description: 'Open a editor for the pinger keywords.',
           type: ApplicationCommandOptionTypes.SubCommand,

@@ -25,7 +25,6 @@ export const lang = {
   },
   // Module: dev
   'dev': {
-    // Alert
     'alert': {
       'result': 'The channel, {{0}}, has been set to receive alerts and notifications.',
     },
@@ -33,7 +32,6 @@ export const lang = {
       'invalid.message': 'Unable to validate the input message. It must not be blank or contain empty space. Please try again.',
       'result': 'Dispatching message to all guilds configured for alerts. Delivery will begin shortly.',
     },
-    // Eval
     'eval': {
       'invalid.code': 'Unable to validate the inputted code.',
       'default': 'The async wrapper failed to evaluate.',
@@ -42,11 +40,9 @@ export const lang = {
   },
   // Module: message
   'message': {
-    // Common
     'emoji.invalid.single': 'The specified emoji was invalid. Please ensure you use the built-in emoji picker. Custom emojis are not supported',
     'emoji.invalid.multi': 'The specified emoji(s) were invalid. Please ensure you use the built-in emoji picker and that each reaction is separated by a space. Custom emojis are not supported.',
 
-    // Forward
     'forward': {
       'none-found': 'The specified forwarder(s) were not found. Please check the provided information and try again.',
     },
@@ -62,7 +58,6 @@ export const lang = {
       'result': 'The following forwarder(s) are currently configured.',
     },
 
-    // Pin
     'pin': {
       'none-found': 'The specified pinned message was not found. Please check the provided information and try again.',
       'invalid.message': 'Unable to validate the input message. It must not be blank or contain empty space. Please try again.',
@@ -82,7 +77,6 @@ export const lang = {
       'result': 'The template, {{0}}, has been deleted successfully.',
     },
 
-    // Reaction
     'reaction': {
       'none-found': 'The specified auto reaction was not found. Please check the provided information and try again.',
     },
@@ -104,10 +98,8 @@ export const lang = {
   },
   // Module: pinger
   'pinger': {
-    // Common
     'none-found': 'The specified pinger was not found. Please check the provided information and try again.',
 
-    // Manage
     'manage.add-channel': {
       'result': 'The specified channel has been added to the approved list of personal pinger channels.',
     },
@@ -124,7 +116,6 @@ export const lang = {
       'result': 'The global pinger configuration has been updated with the specified options.',
     },
 
-    // Create
     'server.create': {
       'exists': 'A pinger with the name of {{0}} alreadt exists in this server. Please choose a different name.',
       'result': [
@@ -149,6 +140,13 @@ export const lang = {
     'server.remove-channel': {
       'result': 'The specified channel has been removed from the specified pinger, if it was already present.',
     },
+    'server.add-alert-role': {
+      'result': 'The specified role has been added to the pinger, if not already present.',
+    },
+    'server.remove-alert-role': {
+      'result': 'The specified role has been removed from the pinger, if it was '
+    },
+
     'server.keywords': {
       'invalid': 'The specified keywords were invalid. Please ensure you use the correct format and try again.',
       'parse-fail': 'The specified keywords could not be parsed. Please ensure you use the correct format and try again. You must have at least 1 positive or negative keyword.',
