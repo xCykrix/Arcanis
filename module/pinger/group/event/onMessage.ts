@@ -72,6 +72,7 @@ export default class extends AsyncInitializable {
           sku !== '' ? sku : title,
         ],
       });
+      console.info(guid);
       const commit = await KVC.persistd.locks.add({
         guid,
         locked: true,
@@ -98,6 +99,8 @@ export default class extends AsyncInitializable {
       if (lockFind?.versionstamp !== undefined) {
         if (lockFind.value.lockedAt + (kvFindGlobal.value.alertCooldownByProduct * 1000) > message.timestamp) {
           Optic.f.debug(`[Pinger/Server] Cooldown guard triggered. Preventing execution.`, {
+            vxid: lockFind.value.lockedAt + (kvFindGlobal.value.alertCooldownByProduct * 1000),
+            ts: message.timestamp,
             guildId: message.guildId,
             channelId: message.channelId,
           });
@@ -114,7 +117,7 @@ export default class extends AsyncInitializable {
           Optic.f.warn(`[Pinger/Server] Map with ID '${map.id}/${map.value.channelId}/${map.value.guidOfPinger}' has no valid pinger. Deleting...`);
           await KVC.appd.pingerChannelMap.delete(map.id);
           continue;
-        } 
+        }
 
         // Validate Keywords
         const keywords = parseKeyword(kvFind.value.keywords);
@@ -126,18 +129,25 @@ export default class extends AsyncInitializable {
           continue;
         }
 
-        // Check Keyword Hit
-        const keywordHit = runKeywordStateMachine(keywords, texts, false);
-
         // Dispatch Alert
-        if (keywordHit) {
+        if (runKeywordStateMachine(keywords, texts, false)) {
           kvFind.value.rolesToAlert.values().forEach((v) => set.add(v));
         }
       }
 
+      // Order Roles
+      const guild = await Bootstrap.bot.cache.guilds.get(message.guildId);
+      const guildRolesSorted = new Map<string, number>();
+      guild?.roles?.map((v) => {
+        guildRolesSorted.set(v.id.toString(), v.position);
+      });
+      const roles = set.values().toArray().sort((a, b) => {
+        return guildRolesSorted.get(b)! - guildRolesSorted.get(a)!;
+      }).map((v) => `<@&${v}>`);
+
       // Send Message
       await Bootstrap.bot.helpers.sendMessage(message.channelId, {
-        content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle).replace('{{SKU}}', sku).replace('{{ROLES}}', set.values().toArray().join(' ')),
+        content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle).replace('{{SKU}}', sku).replace('{{ROLES}}', roles.join(' ')),
       });
     });
   }
