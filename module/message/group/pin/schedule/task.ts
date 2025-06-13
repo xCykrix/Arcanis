@@ -7,14 +7,16 @@ import { MessagePinOp } from '../logic/op.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
+    const pageLength = 20;
+
     setInterval(async () => {
-      const iterations = Math.ceil(await KVC.appd.pin.count() / 20);
+      const iterations = Math.ceil(await KVC.appd.pin.count() / pageLength);
 
       // Process Configuration to Worker State Controls Control Cache
       for (let i = 0; i < iterations; i++) {
         const getPinned = await KVC.appd.pin.getMany({
-          limit: 20,
-          offset: i * 20,
+          limit: pageLength,
+          offset: i * pageLength,
         });
         for (const entry of getPinned.result) {
           // State: Immediate Trigger No Message Ever Sent

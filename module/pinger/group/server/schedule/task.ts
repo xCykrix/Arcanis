@@ -5,23 +5,27 @@ import { Bootstrap } from '../../../../../mod.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    const pageLength = 0;
+    const pageLength = 5;
 
     setInterval(async () => {
-      const iterations = Math.ceil(await KVC.persistd.consumer.countBySecondaryIndex('queueTaskConsume', 'pinger.group.server.autoDelete') / 20);
+      const iterations = Math.ceil(await KVC.persistd.consumer.countBySecondaryIndex('queueTaskConsume', 'pinger.group.server.autoDelete') / pageLength);
 
       // Process Configuration to Worker State Controls Control Cache
       for (let i = 0; i < iterations; i++) {
         const getPinned = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'pinger.group.server.autoDelete', {
-          limit: 20,
-          offset: i * 20,
+          limit: pageLength,
+          offset: i * pageLength,
         });
         for (const entry of getPinned.result) {
           const channelId = entry.value.parameter.get('channelId');
           const messageId = entry.value.parameter.get('messageId');
           if (channelId === undefined || messageId === undefined) continue;
+
+          // Delete Message
           await Bootstrap.bot.helpers.deleteMessage(channelId, messageId);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // 
+          await new Promise((resolve) => setTimeout(resolve, 2500));
         }
         // for (const entry of getPinned.result) {
         //   // State: Immediate Trigger No Message Ever Sent
