@@ -33,8 +33,8 @@ const fileStream = new FileStream('./optical/optic.txt')
   .withLogFileRotation(
     every(20).mb().withLogFileRetentionPolicy(of(7).days()),
   )
-  .withLogHeader(true)
-  .withLogFooter(true);
+  .withLogHeader(false)
+  .withLogFooter(false);
 
 type DefinedLogger = Logger & {
   fatal: <T>(msg: () => T, ...metadata: unknown[]) => T | undefined;

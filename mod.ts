@@ -1,8 +1,8 @@
 import type { CreateSlashApplicationCommand } from '@discordeno';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
-import type { Application } from './lib/database/model/rconf/application.model.ts';
 import { Defaults } from './lib/defaults.ts';
 import { KVC } from './lib/kvc/kvc.ts';
+import type { Application } from './lib/kvc/model/rconf/application.model.ts';
 import { EventManager } from './lib/manager/event.ts';
 import { DynamicModuleLoader } from './lib/util/loader.ts';
 import { Optic } from './lib/util/optic.ts';

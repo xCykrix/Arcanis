@@ -20,22 +20,7 @@ const getProxyCacheBot = (bot: Bot<BotDesiredProperties, DesiredPropertiesBehavi
     },
     cacheOutsideMemory: {
       default: false,
-    },
-    sweeper: {
-      interval: 5 * 60 * 1000,
-      filter: {
-        user: (user) => {
-          if (user.id === bot.id) return false;
-          if (Date.now() - user.lastInteractedTime > 900 * 1000) return true;
-          return false;
-        },
-        member: (member) => {
-          if (member.id === bot.id) return false;
-          if (Date.now() - member.lastInteractedTime > 900 * 1000) return true;
-          return false;
-        },
-      },
-    },
+    }
   });
 export type CacheBotType = ReturnType<typeof getProxyCacheBot>;
 

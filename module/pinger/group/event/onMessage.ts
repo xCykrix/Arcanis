@@ -72,7 +72,6 @@ export default class extends AsyncInitializable {
           sku !== '' ? sku : title,
         ],
       });
-      console.info(guid);
       const commit = await KVC.persistd.locks.add({
         guid,
         locked: true,
@@ -85,6 +84,7 @@ export default class extends AsyncInitializable {
         Optic.f.debug(`[Pinger/Server] Failed to commit to lock cache via add. Prevents racing due to GUID overlap or duplication.`, {
           guildId: message.guildId,
           channelId: message.channelId,
+          messageId: message.id,
         });
         return;
       }
@@ -97,12 +97,11 @@ export default class extends AsyncInitializable {
         return;
       }
       if (lockFind?.versionstamp !== undefined) {
-        if (lockFind.value.lockedAt + (kvFindGlobal.value.alertCooldownByProduct * 1000) > message.timestamp) {
+        if (message.timestamp > lockFind.value.lockedAt + (kvFindGlobal.value.alertCooldownByProduct * 1000)) {
           Optic.f.debug(`[Pinger/Server] Cooldown guard triggered. Preventing execution.`, {
-            vxid: lockFind.value.lockedAt + (kvFindGlobal.value.alertCooldownByProduct * 1000),
-            ts: message.timestamp,
             guildId: message.guildId,
             channelId: message.channelId,
+            messageId: message.id,
           });
           return;
         }
@@ -144,6 +143,9 @@ export default class extends AsyncInitializable {
       const roles = set.values().toArray().sort((a, b) => {
         return guildRolesSorted.get(b)! - guildRolesSorted.get(a)!;
       }).map((v) => `<@&${v}>`);
+
+      // TODO: Permission Guard
+      // if (!noPermission) need to warn return;
 
       // Send Message
       await Bootstrap.bot.helpers.sendMessage(message.channelId, {
