@@ -5,6 +5,7 @@ import type { PersonalPinger, PingerChannelMap, PingerSetup, PingerSetupRole, Se
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
 import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/persistd/alert.ts';
 import type { Component } from './model/persistd/component.ts';
+import { Consumer } from './model/persistd/consumer.ts';
 import type { Lock } from './model/persistd/lock.ts';
 import type { TemporaryDispatch } from './model/persistd/temporary.ts';
 import type { Application } from './model/rconf/application.model.ts';
@@ -115,6 +116,11 @@ const persistdStaticSchema = {
   dispatchedAlert: collection(createModel<DispatchedAlert>(), {
     indices: {
       dispatchEventId: 'primary',
+    },
+  }),
+  consumer: collection(createModel<Consumer>(), {
+    indices: {
+      queueTaskConsume: 'secondary',
     },
   }),
   consumedDispatchedAlert: collection(createModel<ConsumedDispatchAlert>(), {
