@@ -1,11 +1,10 @@
-import { ChannelTypes, type PermissionStrings } from '@discordeno';
+import { ChannelTypes } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
-import { Emoji } from '../../../../lib/util/guard/emoji.ts';
-import { Permissions } from '../../../../lib/util/helper/permissions.ts';
+import { Emoji } from '../../../../lib/util/check/emoji.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
@@ -36,21 +35,9 @@ export default class extends AsyncInitializable {
             pick: args.forward?.delete ?? null,
           };
         },
-        handle: async ({ interaction, args, assistant, guild, botMember }) => {
+        handle: async ({ interaction, args, assistant }) => {
           if (args === null) return; // Assertion
           await interaction.defer();
-
-          // Permission Guard (Source Channel) - Bot Permissions
-          const fromBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
-          if (!Permissions.hasChannelPermissions(guild!, args.from.id as bigint, botMember!, fromBotPermissions)) {
-            await interaction.respond({
-              embeds: Responses.error.make()
-                .setDescription(getLang('global', 'channel', 'permission.bot.missing'))
-                .addField('Channel', `<#${args.from.id}>`)
-                .addField('Required', fromBotPermissions.join('\n')),
-            });
-            return;
-          }
 
           // Validate Reaction
           if (!Emoji.check(args.reaction)) {

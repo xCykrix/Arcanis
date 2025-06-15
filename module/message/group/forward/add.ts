@@ -4,7 +4,7 @@ import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
-import { Emoji } from '../../../../lib/util/guard/emoji.ts';
+import { Emoji } from '../../../../lib/util/check/emoji.ts';
 import { Permissions } from '../../../../lib/util/helper/permissions.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { MessageDefinition } from '../../definition.ts';

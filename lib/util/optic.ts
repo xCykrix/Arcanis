@@ -4,7 +4,7 @@ import { every, FileStream, of } from '@optic/fileStream';
 import { JsonFormatter, TokenReplacer } from '@optic/formatters';
 import { Level, Logger } from '@optic/logger';
 import { Bootstrap } from '../../mod.ts';
-import { Webhook } from './guard/webhook.ts';
+import { Webhook } from './check/webhook.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()

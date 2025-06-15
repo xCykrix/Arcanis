@@ -38,14 +38,18 @@ export class MessagePinOp {
       expireIn: 2000,
     });
     if (commit.ok === false) {
-      Optic.f.debug(`C:${pin.channelId} Failed to commit to lock cache via upsert. Waiting for new trigger. Prevents racing due to GUID being set suddenly.`);
+      Optic.f.debug(`[Message/Pin] Failed to commit to lock cache via add. Prevents racing due to GUID overlap or duplication.`, {
+        channelId: pin.channelId,
+      });
       return;
     }
 
     // Check Change in Mutex
     const fetchMutexedLock = await KVC.persistd.locks.findByPrimaryIndex('guid', guidLock);
     if (fetchMutexedLock?.value?.lockoutMutexId !== mutex) {
-      Optic.f.debug(`C:${pin.channelId} Mutex Guard Triggered. Preventing racing of posting. Waiting to expire or finish before post.`);
+      Optic.f.debug(`[Message/Pin] Mutex guard was triggered. Prevents racing due to GUID overlap or duplication.`, {
+        channelId: pin.channelId,
+      });
       return;
     }
 
@@ -53,14 +57,21 @@ export class MessagePinOp {
     const guild = await Bootstrap.bot.cache.guilds.get(BigInt(pin.guildId));
     const member = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, BigInt(pin.guildId));
     if (guild === undefined || member === undefined || !Permissions.hasChannelPermissions(guild!, BigInt(pin.channelId), member!, ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY', 'SEND_MESSAGES'])) {
-      Optic.f.debug(`C:${pin.channelId} Permissions required for operation were incomplete. Waiting to expire mutex to reduce database burden.`);
+      Optic.f.debug('[Message/Pin] Permissions required for an operation were missing. Waiting for mutex to expire to reduce database load.', {
+        channelId: pin.channelId,
+      });
       return;
     }
 
     // Delete Message with Mutex Lock
     if (pin.lastMessageId !== undefined) {
-      await Bootstrap.bot.helpers.deleteMessage(pin.channelId, pin.lastMessageId, 'Sticky Message').catch((e) => {
-        Optic.f.debug('Failed to delete last pinned message. Already deleted?', pin.lastMessageId, e.stack);
+      await KVC.persistd.consumer.add({
+        queueTaskConsume: 'global.scheduleDeleteMessage',
+        parameter: new Map<string, string>([
+          ['channelId', pin.channelId],
+          ['messageId', pin.lastMessageId],
+          ['reason', 'Removed Pinned Message for Reposting'],
+        ]),
       });
     }
 

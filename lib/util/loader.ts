@@ -5,15 +5,20 @@ import { Optic } from './optic.ts';
 /**
  * Dynamic Runtime Loader
  */
+Array.fromAsync;
 export class DynamicModuleLoader extends AsyncInitializable {
   public override async initialize(): Promise<void> {
-    for await (
-      const ent of walk(new URL('../../module', import.meta.url), {
-        exts: ['.ts'],
-        skip: [
-          /\/logic\//g,
-        ],
-      })
+    const opts = {
+      exts: ['.ts'],
+      skip: [
+        /\/logic\//g,
+      ],
+    };
+    for (
+      const ent of [
+        ...(await Array.fromAsync(walk(new URL('../../module', import.meta.url), opts))),
+        ...(await Array.fromAsync(walk(new URL('../task', import.meta.url), opts))),
+      ]
     ) {
       const imported = await import(ent.path).catch((e: Error) => e) as {
         default: new () => AsyncInitializable;

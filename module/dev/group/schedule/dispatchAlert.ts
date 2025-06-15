@@ -22,7 +22,6 @@ export default class extends AsyncInitializable {
             const guild = await Bootstrap.bot.cache.guilds.get(BigInt(alert.value.guildId!));
             const channel = await Bootstrap.bot.cache.channels.get(BigInt(alert.value.toChannelId));
             if (guild === undefined || channel === undefined) {
-              Optic.f.warn(`Invalid alert. ${alert.value.guildId}/${alert.value.toChannelId} failed to resolve.`);
               return;
             }
             const member = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, guild.id);

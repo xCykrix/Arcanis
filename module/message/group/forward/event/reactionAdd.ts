@@ -1,8 +1,9 @@
-import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes } from '@discordeno';
+import { avatarUrl, ButtonStyles, type DiscordEmbed, EmbedsBuilder, MessageComponentTypes, type PermissionStrings } from '@discordeno';
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
-import { Emoji } from '../../../../../lib/util/guard/emoji.ts';
+import { Emoji } from '../../../../../lib/util/check/emoji.ts';
+import { Permissions } from '../../../../../lib/util/helper/permissions.ts';
 import { Optic } from '../../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../../mod.ts';
 
@@ -23,13 +24,16 @@ export default class extends AsyncInitializable {
       });
       let kvFindLock = await KVC.persistd.locks.findByPrimaryIndex('guid', lockGuid);
       while (kvFindLock?.versionstamp !== undefined && kvFindLock.value.lockoutMutexId !== 'willNeverUnlock') {
-        Optic.f.warn(`Waiting on mutex to be released for message.forward.reactionAdd... Prevents lost events.`);
+        Optic.f.debug('[Message/Forward] Waiting for mutex to be released on message.forward.reactionAdd.', {
+          channelId: reaction.channelId.toString(),
+          messageId: reaction.messageId.toString(),
+        });
         kvFindLock = await KVC.persistd.locks.findByPrimaryIndex('guid', lockGuid);
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
       if (kvFindLock?.value.lockoutMutexId === 'willNeverUnlock') return;
 
-      const lock = await KVC.persistd.locks.add({
+      const commit = await KVC.persistd.locks.add({
         guid: lockGuid,
         locked: true,
         lockedAt: Date.now(),
@@ -37,8 +41,24 @@ export default class extends AsyncInitializable {
       }, {
         expireIn: 3000,
       });
-      if (!lock.ok) {
-        Optic.f.warn('Failed to write mutex on message.forward.reactionAdd... Failed to commit. Exiting to prevent mutex race, but the event was missed. This should rarely be seen.');
+      if (!commit.ok) {
+        Optic.f.debug(`[Message/Forward] Failed to commit to lock cache via add. Prevents racing due to GUID overlap or duplication.`, {
+          channelId: reaction.channelId.toString(),
+          messageId: reaction.messageId.toString(),
+        });
+        return;
+      }
+
+      // Check Permissions
+      const guild = await Bootstrap.bot.cache.guilds.get(reaction.guildId)!;
+      const botMember = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, reaction.guildId)!;
+      // Permission Guard (Target Channel) - Bot Permissions
+      const toBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
+      if (!Permissions.hasChannelPermissions(guild!, reaction.channelId, botMember!, toBotPermissions)) {
+        Optic.f.debug(`[Message/Forward] Permissions required for an operation were missing. Waiting for mutex to expire to reduce database load.`, {
+          channelId: reaction.channelId.toString(),
+          messageId: reaction.messageId.toString(),
+        });
         return;
       }
 
@@ -76,14 +96,21 @@ export default class extends AsyncInitializable {
       // Check Count of Reactions
       const count = reactionFromMessage.count - (reactionFromMessage.me ? 1 : 0);
       if (count < forwarder.value.threshold) {
-        Optic.f.debug('Bounced forward due to not meeting threshold.');
+        Optic.f.debug('[Message/Forward] Bounced forward due to not meeting threshold.', {
+          channelId: reaction.channelId.toString(),
+          messageId: reaction.messageId.toString(),
+        });
+
         await KVC.persistd.locks.deleteByPrimaryIndex('guid', lockGuid);
         return;
       }
 
       // Check Age of Message
       if (message.timestamp < (Date.now() - (forwarder.value.within * 1000))) {
-        Optic.f.debug('Bounced forward due to message being too old.');
+        Optic.f.debug('[Message/Forward] Bounced forward due to message being too old.', {
+          channelId: reaction.channelId.toString(),
+          messageId: reaction.messageId.toString(),
+        });
         await KVC.persistd.locks.deleteByPrimaryIndex('guid', lockGuid);
         return;
       }
@@ -95,7 +122,7 @@ export default class extends AsyncInitializable {
       // Recheck Lock
       kvFindLock = await KVC.persistd.locks.findByPrimaryIndex('guid', lockGuid);
       if (kvFindLock?.value?.lockoutMutexId !== mutex) {
-        Optic.f.warn('Mutex mismatch on message.forward.reactionAdd. Exited to prevent mutex race. Lock is untouched.');
+        Optic.f.warn('[Message/Forward] Mutex mismatch on message.forward.reactionAdd. Exited to prevent mutex race. Lock must expire.');
         return;
       }
       await KVC.persistd.locks.updateByPrimaryIndex('guid', lockGuid, {
@@ -103,6 +130,8 @@ export default class extends AsyncInitializable {
       }, {
         expireIn: forwarder.value.within * 1000,
       });
+
+      // TODO: Permission Guard
 
       // Dispatch
       switch (type) {

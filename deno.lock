@@ -23,6 +23,7 @@
     "jsr:@std/ulid@1.0.0": "1.0.0",
     "npm:@discordeno/bot@next": "21.0.0-next.2eace55",
     "npm:@types/node@*": "22.15.15",
+    "npm:cron@^4.3.1": "4.3.1",
     "npm:dd-cache-proxy@latest": "2.6.4_@discordeno+bot@21.0.0-next.2eace55",
     "npm:url-regex-safe@*": "4.0.0",
     "npm:zod@^3.24.0": "3.25.23"
@@ -147,10 +148,20 @@
         "@discordeno/types"
       ]
     },
+    "@types/luxon@3.6.2": {
+      "integrity": "sha512-R/BdP7OxEMc44l2Ex5lSXHoIXTB2JLNa3y2QISIbr58U/YcsffyQrYW//hZSdrfxrjRZj3GcUoxMPGdO8gSYuw=="
+    },
     "@types/node@22.15.15": {
       "integrity": "sha512-R5muMcZob3/Jjchn5LcO8jdKwSCbzqmPB6ruBxMcf9kbxtniZHP327s6C37iOfuw8mbKK3cAQa7sEl7afLrQ8A==",
       "dependencies": [
         "undici-types"
+      ]
+    },
+    "cron@4.3.1": {
+      "integrity": "sha512-7x7DoEOxV11t3OPWWMjj1xrL1PGkTV5RV+/54IJTZD7gStiaMploY43EkeBSkDZTLRbUwk+OISbQ0TR133oXyA==",
+      "dependencies": [
+        "@types/luxon",
+        "luxon"
       ]
     },
     "dd-cache-proxy@2.6.4_@discordeno+bot@21.0.0-next.2eace55": {
@@ -164,6 +175,9 @@
     },
     "ip-regex@4.3.0": {
       "integrity": "sha512-B9ZWJxHHOHUhUjCPrMpLD4xEq35bUTClHM1S6CBU5ixQnkZmwipwgc96vAd7AAGM9TGHvJR+Uss+/Ak6UphK+Q=="
+    },
+    "luxon@3.6.1": {
+      "integrity": "sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ=="
     },
     "tlds@1.259.0": {
       "integrity": "sha512-AldGGlDP0PNgwppe2quAvuBl18UcjuNtOnDuUkqhd6ipPqrYYBt3aTxK1QTsBVknk97lS2JcafWMghjGWFtunw==",
@@ -202,6 +216,7 @@
       "jsr:@std/fs@1.0.18",
       "jsr:@std/ulid@1.0.0",
       "npm:@discordeno/bot@next",
+      "npm:cron@^4.3.1",
       "npm:dd-cache-proxy@latest",
       "npm:url-regex-safe@*"
     ]
