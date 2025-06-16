@@ -1,6 +1,8 @@
 import { CronJob } from '@cron';
+import type { PermissionStrings } from '@discordeno';
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
+import { Permissions } from '../../../../../lib/util/helper/permissions.ts';
 import { Optic } from '../../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../../mod.ts';
 import { MessagePinOp } from '../logic/op.ts';
@@ -30,10 +32,24 @@ export default class extends AsyncInitializable {
 
             // Timeout
             if (entry.value.lastMessageAt !== undefined && (Date.now() < (entry.value.lastMessageAt + ((entry.value.every ?? 5) * 1000)))) {
-              return;
+              continue;
             }
 
-            // TODO: Permission Check
+            // Permission Guard
+            const channel = await Bootstrap.bot.cache.channels.get(BigInt(entry.value.channelId));
+            const guild = await Bootstrap.bot.cache.guilds.get(channel?.guildId!);
+            const botMember = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, channel?.guildId!);
+            if (channel === undefined || guild === undefined) continue;
+
+            const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
+            if (!Permissions.hasChannelPermissions(guild!, channel.id, botMember!, botPermissions)) {
+              Optic.f.warn(`[Task/global.scheduleDeleteMessage] Permissions required for an operation were missing. Removing entry and sending alert to specified guild.`, {
+                channelId: entry.value.channelId,
+                lastMessageId: entry.value.lastMessageId,
+              });
+              // TODO: Dispatch an Alert Consumer and Suppress Alerts Lockout Cache
+              continue;
+            }
 
             // (Heavy Check): Poll Messages to Verify Consensus.
             const messages = await Bootstrap.bot.helpers.getMessages(entry.value.channelId, {

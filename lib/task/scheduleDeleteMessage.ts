@@ -1,7 +1,9 @@
 import { CronJob } from '@cron';
+import { PermissionStrings } from '@discordeno';
 import { Bootstrap } from '../../mod.ts';
 import { AsyncInitializable } from '../generic/initializable.ts';
 import { KVC } from '../kvc/kvc.ts';
+import { Permissions } from '../util/helper/permissions.ts';
 import { Optic } from '../util/optic.ts';
 
 export default class extends AsyncInitializable {
@@ -24,11 +26,31 @@ export default class extends AsyncInitializable {
           for (const entry of getPinned.result) {
             const channelId = entry.value.parameter.get('channelId');
             const messageId = entry.value.parameter.get('messageId');
+            const isOwnMessage = entry.value.parameter.get('isOwnMessage') === 'true' ? true : false;
             const reason = entry.value.parameter.get('reason') ?? 'Unspecified';
             const after = parseInt(entry.value.parameter.get('after') ?? '0');
 
             if (channelId === undefined || messageId === undefined) continue;
             if (after !== 0 && Date.now() < after) continue;
+
+            // Permission Guard
+            const channel = await Bootstrap.bot.cache.channels.get(BigInt(channelId));
+            const guild = await Bootstrap.bot.cache.guilds.get(channel?.guildId!);
+            const botMember = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, channel?.guildId!);
+            if (channel === undefined || guild === undefined) continue;
+            if (botMember === undefined) continue;
+
+            const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL'];
+            if (!isOwnMessage) botPermissions.push('MANAGE_MESSAGES');
+            if (!Permissions.hasChannelPermissions(guild!, channel.id, botMember!, botPermissions)) {
+              Optic.f.warn(`[Task/global.scheduleDeleteMessage] Permissions required for an operation were missing. Removing entry and sending alert to specified guild.`, {
+                channelId,
+                messageId,
+              });
+              // TODO: Dispatch an Alert Consumer Event Before Deletion
+              await KVC.persistd.consumer.delete(entry.id);
+              continue;
+            }
 
             // Delete Message
             Optic.f.debug(`[Task/global.scheduleDeleteMessage] Consuming deletion of ${channelId}/${messageId} on sequence page ${i}.`);

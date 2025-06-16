@@ -5,9 +5,8 @@ import type { PersonalPinger, PingerChannelMap, PingerSetup, PingerSetupRole, Se
 import type { ReactionModuleConfiguration, ReactionModuleExclusionConfiguration } from './model/appd/reaction.ts';
 import type { AlertConfiguration, ConsumedDispatchAlert, DispatchedAlert } from './model/persistd/alert.ts';
 import type { Component } from './model/persistd/component.ts';
-import { Consumer } from './model/persistd/consumer.ts';
+import type { Consumer } from './model/persistd/consumer.ts';
 import type { Lock } from './model/persistd/lock.ts';
-import type { TemporaryDispatch } from './model/persistd/temporary.ts';
 import type { Application } from './model/rconf/application.model.ts';
 
 function createModel<T = { type: string }>(): Model<T> {
@@ -139,14 +138,6 @@ const persistdStaticSchema = {
   locks: collection(createModel<Lock>(), {
     indices: {
       guid: 'primary',
-    },
-  }),
-
-  // Temporary: Cached Messages for PC
-  tds: collection(createModel<TemporaryDispatch>(), {
-    indices: {
-      guildId: 'secondary',
-      messageId: 'primary',
     },
   }),
 };

@@ -90,7 +90,7 @@ export default class extends AsyncInitializable {
             dispatchEventId: crypto.randomUUID(),
             message: component.text!,
           }, {
-            expireIn: 60000,
+            expireIn: 300000,
           });
 
           // Respond

@@ -3,7 +3,7 @@ import { getLang } from '../../../constants/lang.ts';
 import { GroupBuilder } from '../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
 import { KVC } from '../../../lib/kvc/kvc.ts';
-import { stringify } from '../../../lib/util/helper/stringify.ts';
+import { stringify } from '../../../lib/util/funct/stringify.ts';
 import { Optic } from '../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../mod.ts';
 import type { DevDefinition } from '../definition.ts';
