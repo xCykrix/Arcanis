@@ -1,5 +1,5 @@
 import { CronJob } from '@cron';
-import { PermissionStrings } from '@discordeno';
+import type { PermissionStrings } from '@discordeno';
 import { Bootstrap } from '../../mod.ts';
 import { AsyncInitializable } from '../generic/initializable.ts';
 import { KVC } from '../kvc/kvc.ts';
@@ -19,11 +19,11 @@ export default class extends AsyncInitializable {
         // Paginate Database Queries
         for (let i = 0; i < iterations; i++) {
           Optic.f.debug(`[Task/global.scheduleDeleteMessage] Consuming sequence page: ${i}.`);
-          const getPinned = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.scheduleDeleteMessage', {
+          const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.scheduleDeleteMessage', {
             limit: pageLength,
             offset: i * pageLength,
           });
-          for (const entry of getPinned.result) {
+          for (const entry of getConsumers.result) {
             const channelId = entry.value.parameter.get('channelId');
             const messageId = entry.value.parameter.get('messageId');
             const isOwnMessage = entry.value.parameter.get('isOwnMessage') === 'true' ? true : false;
@@ -47,7 +47,22 @@ export default class extends AsyncInitializable {
                 channelId,
                 messageId,
               });
-              // TODO: Dispatch an Alert Consumer Event Before Deletion
+              const alert = await KVC.persistd.alert.findByPrimaryIndex('guildId', channel?.guildId?.toString() ?? 'valueNeverFound');
+              if (alert?.value !== undefined) {
+                await KVC.persistd.consumer.add({
+                  queueTaskConsume: 'dev.alert.immediateMessage',
+                  parameter: new Map([
+                    ['channelId', alert.value.toChannelId],
+                    [
+                      'alert',
+                      [
+                        `Unable to delete message in <#${channelId}> due to one or more missing permissions.`,
+                        `Permissions: ${botPermissions.join(' ')}`,
+                      ].join('\n'),
+                    ],
+                  ]),
+                });
+              }
               await KVC.persistd.consumer.delete(entry.id);
               continue;
             }

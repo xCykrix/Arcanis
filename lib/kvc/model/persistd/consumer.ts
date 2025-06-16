@@ -1,5 +1,9 @@
+type ConsumerKeys =
+  | 'global.scheduleDeleteMessage'
+  | 'dev.alert.immediateMessage';
+
 export type Consumer = {
-  queueTaskConsume: string;
+  queueTaskConsume: ConsumerKeys;
   parameter: Map<string, string>;
   _failedConsumeAttempts?: number;
 };
