@@ -52,10 +52,11 @@ export default class extends AsyncInitializable {
       // Check Permissions
       const guild = await Bootstrap.bot.cache.guilds.get(reaction.guildId)!;
       const botMember = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, reaction.guildId)!;
-      // Permission Guard (Target Channel) - Bot Permissions
-      const toBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
-      if (!Permissions.hasChannelPermissions(guild!, reaction.channelId, botMember!, toBotPermissions)) {
-        Optic.f.debug(`[Message/Forward] Permissions required for an operation were missing. Waiting for mutex to expire to reduce database load.`, {
+
+      // Permission Guard (Source Channel) - Bot Permissions
+      const fromBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
+      if (!Permissions.hasChannelPermissions(guild!, reaction.channelId, botMember!, fromBotPermissions)) {
+        Optic.f.debug(`[Message/Forward] Permissions in source channel required for an operation were missing. Waiting for mutex to expire to reduce database load.`, {
           channelId: reaction.channelId.toString(),
           messageId: reaction.messageId.toString(),
         });
@@ -69,6 +70,16 @@ export default class extends AsyncInitializable {
       const forwarder = kvFind.result[0];
       if (forwarder?.versionstamp === undefined) {
         await KVC.persistd.locks.deleteByPrimaryIndex('guid', lockGuid);
+        return;
+      }
+
+      // Permission Guard (Target Channel) - Bot Permissions
+      const toBotPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'SEND_MESSAGES'];
+      if (!Permissions.hasChannelPermissions(guild!, BigInt(forwarder.value.toChannelId), botMember!, toBotPermissions)) {
+        Optic.f.debug(`[Message/Forward] Permissions in target channel required for an operation were missing. Waiting for mutex to expire to reduce database load.`, {
+          channelId: reaction.channelId.toString(),
+          messageId: reaction.messageId.toString(),
+        });
         return;
       }
 
@@ -130,8 +141,6 @@ export default class extends AsyncInitializable {
       }, {
         expireIn: forwarder.value.within * 1000,
       });
-
-      // TODO: Permission Guard
 
       // Dispatch
       switch (type) {
