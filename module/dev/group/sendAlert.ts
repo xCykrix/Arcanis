@@ -2,9 +2,9 @@ import { ChannelTypes, type MessageComponent, MessageComponentTypes, TextStyles 
 import { getLang } from '../../../constants/lang.ts';
 import { GroupBuilder } from '../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
-import { KVC } from '../../../lib/kvc/kvc.ts';
 import { Responses } from '../../../lib/util/helper/responses.ts';
 import type { DevDefinition } from '../definition.ts';
+import DispatchAlert from './schedule/dispatchAlert.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
@@ -85,12 +85,8 @@ export default class extends AsyncInitializable {
             return;
           }
 
-          // Assign to Dispatcher
-          await KVC.persistd.dispatchedAlert.add({
-            dispatchEventId: crypto.randomUUID(),
+          await DispatchAlert.sendGlobalAlert({
             message: component.text!,
-          }, {
-            expireIn: 300000,
           });
 
           // Respond

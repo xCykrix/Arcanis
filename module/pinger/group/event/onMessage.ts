@@ -12,6 +12,8 @@ export default class extends AsyncInitializable {
       if (message.guildId === undefined) return;
       const kvFindGlobal = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', message.guildId.toString());
       if (kvFindGlobal?.versionstamp === undefined) return;
+      const mapping = await KVC.appd.pingerChannelMap.findBySecondaryIndex('channelId', message.channelId.toString());
+      if ((mapping.result ?? []).length === 0) return;
 
       // Parse and Rebuild Message
       const texts: string[] = [];
@@ -109,7 +111,6 @@ export default class extends AsyncInitializable {
 
       // Run Mappings
       const set = new Set<string>();
-      const mapping = await KVC.appd.pingerChannelMap.findBySecondaryIndex('channelId', message.channelId.toString());
       for (const map of mapping.result) {
         const kvFind = await KVC.appd.serverPinger.findByPrimaryIndex('guid', map.value.guidOfPinger);
         if (kvFind?.versionstamp === undefined) {
@@ -149,7 +150,7 @@ export default class extends AsyncInitializable {
 
       // Send Message
       await Bootstrap.bot.helpers.sendMessage(message.channelId, {
-        content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle).replace('{{SKU}}', sku).replace('{{ROLES}}', roles.join(' ')),
+        content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle.trim()).replace('{{SKU}}', sku.trim()).replace('{{ROLES}}', roles.join(' ')),
       });
     });
   }

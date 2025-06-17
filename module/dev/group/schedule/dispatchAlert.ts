@@ -1,25 +1,52 @@
 import { CronJob } from '@cron';
 import type { PermissionStrings } from '@discordeno';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
+import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
 import { Permissions } from '../../../../lib/util/helper/permissions.ts';
+import { Responses } from '../../../../lib/util/helper/responses.ts';
 import { Optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
 
-export default class extends AsyncInitializable {
+export default class DispatchAlert extends AsyncInitializable {
+  public static async sendGlobalAlert(passthrough: {
+    message: string;
+  }): Promise<void> {
+    const alerts = await KVC.persistd.alert.getMany();
+    for (const alert of alerts.result ?? []) {
+      await KVC.persistd.consumer.add({
+        queueTaskConsume: 'dev.alert.immediateMessage',
+        parameter: new Map([
+          ['dispatchId', crypto.randomUUID()],
+          ['channelId', alert.value.toChannelId],
+          ['message', passthrough.message],
+        ]),
+      }, {
+        expireIn: 300000,
+      });
+    }
+  }
+
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     CronJob.from({
-      cronTime: '0 * * * *',
+      cronTime: '*/5 * * * * *',
       onTick: async () => {
-        const alerts = await KVC.persistd.alert.getMany();
         const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'dev.alert.immediateMessage');
         for (const entry of getConsumers.result) {
-          const channelId = entry.value.parameter.get('channelId');
-          const message = entry.value.parameter.get('alert');
+          const dispatchId = entry.value.parameter.get('dispatchId')!;
+          const channelId = entry.value.parameter.get('channelId')!;
 
-          // Guard Execution
-          if (channelId === undefined) continue;
+          // Check Evaluation
+          const guid = GUID.make({
+            moduleId: 'dev.alert.immediateMessage:queueTaskConsume',
+            channelId,
+            constants: [
+              dispatchId,
+            ],
+          });
+          const locks = await KVC.persistd.locks.findByPrimaryIndex('guid', guid);
+          if (locks?.value.lockedAt !== undefined) continue;
 
           // Permission Guard
           const channel = await Bootstrap.bot.cache.channels.get(BigInt(channelId));
@@ -36,45 +63,44 @@ export default class extends AsyncInitializable {
             continue;
           }
 
-          // Dispatch Alert
-          await KVC.persistd.consumer.delete(entry.id);
-          // TODO: SEND MESSAGgiE
-        }
-
-        // X OLD CODE
-        // const alerts = await KVC.persistd.alert.getMany();
-        for (const alert of alerts.result) {
-          const consumedDispatch = await KVC.persistd.consumedDispatchedAlert.findBySecondaryIndex('dispatchEventId', entry.value.dispatchEventId, {
-            filter: (v) => v.value.guildId === alert.value.guildId,
+          // Write to Lock
+          await KVC.persistd.locks.add({
+            guid,
+            locked: true,
+            lockedAt: Date.now(),
+          }, {
+            expireIn: 900000,
           });
-          if (consumedDispatch.result.length === 0) {
-            // Write a Dispatch Notice
-            await KVC.persistd.consumedDispatchedAlert.add({
-              guildId: alert.value.guildId,
-              dispatchEventId: entry.value.dispatchEventId,
-            }, {
-              expireIn: 1800000,
-            });
 
-            // Send Message
-            Optic.f.info('[Dev/Alert] Global alert has been consumed.', {
-              guildId: alert.value.guildId,
-              channelId: alert.value.toChannelId,
+          // Get Alert
+          const message = entry.value.parameter.get('message');
+
+          // Dispatch Alert to Channel
+          Optic.f.info(`[Task/global.dev.alert.immediateMessage] Consumed dispatched request.`, {
+            dispatchId,
+            guildId: channel.guildId!,
+            channelId,
+          });
+
+          console.info('sendMessageCall');
+          await Bootstrap.bot.helpers.sendMessage(channel.id, {
+            embeds: Responses.success.make()
+              .setTitle('Developer Update or Alert')
+              .setDescription(message!),
+          }).catch((e) => {
+            Optic.incident({
+              moduleId: 'Task/global.dev.alert.immediateMessage',
+              message: 'Failed to dispatch message to guild.',
+              err: e,
             });
-            await Bootstrap.bot.helpers.sendMessage(channel.id, {
-              embeds: Responses.success.make()
-                .setDescription(entry.value.message),
-            }).catch((e) => {
-              Optic.f.warn('[Dev/Alert] Unable to send alert due to Discord API Error', {
-                guildId: alert.value.guildId,
-                channelId: alert.value.toChannelId,
-                e,
-              });
-            });
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
+          });
+
+          await KVC.persistd.consumer.delete(entry.id);
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       },
+      waitForCompletion: true,
+      start: true,
     });
   }
 }
