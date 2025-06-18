@@ -1,4 +1,5 @@
 type ConsumerKeys =
+  | 'global.addReactionToMessage'
   | 'global.scheduleDeleteMessage'
   | 'dev.alert.immediateMessage';
 

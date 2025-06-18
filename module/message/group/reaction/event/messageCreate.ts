@@ -1,7 +1,7 @@
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
 import type { ReactionType } from '../../../../../lib/kvc/model/appd/reaction.ts';
-import { Optic } from '../../../../../lib/util/optic.ts';
+import AddReactionToMessage from '../../../../../lib/task/addReactionsToMessage.ts';
 import { Bootstrap } from '../../../../../mod.ts';
 
 export default class extends AsyncInitializable {
@@ -39,12 +39,11 @@ export default class extends AsyncInitializable {
       }
 
       // Apply Reactions
-      for (const react of result.value.reaction) {
-        await Bootstrap.bot.helpers.addReaction(message.channelId, message.id, react).catch((e) => {
-          Optic.f.warn(`[${message.channelId}/${message.id}] Failed to add reaction '${react}'.`, e);
-        });
-        await new Promise((resolve) => setTimeout(resolve, 1250));
-      }
+      await AddReactionToMessage.queue({
+        channelId: message.channelId.toString(),
+        messageId: message.id.toString(),
+        reactions: result.value.reaction.values().toArray(),
+      });
     });
   }
 }

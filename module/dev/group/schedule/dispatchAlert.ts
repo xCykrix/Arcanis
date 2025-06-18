@@ -9,6 +9,22 @@ import { Optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
 
 export default class DispatchAlert extends AsyncInitializable {
+  public static async sendGuildAlert(passthrough: {
+    guildId: string;
+    message: string;
+  }): Promise<void> {
+    const alert = await KVC.persistd.alert.findByPrimaryIndex('guildId', passthrough.guildId);
+    if (alert?.versionstamp === undefined) return;
+
+    await KVC.persistd.consumer.add({
+      queueTaskConsume: 'dev.alert.immediateMessage',
+      parameter: new Map([
+        ['dispatchId', crypto.randomUUID()],
+        ['channelId', alert.value.toChannelId],
+        ['message', passthrough.message],
+      ]),
+    });
+  }
   public static async sendGlobalAlert(passthrough: {
     message: string;
   }): Promise<void> {

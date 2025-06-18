@@ -7,53 +7,54 @@ import { KVC } from '../kvc/kvc.ts';
 import { Permissions } from '../util/helper/permissions.ts';
 import { Optic } from '../util/optic.ts';
 
-export default class ScheduleDeleteMessage extends AsyncInitializable {
-  public static async schedule(passthrough: {
+export default class AddReactionToMessage extends AsyncInitializable {
+  public static async queue(passthrough: {
     channelId: string;
     messageId: string;
-    reason?: string;
-    isOwnMessage?: boolean;
-    after?: number;
+    reactions: string[];
   }): Promise<void> {
-    await KVC.persistd.consumer.add({
-      queueTaskConsume: 'global.scheduleDeleteMessage',
-      parameter: new Map([
-        ['channelId', passthrough.channelId],
-        ['messageId', passthrough.messageId],
-        ['reason', passthrough.reason ?? 'Unspecified'],
-        ['isOwnMessage', passthrough.isOwnMessage ? 'true' : 'false'],
-        ['after', passthrough.after?.toString() ?? '0'],
-      ]),
-    }, {
-      expireIn: 300000,
-    });
+    for (const reaction of passthrough.reactions) {
+      await KVC.persistd.consumer.add({
+        queueTaskConsume: 'global.addReactionToMessage',
+        parameter: new Map([
+          ['channelId', passthrough.channelId],
+          ['messageId', passthrough.messageId],
+          ['reaction', reaction],
+        ]),
+      }, {
+        expireIn: 300000,
+      });
+    }
   }
 
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    const pageLength = 50;
+    const pageLength = 20;
 
     CronJob.from({
       cronTime: '*/1 * * * * *',
       onTick: async () => {
-        const iterations = Math.ceil(await KVC.persistd.consumer.countBySecondaryIndex('queueTaskConsume', 'global.scheduleDeleteMessage') / pageLength);
+        const iterations = Math.ceil(await KVC.persistd.consumer.countBySecondaryIndex('queueTaskConsume', 'global.addReactionToMessage') / pageLength);
+        const failedMessageIds: string[] = [];
 
         // Paginate Database Queries
-        for (let i = 0; i < iterations; i++) {
-          Optic.f.debug(`[Task/global.scheduleDeleteMessage] Consuming sequence page: ${i}.`);
-          const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.scheduleDeleteMessage', {
+        for (let i = 0; i < (iterations > 5 ? 5 : iterations); i++) {
+          Optic.f.debug(`[Task/global.addReactionToMessage] Consuming sequence page: ${i}.`);
+          const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.addReactionToMessage', {
             limit: pageLength,
             offset: i * pageLength,
           });
           for (const entry of getConsumers.result) {
-            const channelId = entry.value.parameter.get('channelId')!;
-            const messageId = entry.value.parameter.get('messageId')!;
-            const reason = entry.value.parameter.get('reason')!;
-            const isOwnMessage = entry.value.parameter.get('isOwnMessage') === 'true' ? true : false;
-            const after = parseInt(entry.value.parameter.get('after')!);
-
+            const channelId = entry.value.parameter.get('channelId');
+            const messageId = entry.value.parameter.get('messageId');
+            const reaction = entry.value.parameter.get('reaction');
             if (channelId === undefined || messageId === undefined) continue;
-            if (after !== 0 && Date.now() < after) continue;
+            if (reaction === undefined) continue;
+
+            // Skip consume if previous iteration had a failed addition. Helps to assure order.
+            if (failedMessageIds.includes(messageId)) {
+              Optic.f.debug(`[Task/global.addReactionToMessage] Skipped ${channelId}/${messageId} due to previous API error in ordered sequence.`);
+            }
 
             // Permission Guard
             const channel = await Bootstrap.bot.cache.channels.get(BigInt(channelId));
@@ -62,10 +63,9 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
             if (channel === undefined || guild === undefined) continue;
             if (botMember === undefined) continue;
 
-            const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL'];
-            if (!isOwnMessage) botPermissions.push('MANAGE_MESSAGES');
+            const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'ADD_REACTIONS'];
             if (!Permissions.hasChannelPermissions(guild!, channel.id, botMember!, botPermissions)) {
-              Optic.f.warn(`[Task/global.scheduleDeleteMessage] Permissions required for an operation were missing. Removing entry and sending alert to specified guild.`, {
+              Optic.f.warn(`[Task/global.addReactionToMessage] Permissions required for an operation were missing. Removing entry and sending alert to specified guild.`, {
                 channelId,
                 messageId,
               });
@@ -76,17 +76,18 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
                   `Permissions: ${botPermissions.join(' ')}`,
                 ].join('\n'),
               });
-              await await KVC.persistd.consumer.delete(entry.id);
+              await KVC.persistd.consumer.delete(entry.id);
               continue;
             }
 
-            // Delete Message
-            Optic.f.debug(`[Task/global.scheduleDeleteMessage] Consuming deletion of ${channelId}/${messageId} on sequence page ${i}.`);
-            const deleted = await Bootstrap.bot.helpers.deleteMessage(channelId, messageId, reason).catch((e) => {
-              Optic.f.warn('[Task/global.scheduleDeleteMessage] Failed to delete message due to Discord API Error.', {
+            // React to Message Message
+            Optic.f.debug(`[Task/global.addReactionToMessage] Consuming adding reaction to ${channelId}/${messageId} on sequence page ${i}. Reaction: ${reaction}`);
+            const deleted = await Bootstrap.bot.helpers.addReaction(channelId, messageId, reaction).catch((e) => {
+              Optic.f.warn('[Task/global.addReactionToMessage] Failed to add reaction to message due to Discord API Error.', {
                 message: e.message,
               });
               entry.value._failedConsumeAttempts = (entry.value._failedConsumeAttempts ?? 0) + 1;
+              failedMessageIds.push(messageId);
               KVC.persistd.consumer.update(entry.id, {
                 _failedConsumeAttempts: entry.value._failedConsumeAttempts,
               });
@@ -95,7 +96,7 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
 
             // Handle Failed Consume Attempts
             if ((entry.value._failedConsumeAttempts ?? 0) >= 2) {
-              Optic.f.warn(`[Task/global.scheduleDeleteMessage] Failed deletion of ${channelId}/${messageId}. Removing consumer for invalid API inquiries.`);
+              Optic.f.warn(`[Task/global.addReactionToMessage] Failed to add reaction twice in ${channelId}/${messageId}. Removing consumer for invalid API inquiries.`);
             } else if (deleted === null) {
               continue;
             }
@@ -110,8 +111,8 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
       },
       errorHandler: (e) => {
         Optic.incident({
-          moduleId: 'global.scheduleDeleteMessage',
-          message: 'Failed to complete the global.scheduleDeleteMessage task.',
+          moduleId: 'global.addReactionToMessage',
+          message: 'Failed to complete the global.addReactionToMessage task.',
           err: e as Error ?? new Error('Unknown Error Occurred.'),
         });
       },
