@@ -1,9 +1,7 @@
 import type { DenoKvCommitError, DenoKvCommitResult } from '@kvdex';
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
-import { Optic } from '../../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../../mod.ts';
-import { MessagePinOp } from '../logic/op.ts';
 
 export default class extends AsyncInitializable {
   private database = KVC.persistd['kv'] as Deno.Kv;
@@ -30,8 +28,8 @@ export default class extends AsyncInitializable {
       }
 
       if ((fetch?.value ?? 0) + 1 >= (kvFind.value.every ?? 5)) {
-        MessagePinOp.op(kvFind.value, true).catch((e) => {
-          Optic.f.warn('Failed to process pin event from messageCreate handler.', e);
+        await KVC.appd.pin.update(kvFind.id, {
+          eventTrigger: true,
         });
       }
     });

@@ -7,6 +7,7 @@ export type PinModuleConfiguration = {
   every?: number;
   within?: number;
 
+  eventTrigger?: boolean;
   lastMessageId?: string;
   lastMessageAt?: number;
 };
@@ -15,5 +16,5 @@ export type PinModuleTemplate = {
   guid: string;
   guildId: string;
   name: string;
-  message: string;  
+  message: string;
 };

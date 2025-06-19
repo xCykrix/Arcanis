@@ -2,9 +2,9 @@ import { ChannelTypes, type MessageComponent, MessageComponentTypes, TextStyles 
 import { getLang } from '../../../constants/lang.ts';
 import { GroupBuilder } from '../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../lib/generic/initializable.ts';
+import DispatchAlertMessage from '../../../lib/task/dispatchAlertMessage.ts';
 import { Responses } from '../../../lib/util/helper/responses.ts';
 import type { DevDefinition } from '../definition.ts';
-import DispatchAlert from './schedule/dispatchAlert.ts';
 
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
@@ -85,7 +85,8 @@ export default class extends AsyncInitializable {
             return;
           }
 
-          await DispatchAlert.sendGlobalAlert({
+          // Send the Global Alert Message to Dispatcher Queue
+          await DispatchAlertMessage.globalAlert({
             message: component.text!,
           });
 

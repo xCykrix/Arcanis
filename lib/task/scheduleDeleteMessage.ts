@@ -1,11 +1,11 @@
 import { CronJob } from '@cron';
 import type { PermissionStrings } from '@discordeno';
 import { Bootstrap } from '../../mod.ts';
-import DispatchAlert from '../../module/dev/group/schedule/dispatchAlert.ts';
 import { AsyncInitializable } from '../generic/initializable.ts';
 import { KVC } from '../kvc/kvc.ts';
 import { Permissions } from '../util/helper/permissions.ts';
 import { Optic } from '../util/optic.ts';
+import DispatchAlertMessage from './dispatchAlertMessage.ts';
 
 export default class ScheduleDeleteMessage extends AsyncInitializable {
   public static async schedule(passthrough: {
@@ -69,10 +69,10 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
                 channelId,
                 messageId,
               });
-              await DispatchAlert.sendGuildAlert({
+              await DispatchAlertMessage.guildAlert({
                 guildId: channel.guildId!.toString(),
                 message: [
-                  `Unable to add reaction for message in <#${channelId}> due to one or more missing permissions.`,
+                  `Unable to delete message in <#${channelId}> due to one or more missing permissions.`,
                   `Permissions: ${botPermissions.join(' ')}`,
                 ].join('\n'),
               });

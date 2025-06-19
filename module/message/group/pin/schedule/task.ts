@@ -2,6 +2,7 @@ import { CronJob } from '@cron';
 import type { PermissionStrings } from '@discordeno';
 import { AsyncInitializable } from '../../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../../lib/kvc/kvc.ts';
+import DispatchAlertMessage from '../../../../../lib/task/dispatchAlertMessage.ts';
 import { Permissions } from '../../../../../lib/util/helper/permissions.ts';
 import { Optic } from '../../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../../mod.ts';
@@ -43,11 +44,17 @@ export default class extends AsyncInitializable {
 
             const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'];
             if (!Permissions.hasChannelPermissions(guild!, channel.id, botMember!, botPermissions)) {
-              Optic.f.warn(`[Task/global.scheduleDeleteMessage] Permissions required for an operation were missing. Removing entry and sending alert to specified guild.`, {
+              Optic.f.warn(`[Task/message.pin] Permissions required for an operation were missing. Skipping sequence.`, {
                 channelId: entry.value.channelId,
                 lastMessageId: entry.value.lastMessageId,
               });
-              // TODO: Dispatch an Alert Consumer and Suppress Alerts Lockout Cache
+              await DispatchAlertMessage.guildAlert({
+                guildId: channel.guildId!.toString(),
+                message: [
+                  `Unable to send pinned message in <#${channel.id}> due to one or more missing permissions.`,
+                  `Permissions: ${botPermissions.join(' ')}`,
+                ].join('\n'),
+              });
               continue;
             }
 

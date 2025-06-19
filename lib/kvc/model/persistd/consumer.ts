@@ -1,7 +1,7 @@
 type ConsumerKeys =
   | 'global.addReactionToMessage'
   | 'global.scheduleDeleteMessage'
-  | 'dev.alert.immediateMessage';
+  | 'global.dispatchAlertMessage';
 
 export type Consumer = {
   queueTaskConsume: ConsumerKeys;

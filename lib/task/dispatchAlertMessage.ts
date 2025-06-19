@@ -1,15 +1,15 @@
 import { CronJob } from '@cron';
 import type { PermissionStrings } from '@discordeno';
-import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
-import { GUID } from '../../../../lib/kvc/guid.ts';
-import { KVC } from '../../../../lib/kvc/kvc.ts';
-import { Permissions } from '../../../../lib/util/helper/permissions.ts';
-import { Responses } from '../../../../lib/util/helper/responses.ts';
-import { Optic } from '../../../../lib/util/optic.ts';
-import { Bootstrap } from '../../../../mod.ts';
+import { Bootstrap } from '../../mod.ts';
+import { AsyncInitializable } from '../generic/initializable.ts';
+import { GUID } from '../kvc/guid.ts';
+import { KVC } from '../kvc/kvc.ts';
+import { Permissions } from '../util/helper/permissions.ts';
+import { Responses } from '../util/helper/responses.ts';
+import { Optic } from '../util/optic.ts';
 
-export default class DispatchAlert extends AsyncInitializable {
-  public static async sendGuildAlert(passthrough: {
+export default class DispatchAlertMessage extends AsyncInitializable {
+  public static async guildAlert(passthrough: {
     guildId: string;
     message: string;
   }): Promise<void> {
@@ -17,7 +17,7 @@ export default class DispatchAlert extends AsyncInitializable {
     if (alert?.versionstamp === undefined) return;
 
     await KVC.persistd.consumer.add({
-      queueTaskConsume: 'dev.alert.immediateMessage',
+      queueTaskConsume: 'global.dispatchAlertMessage',
       parameter: new Map([
         ['dispatchId', crypto.randomUUID()],
         ['channelId', alert.value.toChannelId],
@@ -25,13 +25,13 @@ export default class DispatchAlert extends AsyncInitializable {
       ]),
     });
   }
-  public static async sendGlobalAlert(passthrough: {
+  public static async globalAlert(passthrough: {
     message: string;
   }): Promise<void> {
     const alerts = await KVC.persistd.alert.getMany();
     for (const alert of alerts.result ?? []) {
       await KVC.persistd.consumer.add({
-        queueTaskConsume: 'dev.alert.immediateMessage',
+        queueTaskConsume: 'global.dispatchAlertMessage',
         parameter: new Map([
           ['dispatchId', crypto.randomUUID()],
           ['channelId', alert.value.toChannelId],
@@ -48,7 +48,7 @@ export default class DispatchAlert extends AsyncInitializable {
     CronJob.from({
       cronTime: '*/5 * * * * *',
       onTick: async () => {
-        const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'dev.alert.immediateMessage');
+        const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.dispatchAlertMessage');
         for (const entry of getConsumers.result) {
           const dispatchId = entry.value.parameter.get('dispatchId')!;
           const channelId = entry.value.parameter.get('channelId')!;
