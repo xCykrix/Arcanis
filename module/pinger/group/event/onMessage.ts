@@ -1,6 +1,10 @@
+import type { PermissionStrings } from '@discordeno';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { GUID } from '../../../../lib/kvc/guid.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
+import DispatchAlertMessage from '../../../../lib/task/dispatchAlertMessage.ts';
+import ScheduleDeleteMessage from '../../../../lib/task/scheduleDeleteMessage.ts';
+import { Permissions } from '../../../../lib/util/helper/permissions.ts';
 import { Optic } from '../../../../lib/util/optic.ts';
 import { Bootstrap } from '../../../../mod.ts';
 import { parseKeyword, runKeywordStateMachine } from '../logic/parseKeyword.ts';
@@ -31,6 +35,7 @@ export default class extends AsyncInitializable {
           texts.push(embed.title.toLowerCase());
         }
         if (embed.description !== undefined) texts.push(embed.description.toLowerCase());
+        if (embed.footer?.text !== undefined) texts.push(embed.footer.text.toLowerCase());
         for (const field of embed.fields ?? []) {
           if (field.name.toLowerCase() === 'sku') {
             sku = field.value.toLowerCase();
@@ -52,6 +57,7 @@ export default class extends AsyncInitializable {
               texts.push(followFetchEmbed.title.toLowerCase());
             }
             if (followFetchEmbed.description !== undefined) texts.push(followFetchEmbed.description.toLowerCase());
+            if (followFetchEmbed.footer?.text !== undefined) texts.push(followFetchEmbed.footer.text.toLowerCase());
             for (const field of followFetchEmbed.fields ?? []) {
               if (field.name.toLowerCase() === 'sku') {
                 sku = field.value.toLowerCase();
@@ -144,13 +150,41 @@ export default class extends AsyncInitializable {
       const roles = set.values().toArray().sort((a, b) => {
         return guildRolesSorted.get(b)! - guildRolesSorted.get(a)!;
       }).map((v) => `<@&${v}>`);
+      if (roles.length === 0) return;
 
-      // TODO: Permission Guard
-      // if (!noPermission) need to warn return;
+      // Permission Guard to Send Message
+      const channel = await Bootstrap.bot.cache.channels.get(BigInt(message.channelId));
+      const botMember = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, channel?.guildId!);
+      if (channel === undefined || guild === undefined) return;
+      if (botMember === undefined) return;
+
+      // Permission Guard
+      const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'ADD_REACTIONS'];
+      if (!Permissions.hasChannelPermissions(guild!, channel.id, botMember!, botPermissions)) {
+        Optic.f.warn(`[Task/global.addReactionToMessage] Permissions required for an operation were missing. Removing entry and sending alert to specified guild.`, {
+          channelId: message.channelId,
+          messageId: message.id,
+        });
+        await DispatchAlertMessage.guildAlert({
+          guildId: channel.guildId!.toString(),
+          message: [
+            `Unable to send message in <#${message.channelId}> due to one or more missing permissions.`,
+            `Permissions: ${botPermissions.join(' ')}`,
+          ].join('\n'),
+        });
+        return;
+      }
 
       // Send Message
-      await Bootstrap.bot.helpers.sendMessage(message.channelId, {
+      const sent = await Bootstrap.bot.helpers.sendMessage(message.channelId, {
         content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle.trim()).replace('{{SKU}}', sku.trim()).replace('{{ROLES}}', roles.join(' ')),
+      });
+      await ScheduleDeleteMessage.schedule({
+        channelId: message.channelId.toString(),
+        messageId: message.id.toString(),
+        reason: 'Auto deletion by Alerts Module.',
+        isOwnMessage: true,
+        after: sent.timestamp + 30000,
       });
     });
   }

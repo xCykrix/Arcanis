@@ -3,6 +3,7 @@ import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
 import { KVC } from '../../../../lib/kvc/kvc.ts';
+import ScheduleDeleteMessage from '../../../../lib/task/scheduleDeleteMessage.ts';
 import { Responses } from '../../../../lib/util/helper/responses.ts';
 import type { MessageDefinition } from '../../definition.ts';
 
@@ -44,6 +45,16 @@ export default class extends AsyncInitializable {
                 .setDescription(getLang('message', 'pin', 'none-found')),
             });
             return;
+          }
+
+          // Schedule Message Deletion
+          if (kvFind.value.lastMessageId !== undefined) {
+            await ScheduleDeleteMessage.schedule({
+              channelId: kvFind.value.channelId,
+              messageId: kvFind.value.lastMessageId,
+              isOwnMessage: true,
+              reason: 'Pinned Message Deleted',
+            });
           }
 
           // Delete

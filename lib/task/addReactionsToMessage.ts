@@ -24,6 +24,7 @@ export default class AddReactionToMessage extends AsyncInitializable {
       }, {
         expireIn: 300000,
       });
+      await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * 5) + 1));
     }
   }
 

@@ -31,6 +31,12 @@ export default class extends AsyncInitializable {
         await KVC.appd.pin.update(kvFind.id, {
           eventTrigger: true,
         });
+        result = null;
+        while (result === null || result?.ok === false) {
+          result = await this.database.atomic()
+            .delete(fetch.key)
+            .commit();
+        }
       }
     });
   }

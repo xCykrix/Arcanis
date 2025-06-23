@@ -227,6 +227,7 @@ export default class extends AsyncInitializable {
               message: interaction.message!.content!,
               every: parseInt(constants.values().toArray()[2]),
               within: parseInt(constants.values().toArray()[3]),
+              eventTrigger: true,
             },
             set: {
               guid: GUID.make({
@@ -239,6 +240,7 @@ export default class extends AsyncInitializable {
               message: interaction.message!.content!,
               every: parseInt(constants.values().toArray()[2]),
               within: parseInt(constants.values().toArray()[3]),
+              eventTrigger: true,
             },
           });
 
