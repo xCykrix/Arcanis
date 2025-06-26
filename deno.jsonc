@@ -13,9 +13,7 @@
     "@optic": "jsr:@onjara/optic@2.0.3",
     "@kvdex": "jsr:@olli/kvdex@3.4.0",
     "@discord-emoji": "jsr:@amethyst/discord-emoji",
-    "@url-regex-safe": "npm:url-regex-safe",
-    "@cron": "npm:cron@^4.3.1",
-    "cron": "npm:cron@^4.3.1"
+    "@cron": "npm:cron@^4.3.1"
   },
   "exports": {},
   "nodeModulesDir": "none",

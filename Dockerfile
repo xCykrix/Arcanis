@@ -12,4 +12,4 @@ RUN deno install
 RUN deno cache mod.ts
 
 # Start Deno Application
-CMD ["deno", "run", "-A", "--unstable-kv", "mod.ts"]
+CMD ["deno", "run", "-A", "--unstable-cron", "--unstable-kv", "mod.ts"]
