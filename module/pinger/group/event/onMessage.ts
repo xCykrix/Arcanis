@@ -180,8 +180,8 @@ export default class extends AsyncInitializable {
         content: kvFindGlobal.value.alertMessage.replace('{{TITLE}}', properTitle.trim()).replace('{{SKU}}', sku.trim()).replace('{{ROLES}}', roles.join(' ')),
       });
       await ScheduleDeleteMessage.schedule({
-        channelId: message.channelId.toString(),
-        messageId: message.id.toString(),
+        channelId: sent.channelId.toString(),
+        messageId: sent.id.toString(),
         reason: 'Auto deletion by Alerts Module.',
         isOwnMessage: true,
         after: sent.timestamp + 30000,

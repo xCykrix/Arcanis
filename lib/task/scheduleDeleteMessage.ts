@@ -40,7 +40,6 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
 
         // Paginate Database Queries
         for (let i = 0; i < iterations; i++) {
-          Optic.f.debug(`[Task/global.scheduleDeleteMessage] Consuming sequence page: ${i}.`);
           const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.scheduleDeleteMessage', {
             limit: pageLength,
             offset: i * pageLength,
