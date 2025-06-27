@@ -40,7 +40,6 @@ export default class AddReactionToMessage extends AsyncInitializable {
 
         // Paginate Database Queries
         for (let i = 0; i < (iterations > 5 ? 5 : iterations); i++) {
-          Optic.f.debug(`[Task/global.addReactionToMessage] Consuming sequence page: ${i}.`);
           const getConsumers = await KVC.persistd.consumer.findBySecondaryIndex('queueTaskConsume', 'global.addReactionToMessage', {
             limit: pageLength,
             offset: i * pageLength,
