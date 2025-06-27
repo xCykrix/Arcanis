@@ -1,4 +1,4 @@
-                                                                      import { ChannelTypes } from '@discordeno';
+import { ChannelTypes } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
@@ -30,8 +30,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.server?.create === undefined,
-            pick: args.server?.create ?? null,
+            inhibit: args?.server?.create === undefined,
+            pick: args?.server?.create ?? null,
           };
         },
         handle: async ({ interaction, args, assistant }) => {

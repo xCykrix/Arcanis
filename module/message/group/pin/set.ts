@@ -33,8 +33,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.pin?.set === undefined,
-            pick: args.pin?.set ?? null,
+            inhibit: args?.pin?.set === undefined,
+            pick: args?.pin?.set ?? null,
           };
         },
         handle: async ({ interaction, args, assistant, guild, botMember }) => {

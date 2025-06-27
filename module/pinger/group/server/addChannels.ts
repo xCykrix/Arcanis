@@ -31,8 +31,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.server?.['add-channels'] === undefined,
-            pick: args.server?.['add-channels'] ?? null,
+            inhibit: args?.server?.['add-channels'] === undefined,
+            pick: args?.server?.['add-channels'] ?? null,
           };
         },
         handle: async ({ interaction, args, assistant }) => {

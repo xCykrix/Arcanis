@@ -30,8 +30,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.server?.['remove-alert-role'] === undefined,
-            pick: args.server?.['remove-alert-role'] ?? null,
+            inhibit: args?.server?.['remove-alert-role'] === undefined,
+            pick: args?.server?.['remove-alert-role'] ?? null,
           };
         },
         handle: async ({ interaction, args, assistant }) => {

@@ -31,8 +31,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.forward?.delete === undefined,
-            pick: args.forward?.delete ?? null,
+            inhibit: args?.forward?.delete === undefined,
+            pick: args?.forward?.delete ?? null,
           };
         },
         handle: async ({ interaction, args, assistant }) => {

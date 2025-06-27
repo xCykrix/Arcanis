@@ -30,8 +30,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.pin?.['delete-template'] === undefined,
-            pick: args.pin?.['delete-template'] ?? null,
+            inhibit: args?.pin?.['delete-template'] === undefined,
+            pick: args?.pin?.['delete-template'] ?? null,
           };
         },
         handle: async ({ interaction, args }) => {

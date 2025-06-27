@@ -34,7 +34,7 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
     const pageLength = 50;
 
     CronJob.from({
-      cronTime: '*/1 * * * * *',
+      cronTime: '*/2 * * * * *',
       onTick: async () => {
         const iterations = Math.ceil(await KVC.persistd.consumer.countBySecondaryIndex('queueTaskConsume', 'global.scheduleDeleteMessage') / pageLength);
 

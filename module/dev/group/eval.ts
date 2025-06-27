@@ -11,8 +11,9 @@ import type { DevDefinition } from '../definition.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    KVC;
+    // Static Imports for Eval
     Bootstrap;
+    KVC;
 
     GroupBuilder.builder<
       DevDefinition['eval'],
@@ -34,8 +35,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.eval === undefined,
-            pick: args.eval ?? null,
+            inhibit: args?.eval === undefined,
+            pick: args?.eval ?? null,
           };
         },
         handle: async ({ interaction, args, assistant }) => {

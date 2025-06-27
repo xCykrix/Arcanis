@@ -98,7 +98,6 @@ export default class DispatchAlertMessage extends AsyncInitializable {
             channelId,
           });
 
-          console.info('sendMessageCall');
           await Bootstrap.bot.helpers.sendMessage(channel.id, {
             embeds: Responses.success.make()
               .setTitle('Developer Update or Alert')

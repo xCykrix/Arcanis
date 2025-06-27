@@ -29,8 +29,8 @@ export default class extends AsyncInitializable {
         },
         pickAndInhibit: ({ args }) => {
           return {
-            inhibit: args.manage?.['remove-role'] === undefined,
-            pick: args.manage?.['remove-role'] ?? null,
+            inhibit: args?.manage?.['remove-role'] === undefined,
+            pick: args?.manage?.['remove-role'] ?? null,
           };
         },
         handle: async ({ interaction, args }) => {

@@ -5,7 +5,6 @@ import { Optic } from './optic.ts';
 /**
  * Dynamic Runtime Loader
  */
-Array.fromAsync;
 export class DynamicModuleLoader extends AsyncInitializable {
   public override async initialize(): Promise<void> {
     const opts = {
