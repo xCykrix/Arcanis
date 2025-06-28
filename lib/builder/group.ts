@@ -261,7 +261,6 @@ export class GroupBuilder<Packet, RawPacket> {
         assistant: this.assistant,
       });
       if (pick === null) return;
-      console.info('pick', pick, handler.pick.toString());
 
       // Run Handle
       const choices = await handler.generate({

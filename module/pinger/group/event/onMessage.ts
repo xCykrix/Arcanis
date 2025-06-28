@@ -139,7 +139,7 @@ export default class extends AsyncInitializable {
         }
 
         // Dispatch Alert
-        if (runKeywordStateMachine(keywords, texts, false)) {
+        if (runKeywordStateMachine(keywords, texts)) {
           kvFind.value.rolesToAlert.values().forEach((v) => set.add(v));
         }
       }
@@ -185,7 +185,7 @@ export default class extends AsyncInitializable {
       await ScheduleDeleteMessage.schedule({
         channelId: sent.channelId.toString(),
         messageId: sent.id.toString(),
-        reason: 'Auto deletion by Alerts Module.',
+        reason: 'Auto deletion by Pinger Module.',
         isOwnMessage: true,
         after: sent.timestamp + 30000,
       });

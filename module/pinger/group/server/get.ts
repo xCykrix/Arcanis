@@ -65,7 +65,7 @@ export default class extends AsyncInitializable {
             embeds: Responses.success.make()
               .setTitle(args.name)
               .setDescription(getLang('pinger', 'server.get', 'result'))
-              .addField('Channels', channelList.length > 0 ? channelList.map((v) => `<@&${v}}`).join(' ') : 'No Channels Configured')
+              .addField('Channels', channelList.length > 0 ? channelList.map((v) => `<@&${v}>`).join(' ') : 'No Channels Configured')
               .addField(
                 'Keywords',
                 [
