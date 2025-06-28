@@ -12,6 +12,13 @@ import { parseKeyword, runKeywordStateMachine } from '../logic/parseKeyword.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
+    const skuSupportedFields = [
+      'sku',
+      'pid',
+      'asin',
+      'tcin',
+    ];
+
     Bootstrap.event.add('messageCreate', async (message) => {
       if (message.guildId === undefined) return;
       const kvFindGlobal = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', message.guildId.toString());
@@ -37,9 +44,7 @@ export default class extends AsyncInitializable {
         if (embed.description !== undefined) texts.push(embed.description.toLowerCase());
         if (embed.footer?.text !== undefined) texts.push(embed.footer.text.toLowerCase());
         for (const field of embed.fields ?? []) {
-          if (field.name.toLowerCase() === 'sku') {
-            sku = field.value.toLowerCase();
-          }
+          if (skuSupportedFields.includes(field.name.toLowerCase())) sku = field.value.toLowerCase();
           texts.push(field.value.toLowerCase());
         }
       }
@@ -59,9 +64,7 @@ export default class extends AsyncInitializable {
             if (followFetchEmbed.description !== undefined) texts.push(followFetchEmbed.description.toLowerCase());
             if (followFetchEmbed.footer?.text !== undefined) texts.push(followFetchEmbed.footer.text.toLowerCase());
             for (const field of followFetchEmbed.fields ?? []) {
-              if (field.name.toLowerCase() === 'sku') {
-                sku = field.value.toLowerCase();
-              }
+              if (skuSupportedFields.includes(field.name.toLowerCase())) sku = field.value.toLowerCase();
               texts.push(field.value.toLowerCase());
             }
           }
