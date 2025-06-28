@@ -1,4 +1,4 @@
-FROM denoland/deno:2.3.5
+FROM denoland/deno:2.3.7
 LABEL org.opencontainers.image.source="https://github.com/xCykrix/Arcanis"
 
 # Create Working Directories
