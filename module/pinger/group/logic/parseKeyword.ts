@@ -6,7 +6,7 @@ export function parseKeyword(input: string): string[] | null {
   return input.match(regex)?.filter((v) => v.length > 0).map((v) => v.trim().replaceAll(/\s/g, ' ')) ?? null;
 }
 
-export function runKeywordStateMachine(keywords: string[], texts: string[], personal: boolean = false): boolean {
+export function runKeywordStateMachine(keywords: string[], texts: string[]): boolean {
   let state = false;
   const text = texts.join(' ').normalize('NFKC').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   for (const keyword of keywords) {
@@ -14,7 +14,7 @@ export function runKeywordStateMachine(keywords: string[], texts: string[], pers
       state = false;
       continue;
     }
-    if (keyword === '+all' && !personal) {
+    if (keyword === '+all') {
       state = true;
       continue;
     }
