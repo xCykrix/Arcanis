@@ -74,15 +74,24 @@ export default class extends AsyncInitializable {
       // Fast exit if no title or sku was found.
       if (title === '' && sku === '') return;
 
+      // Create State
       const mutex = crypto.randomUUID();
       const guid = GUID.make({
         moduleId: 'pinger.group.event.onMessage.lockout',
         guildId: message.guildId.toString(),
         channelId: message.channelId.toString(),
         constants: [
-          sku !== '' ? sku : title,
+          title,
         ],
       });
+
+      // Wipe if Expired
+      const getCurrent = await KVC.persistd.locks.findByPrimaryIndex('guid', guid);
+      if (getCurrent?.versionstamp !== undefined && Date.now() >= (getCurrent.value.lockedAt) + kvFindGlobal.value.alertCooldownByProduct * 1000) {
+        await KVC.persistd.locks.delete(getCurrent.id);
+      }
+
+      // Write Lock
       const commit = await KVC.persistd.locks.add({
         guid,
         locked: true,
