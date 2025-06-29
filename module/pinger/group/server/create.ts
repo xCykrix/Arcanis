@@ -46,12 +46,32 @@ export default class extends AsyncInitializable {
             ],
           });
 
+          // Get or Upsert Parent Configuation
+          let kvFindGlobal = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString());
+          if (kvFindGlobal?.versionstamp === undefined) {
+            await KVC.appd.guildPingerSetup.add({
+              guildId: interaction.guildId!.toString(),
+              alertCooldownByProduct: 15,
+              deleteAlertAfter: 30,
+              personalChannelIds: new Set(),
+              alertMessage: '{{TITLE}} {{ROLES}}',
+            });
+            kvFindGlobal = await KVC.appd.guildPingerSetup.findByPrimaryIndex('guildId', interaction.guildId!.toString())!;
+          }
+          if (kvFindGlobal?.versionstamp === undefined) {
+            await interaction.respond({
+              embeds: Responses.error.make()
+                .setDescription(getLang('pinger', 'server.create', 'no-parent-configuration'))
+            })
+            return;
+          }
+
           // Check Exists
           const kvFind = await KVC.appd.serverPinger.findByPrimaryIndex('guid', guid);
           if (kvFind?.versionstamp !== undefined) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('pinger', 'server.create', 'exists', [args.name])),
+                .setDescription(getLang('pinger', 'server.create', 'exists', [kvFindGlobal.value.alertCooldownByProduct, kvFindGlobal.value.deleteAlertAfter])),
             });
             return;
           }
@@ -68,7 +88,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'server.create', 'result')),
+              .setDescription(getLang('pinger', 'server.create', 'result', [kvFindGlobal])),
           });
         },
       });

@@ -117,6 +117,7 @@ export const lang = {
     },
 
     'server.create': {
+      'no-parent-configuration': 'Unable to create or load the upstream configuration. Please report this as an issue.',
       'exists': 'A pinger with the name of {{0}} alreadt exists in this server. Please choose a different name.',
       'result': [
         'The pinger has been created. Keywords will default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
@@ -124,7 +125,7 @@ export const lang = {
         'This pinger has a cooldown of {{0}} second(s) and messages will automatically delete after {{1}} second(s) .',
         '',
         'To add channels, use `/pinger server add-channels`.',
-        'To update keywords or options, use `/pinger server update`.',
+        'To update keywords or options, use `/pinger manage configure`.',
       ].join('\n'),
     },
     'server.delete': {
@@ -144,7 +145,7 @@ export const lang = {
       'result': 'The specified role has been added to the pinger, if not already present.',
     },
     'server.remove-alert-role': {
-      'result': 'The specified role has been removed from the pinger, if it was '
+      'result': 'The specified role has been removed from the pinger, if it was ',
     },
 
     'server.keywords': {
