@@ -61,8 +61,8 @@ export default class extends AsyncInitializable {
           if (kvFindGlobal?.versionstamp === undefined) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('pinger', 'server.create', 'no-parent-configuration'))
-            })
+                .setDescription(getLang('pinger', 'server.create', 'no-parent-configuration')),
+            });
             return;
           }
 
@@ -71,7 +71,7 @@ export default class extends AsyncInitializable {
           if (kvFind?.versionstamp !== undefined) {
             await interaction.respond({
               embeds: Responses.error.make()
-                .setDescription(getLang('pinger', 'server.create', 'exists', [kvFindGlobal.value.alertCooldownByProduct, kvFindGlobal.value.deleteAlertAfter])),
+                .setDescription(getLang('pinger', 'server.create', 'exists')),
             });
             return;
           }
@@ -88,7 +88,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'server.create', 'result', [kvFindGlobal])),
+              .setDescription(getLang('pinger', 'server.create', 'result', [kvFindGlobal.value.alertCooldownByProduct, kvFindGlobal.value.deleteAlertAfter])),
           });
         },
       });
