@@ -1,4 +1,4 @@
-import { ChannelTypes, MessageComponent, MessageComponentTypes, TextInputComponent, TextStyles } from '@discordeno';
+import { ChannelTypes, type MessageComponent, MessageComponentTypes, type TextInputComponent, TextStyles } from '@discordeno';
 import { getLang } from '../../../../constants/lang.ts';
 import { GroupBuilder } from '../../../../lib/builder/group.ts';
 import { AsyncInitializable } from '../../../../lib/generic/initializable.ts';
