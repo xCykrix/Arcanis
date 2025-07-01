@@ -12,7 +12,10 @@ import { parseKeyword, runKeywordStateMachine } from '../logic/parseKeyword.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    const skuSupportedFields = [
+    const ignoreFields = [
+      'offer id',
+    ]
+    const skuFields = [
       'sku',
       'pid',
       'asin',
@@ -44,7 +47,8 @@ export default class extends AsyncInitializable {
         if (embed.description !== undefined) texts.push(embed.description.toLowerCase());
         if (embed.footer?.text !== undefined) texts.push(embed.footer.text.toLowerCase());
         for (const field of embed.fields ?? []) {
-          if (skuSupportedFields.includes(field.name.toLowerCase())) sku = field.value.toLowerCase();
+          if (ignoreFields.includes(field.name.toLowerCase())) continue;
+          if (skuFields.includes(field.name.toLowerCase())) sku = field.value.toLowerCase();
           texts.push(field.value.toLowerCase());
         }
       }
@@ -64,7 +68,8 @@ export default class extends AsyncInitializable {
             if (followFetchEmbed.description !== undefined) texts.push(followFetchEmbed.description.toLowerCase());
             if (followFetchEmbed.footer?.text !== undefined) texts.push(followFetchEmbed.footer.text.toLowerCase());
             for (const field of followFetchEmbed.fields ?? []) {
-              if (skuSupportedFields.includes(field.name.toLowerCase())) sku = field.value.toLowerCase();
+              if (ignoreFields.includes(field.name.toLowerCase())) continue;
+              if (skuFields.includes(field.name.toLowerCase())) sku = field.value.toLowerCase();
               texts.push(field.value.toLowerCase());
             }
           }
@@ -72,7 +77,7 @@ export default class extends AsyncInitializable {
       }
 
       // Fast exit if no title or sku was found.
-      if (title === '' && sku === '') return;
+      if (title === '') return;
 
       // Create State
       const mutex = crypto.randomUUID();
