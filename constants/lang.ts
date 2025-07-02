@@ -81,7 +81,7 @@ export const lang = {
       'none-found': 'The specified auto reaction was not found. Please check the provided information and try again.',
     },
     'reaction.set': {
-      'exceed': 'Discord has a limit of 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} would cause this us exceed 20.',
+      'exceed': 'Discord has a limit of 20 unique reactions per message. You currently have {{0}} reactions already configured, adding {{1}} would cause us to exceed 20.',
       'exclusive': `The message type '{{0}}' is not compatible with '{{1}}'. Please delete the existing auto reaction and try again.`,
       'result': 'The auto reaction(s) have been applied to the specified channel.',
     },
@@ -92,7 +92,7 @@ export const lang = {
       'result': 'The following auto reaction(s) are currently configured.',
     },
     'reaction.exclude': {
-      'result': 'Please use the following drop-downs to configure the exclusion.',
+      'result': 'Please use the following dropdowns to configure the exclusion.',
       'submit': 'The auto reaction exclusions have been updated for the specified channel. You can continue to make changes as needed.',
     },
   },
@@ -104,53 +104,53 @@ export const lang = {
       'result': 'The specified channel has been added to the approved list of personal pinger channels.',
     },
     'manage.add-role': {
-      'result': 'The specified role has had their access and restrictions set or updated.',
+      'result': 'The specified role has had their access and restrictions updated.',
     },
     'manage.remove-channel': {
-      'result': 'The specified channel has been removed from the approved list of pinger channels, if configured. You must re-add this channel to the server or personal category, if needed.',
+      'result': 'The specified channel has been removed from the approved list of personal pinger channels, if configured.',
     },
     'manage.remove-role': {
-      'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to installed tools unless another role is set on this user.',
+      'result': 'The specified role has had their access removed, if configured. Users with this role will no longer receive pinger alerts or have access to licensed software, unless another role is set on this user.',
     },
     'manage.configure': {
-      'result': 'The global pinger configuration has been updated with the specified options.',
+      'result': 'The global pinger configuration has been updated to the specified options.',
     },
 
     'server.create': {
-      'no-parent-configuration': 'Unable to create or load the upstream configuration. Please report this as an issue.',
-      'exists': 'A pinger with the name of {{0}} alreadt exists in this server. Please choose a different name.',
+      'no-parent-configuration': 'Unable to create or load the upstream configuration. Please report this as an issue, this should not happen.',
+      'exists': 'The pinger with a name of {{0}} already exists in this server. Please choose a different name.',
       'result': [
-        'The pinger has been created. Keywords will default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
+        'The pinger, **{{2}}**, has been created. Keywords default to `-all` to prevent pings during setup. You will need to add channels and set the keywords.',
         '',
-        'This pinger has a cooldown of {{0}} second(s) and messages will automatically delete after {{1}} second(s) .',
+        'This pinger has a cooldown of **{{0}}** second(s) and messages will automatically delete after **{{1}}** second(s). This is set globally.',
         '',
-        'To add channels, use `/pinger server add-channels`.',
-        'To update keywords or options, use `/pinger manage configure`.',
+        'To add channels, use `/pinger server add-channels name:{{2}} channels:#chan1 #chan2 #chan3`.',
+        'To update keywords or options, use `/pinger server keywords name:{{2}}`.',
       ].join('\n'),
     },
     'server.delete': {
-      'result': 'The specified pinger has been deleted. All channels and keywords have been removed.',
+      'result': 'The specified pinger has been deleted. All channels and keywords associated have been removed.',
     },
     'server.get': {
       'result': 'The specified pinger is configured with the following channels and keywords.',
     },
     'server.add-channels': {
-      'invalid-channel-type': 'The specified channel is not a valid text or announcement channel. Please choose a different channel.',
-      'result': 'The specified channel(s) have been added to the pinger, if not already present.',
+      'invalid-channel-type': 'The specified channel is not a valid guild announcement or text channel. Please choose a different channel. Forums or Threads are not supported.',
+      'result': 'The channel(s) specified have been added to **{{0}}**, if not already present.',
     },
     'server.remove-channel': {
-      'result': 'The specified channel has been removed from the specified pinger, if it was already present.',
+      'result': 'The channel specified has been removed from **{{0}}**, if it was already present.',
     },
     'server.add-alert-role': {
-      'result': 'The specified role has been added to the pinger, if not already present.',
+      'result': 'The role specified has been added to **{{0}}**, if not already present.',
     },
     'server.remove-alert-role': {
-      'result': 'The specified role has been removed from the pinger, if it was ',
+      'result': 'The role specified has been removed from **{{0}}**, if it was already present.',
     },
 
     'server.keywords': {
-      'invalid': 'The specified keywords were invalid. Please ensure you use the correct format and try again.',
-      'parse-fail': 'The specified keywords could not be parsed. Please ensure you use the correct format and try again. You must have at least 1 positive or negative keyword.',
+      'invalid': 'The keywords provided were not valid. Please ensure you use the correct format and try again.',
+      'parse-fail': 'The specified keywords could not be parsed. Please ensure you use the correct format and try again. You must have at least one positive or negative keyword.',
     },
   },
 } as const;
