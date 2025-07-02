@@ -55,7 +55,7 @@ export default class extends AsyncInitializable {
           const embeds = Responses.success.make()
             .setDescription(getLang('message', 'forward.list', 'result'))
             .setFooter('Page: 1');
-          const fields = new Map<string, Set<[string, string]>>();
+          const fields = new Map<string, Set<[string, string, string]>>();
 
           // Iterate Embeds from Pagination
           const currentPage = kvFind.result.slice(0, 14);
@@ -63,14 +63,12 @@ export default class extends AsyncInitializable {
 
           for (const configuration of currentPage) {
             if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
-            fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
+            fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction, configuration.value.threshold.toString()]);
           }
           for (const [key, value] of fields.entries()) {
-            const chunk: string[] = [];
             for (const v of value) {
-              chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
+              embeds.addField(`Forward From <#${key}> To <#${v[0]}>`, `On ${v[1]} with ${v[2]} reaction(s).`);
             }
-            embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
           }
           embeds.addField('Search Channel', `<#${args.channel.id.toString()}>`);
 
@@ -139,7 +137,7 @@ export default class extends AsyncInitializable {
           const embeds = Responses.success.make()
             .setDescription(getLang('message', 'forward', 'none-found'))
             .setFooter(`Page: ${index + 1}`);
-          const fields = new Map<string, Set<[string, string]>>();
+          const fields = new Map<string, Set<[string, string, string]>>();
 
           // Iterate Embeds from Pagination
           const hasPreviousPage = index >= 1 ? true : false;
@@ -148,16 +146,14 @@ export default class extends AsyncInitializable {
 
           for (const configuration of currentPage) {
             if (!fields.has(configuration.value.fromChannelId)) fields.set(configuration.value.fromChannelId, new Set());
-            fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction]);
+            fields.get(configuration.value.fromChannelId)!.add([configuration.value.toChannelId, configuration.value.reaction, configuration.value.threshold.toString()]);
           }
           for (const [key, value] of fields.entries()) {
-            const chunk: string[] = [];
             for (const v of value) {
-              chunk.push(`To: <#${v[0]}> Reaction: ${v[1]}`);
+              embeds.addField(`Forward From <#${key}> To <#${v[0]}>`, `On ${v[1]} with ${v[2]} reaction(s).`);
             }
-            embeds.addField(`From: <#${key}>`, `${chunk.join('\n')}`);
           }
-          embeds.addField('Search Channel', `<#${channel}>`);
+          embeds.addField('Search Channel', `<#${channel}`);
 
           // Respond
           await interaction.edit({
