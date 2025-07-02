@@ -81,13 +81,13 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
 
             // Delete Message
             Optic.f.debug(`[Task/global.scheduleDeleteMessage] Consuming deletion of ${channelId}/${messageId} on sequence page ${i}.`);
-            const deleted = await Bootstrap.bot.helpers.deleteMessage(channelId, messageId, reason).catch((e) => {
+            const deleted = await Bootstrap.bot.helpers.deleteMessage(channelId, messageId, reason).catch(async (e) => {
               Optic.f.warn(`[Task/global.scheduleDeleteMessage] Failed to delete message due to Discord API Error.`, {
                 failedAttempts: entry.value._failedConsumeAttempts ?? 0,
                 message: e.message,
               });
               entry.value._failedConsumeAttempts = (entry.value._failedConsumeAttempts ?? 0) + 1;
-              KVC.persistd.consumer.update(entry.id, {
+              await KVC.persistd.consumer.update(entry.id, {
                 _failedConsumeAttempts: entry.value._failedConsumeAttempts,
               });
               return null;
@@ -96,6 +96,7 @@ export default class ScheduleDeleteMessage extends AsyncInitializable {
             // Handle Failed Consume Attempts
             if ((entry.value._failedConsumeAttempts ?? 0) >= 2) {
               Optic.f.warn(`[Task/global.scheduleDeleteMessage] Failed deletion of ${channelId}/${messageId}. Removing consumer for invalid API inquiries.`);
+              await KVC.persistd.consumer.delete(entry.id);
             } else if (deleted === null) {
               continue;
             }

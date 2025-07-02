@@ -84,7 +84,7 @@ export default class extends AsyncInitializable {
             if (triggered) {
               // Schedule Deletion on a Trigger
               if (entry.value.lastMessageId) {
-                ScheduleDeleteMessage.schedule({
+                await ScheduleDeleteMessage.schedule({
                   channelId: entry.value.channelId,
                   messageId: entry.value.lastMessageId,
                   reason: 'Pin Module Automation',
@@ -109,12 +109,8 @@ export default class extends AsyncInitializable {
               await KVC.appd.pin.updateByPrimaryIndex('channelId', entry.value.channelId, {
                 lastMessageId: sent.id.toString(),
                 lastMessageAt: sent.timestamp,
+                eventTrigger: false,
               });
-              if (entry.value.eventTrigger) {
-                await KVC.appd.pin.update(entry.id, {
-                  eventTrigger: false,
-                });
-              }
             }
           }
         }
