@@ -6,32 +6,30 @@ import { Optic } from '../../util/optic.ts';
 import DispatchAlertMessage from '../dispatchAlertMessage.ts';
 
 export default class extends AsyncInitializable {
+  // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
     CronJob.from({
       cronTime: '*/5 * * * * *',
       onTick: async () => {
-        const getForwarders = await KVC.appd.forward.getMany();
-        for (const entry of getForwarders.result) {
+        const getReactions = await KVC.appd.reaction.getMany();
+        for (const entry of getReactions.result) {
           // Extract IDs
-          const fromChannelId = entry.value.fromChannelId;
-          const toChannelId = entry.value.toChannelId;
+          const channelId = entry.value.channelId;
 
           // Fetch Cache
-          const fromChannel = await Bootstrap.bot.cache.channels.get(BigInt(fromChannelId));
-          const toChannel = await Bootstrap.bot.cache.channels.get(BigInt(toChannelId));
+          const channel = await Bootstrap.bot.cache.channels.get(BigInt(channelId));
 
           // Check for Orphaned Record
-          if (fromChannel === undefined || toChannel === undefined) {
-            Optic.f.warn('[Task/orphan/pruneMessageForward] Forwarder is orphaned, removing from KVC.', {
+          if (channel === undefined) {
+            Optic.f.warn('[Task/orphan/pruneMessageReact] Reaction is orphaned, removing from KVC.', {
               guildId: entry.value.guildId,
-              fromChannelId,
-              toChannelId,
+              channelId,
             });
+            await KVC.appd.reaction.delete(entry.id);
             await DispatchAlertMessage.guildAlert({
               guildId: entry.value.guildId,
-              message: `Forwarder from <#${fromChannelId}> to <#${toChannelId}> has been pruned due to an orphaned channel records.`,
+              message: `Auto Reaction in <#${channelId}> has been pruned due to an orphaned channel record.`,
             });
-            await KVC.appd.forward.delete(entry.id);
           }
         }
       },
