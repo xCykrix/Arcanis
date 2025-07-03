@@ -153,7 +153,7 @@ export default class extends AsyncInitializable {
               embeds.addField(`Forward From <#${key}> To <#${v[0]}>`, `On ${v[1]} with ${v[2]} reaction(s).`);
             }
           }
-          embeds.addField('Search Channel', `<#${channel}`);
+          embeds.addField('Search Channel', `<#${channel}>`);
 
           // Respond
           await interaction.edit({
