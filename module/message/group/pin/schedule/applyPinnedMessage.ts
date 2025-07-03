@@ -43,7 +43,14 @@ export default class extends AsyncInitializable {
             const channel = await Bootstrap.bot.cache.channels.get(BigInt(entry.value.channelId));
             const guild = await Bootstrap.bot.cache.guilds.get(channel?.guildId!);
             const botMember = await Bootstrap.bot.cache.members.get(Bootstrap.bot.id, channel?.guildId!);
-            if (channel === undefined || guild === undefined) continue;
+            if (channel === undefined || guild === undefined) {
+              await DispatchAlertMessage.guildAlert({
+                guildId: entry.value.guildId,
+                message: `Pinned message in <#${entry.value.channelId}> has been pruned due to an orphaned channel record.`,
+              });
+              await KVC.appd.pin.delete(entry.id);
+              continue;
+            }
 
             const botPermissions: PermissionStrings[] = ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY', 'SEND_MESSAGES'];
             if (!Permissions.hasChannelPermissions(guild!, channel.id, botMember!, botPermissions)) {

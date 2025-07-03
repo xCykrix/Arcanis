@@ -100,7 +100,7 @@ export default class DispatchAlertMessage extends AsyncInitializable {
 
           await Bootstrap.bot.helpers.sendMessage(channel.id, {
             embeds: Responses.success.make()
-              .setTitle('Developer Update or Alert')
+              .setTitle('Alert Message')
               .setDescription(message!),
           }).catch((e) => {
             Optic.incident({

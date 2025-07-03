@@ -2,12 +2,13 @@ import { CronJob } from '@cron';
 import { Bootstrap } from '../../../mod.ts';
 import { AsyncInitializable } from '../../generic/initializable.ts';
 import { KVC } from '../../kvc/kvc.ts';
+import { Optic } from '../../util/optic.ts';
 import DispatchAlertMessage from '../dispatchAlertMessage.ts';
 
 export default class extends AsyncInitializable {
   public override async initialize(): Promise<void> {
     CronJob.from({
-      cronTime: '*/5 * * * *',
+      cronTime: '*/5 * * * * *',
       onTick: async () => {
         const getForwarders = await KVC.appd.forward.getMany();
         for (const entry of getForwarders.result) {
@@ -21,6 +22,11 @@ export default class extends AsyncInitializable {
 
           // Check for Orphaned Record
           if (fromChannel === undefined || toChannel === undefined) {
+            Optic.f.warn('[Task/orphan/pruneMessageForward] Forwarder is orphaned, removing from KVC.', {
+              guildId: entry.value.guildId,
+              fromChannelId,
+              toChannelId,
+            });
             await DispatchAlertMessage.guildAlert({
               guildId: entry.value.guildId,
               message: `Forwarder from <#${fromChannelId}> to <#${toChannelId}> has been pruned due to an orphaned channel records.`,
