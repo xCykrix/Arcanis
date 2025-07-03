@@ -88,7 +88,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'server.create', 'result', [kvFindGlobal.value.alertCooldownByProduct, kvFindGlobal.value.deleteAlertAfter])),
+              .setDescription(getLang('pinger', 'server.create', 'result', [kvFindGlobal.value.alertCooldownByProduct, kvFindGlobal.value.deleteAlertAfter, args.name])),
           });
         },
       });

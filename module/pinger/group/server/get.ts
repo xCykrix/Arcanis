@@ -64,7 +64,7 @@ export default class extends AsyncInitializable {
           await interaction.respond({
             embeds: Responses.success.make()
               .setTitle(args.name)
-              .setDescription(getLang('pinger', 'server.get', 'result'))
+              .setDescription(getLang('pinger', 'server.get', 'result', [kvFind.value.name]))
               .addField('Channels', channelList.length > 0 ? channelList.map((v) => `<#${v}>`).join(' ') : 'No Channels Configured')
               .addField(
                 'Keywords',

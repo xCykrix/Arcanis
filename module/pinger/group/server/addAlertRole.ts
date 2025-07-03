@@ -64,7 +64,7 @@ export default class extends AsyncInitializable {
 
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'server.add-alert-role', 'result')),
+              .setDescription(getLang('pinger', 'server.add-alert-role', 'result', [kvFind.value.name])),
           });
         },
       })

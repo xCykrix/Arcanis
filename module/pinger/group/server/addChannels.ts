@@ -93,7 +93,7 @@ export default class extends AsyncInitializable {
           const values = added.map((v) => `<#${v}>`);
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'server.add-channels', 'result'))
+              .setDescription(getLang('pinger', 'server.add-channels', 'result', [kvFind.value.name]))
               .addField('Channels', values.length > 0 ? values.join(' ') : 'No Channels Added'),
           });
         },

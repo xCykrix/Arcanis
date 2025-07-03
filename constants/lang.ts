@@ -129,10 +129,10 @@ export const lang = {
       ].join('\n'),
     },
     'server.delete': {
-      'result': 'The specified pinger has been deleted. All channels and keywords associated have been removed.',
+      'result': 'Pinger **{{0}}** has been deleted. All channels and keywords associated have been removed.',
     },
     'server.get': {
-      'result': 'The specified pinger is configured with the following channels and keywords.',
+      'result': 'Pinger **{{0}}** is configured with the following channels and keywords.',
     },
     'server.add-channels': {
       'invalid-channel-type': 'The specified channel is not a valid guild announcement or text channel. Please choose a different channel. Forums or Threads are not supported.',

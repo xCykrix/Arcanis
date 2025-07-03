@@ -64,7 +64,7 @@ export default class extends AsyncInitializable {
           // Respond
           await interaction.respond({
             embeds: Responses.success.make()
-              .setDescription(getLang('pinger', 'server.remove-channel', 'result')),
+              .setDescription(getLang('pinger', 'server.remove-channel', 'result', [kvFind.value.name])),
           });
         },
       })
