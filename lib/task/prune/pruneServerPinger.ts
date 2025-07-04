@@ -30,10 +30,6 @@ export default class extends AsyncInitializable {
                 guildId: entry.value.guidOfPinger,
                 channelId,
               });
-              await DispatchAlertMessage.guildAlert({
-                guildId: entry.value.guidOfPinger,
-                message: `Pinger association found for <#${channelId}> but the parent pinger was not found. This should not have happened.`,
-              });
               await KVC.appd.pingerChannelMap.delete(entry.id);
               continue;
             }
@@ -44,7 +40,7 @@ export default class extends AsyncInitializable {
               channelId,
             });
             await DispatchAlertMessage.guildAlert({
-              guildId: entry.value.guidOfPinger,
+              guildId: pinger.value.guildId,
               message: `Pinger association for **${pinger.value.name}** <#${channelId}> has been pruned due to an orphaned channel record.`,
             });
             await KVC.appd.pingerChannelMap.delete(entry.id);
