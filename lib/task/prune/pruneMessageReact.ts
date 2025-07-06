@@ -8,7 +8,7 @@ import DispatchAlertMessage from '../dispatchAlertMessage.ts';
 export default class extends AsyncInitializable {
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    CronJob.from({
+    const job = CronJob.from({
       cronTime: '*/5 * * * * *',
       onTick: async () => {
         const getReactions = await KVC.appd.reaction.getMany();
@@ -34,7 +34,7 @@ export default class extends AsyncInitializable {
         }
       },
       waitForCompletion: true,
-      start: true,
     });
+    setTimeout(job.start, 60000);
   }
 }
