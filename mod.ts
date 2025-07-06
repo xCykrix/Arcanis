@@ -1,16 +1,12 @@
 import type { CreateSlashApplicationCommand } from '@discordeno';
-import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
-import { Defaults } from './lib/defaults.ts';
-import { KVC } from './lib/kvc/kvc.ts';
-import type { Application } from './lib/kvc/model/rconf/application.model.ts';
+import { type CacheBotType } from './lib/bot.ts';
 import { EventManager } from './lib/manager/event.ts';
-import { DynamicModuleLoader } from './lib/util/loader.ts';
-import { Optic } from './lib/util/optic.ts';
+import { sequelizeOrbit, sequelizeTenant } from './database/sequelize.ts';
 
 /** Boostrap Class */
 export class Bootstrap {
   // Internal Registers
-  static application: Application | null = null;
+  // static application: Application | null = null;
 
   /** The Interaction Catalyst Index. */
   public static guildChatInputInteraction = new Set<Omit<CreateSlashApplicationCommand, 'nameLocalizations' | 'descriptionLocalizations' | 'dmPermission' | 'handler' | 'integrationTypes' | 'contexts'>>();
@@ -24,33 +20,41 @@ export class Bootstrap {
 
   /** Main Boostrap Entrypoint. */
   private static async boot(): Promise<void> {
-    // Fetch Data from Remote Configuration Server
-    if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPLICATION_ID' is undefined.`);
-    this.application = (await KVC.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
+    // Connect Database
+    await sequelizeOrbit.authenticate();
+    await sequelizeTenant.authenticate();
 
-    // Check Remote Configuration Server Response
-    if (this.application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);
+    // // Fetch Data from Remote Configuration Server
+    // if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPLICATION_ID' is undefined.`);
+    // this.application = (await KVC.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
 
-    // Post Status
-    Optic.f.info(`Application ID: ${this.application?.applicationId} / ${this.application.publicKey}`);
+    // // Check Remote Configuration Server Response
+    // if (this.application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);
 
-    // Initialize Bot Application
-    this.bot = createBotWithToken(this.application.token);
-    this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
+    // // Post Status
+    // Optic.f.info(`Application ID: ${this.application?.applicationId} / ${this.application.publicKey}`);
+    // Optic.f.info(this.application);
 
-    // Setup Event Manager and Load Default Events
-    this.event = new EventManager(this.bot);
-    await (new Defaults()).initialize();
+    // // Initialize Bot Application
+    // this.bot = createBotWithToken(this.application.token);
+    // this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
 
-    // Trigger Dynamic Module Loader
-    await (new DynamicModuleLoader()).initialize();
+    // // Setup Event Manager and Load Default Events
+    // this.event = new EventManager(this.bot);
+    // await (new Defaults()).initialize();
 
-    // Connect to Discord Gateway.
-    await this.bot.start();
+    // // Trigger Dynamic Module Loader
+    // await (new DynamicModuleLoader()).initialize();
+
+    // // Connect to Discord Gateway.
+    // // await this.bot.start();
   }
 }
 
 // Initialize Application on Primary Entrypoint Interaction.
 if (import.meta.main) {
-  Bootstrap['boot']();
+  Bootstrap['boot']().catch((e) => {
+    console.error('Failed to bootstrap the application:', e);
+    Deno.exit(1);
+  });
 }

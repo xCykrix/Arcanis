@@ -2,16 +2,12 @@
   "version": "5",
   "specifiers": {
     "jsr:@amethyst/discord-emoji@*": "2.5.3",
-    "jsr:@olli/kvdex@3.4.0": "3.4.0",
     "jsr:@onjara/optic@2.0.3": "2.0.3",
-    "jsr:@std/bytes@^1.0.4": "1.0.6",
-    "jsr:@std/cli@1.0.12": "1.0.12",
     "jsr:@std/cli@^1.0.18": "1.0.19",
-    "jsr:@std/collections@^1.0.9": "1.1.1",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/fmt@^1.0.2": "1.0.8",
     "jsr:@std/fmt@^1.0.8": "1.0.8",
-    "jsr:@std/fs@1.0.18": "1.0.18",
+    "jsr:@std/fs@*": "1.0.18",
     "jsr:@std/html@^1.0.4": "1.0.4",
     "jsr:@std/http@*": "1.0.17",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
@@ -19,27 +15,16 @@
     "jsr:@std/path@^1.0.6": "1.1.0",
     "jsr:@std/path@^1.1.0": "1.1.0",
     "jsr:@std/streams@^1.0.9": "1.0.9",
-    "jsr:@std/ulid@1": "1.0.0",
-    "jsr:@std/ulid@1.0.0": "1.0.0",
     "npm:@discordeno/bot@next": "21.0.0-next.2eace55",
     "npm:@types/node@*": "22.15.15",
-    "npm:cron@^4.3.1": "4.3.1",
     "npm:dd-cache-proxy@latest": "2.6.4_@discordeno+bot@21.0.0-next.2eace55",
-    "npm:zod@^3.24.0": "3.25.23"
+    "npm:mariadb@*": "3.4.4",
+    "npm:sequelize-typescript@*": "2.1.6_@types+node@22.15.15_@types+validator@13.15.2_reflect-metadata@0.2.2_sequelize@6.37.7",
+    "npm:sequelize@*": "6.37.7"
   },
   "jsr": {
     "@amethyst/discord-emoji@2.5.3": {
       "integrity": "f3f8c07efb5c9e014bf65cd6afaef436aa8492c61c66d975fd1318c652fce6be"
-    },
-    "@olli/kvdex@3.4.0": {
-      "integrity": "007b1dca50a20f7d036d186fb24875ce2eb19d9c0b3a32878edc1d0e8181aa9a",
-      "dependencies": [
-        "jsr:@std/bytes",
-        "jsr:@std/cli@1.0.12",
-        "jsr:@std/collections",
-        "jsr:@std/ulid@1",
-        "npm:zod"
-      ]
     },
     "@onjara/optic@2.0.3": {
       "integrity": "b4bf8cae0820a3c3f362ba4d78939237fcfa23e3087bbd3f9fd3c883839820f1",
@@ -48,20 +33,11 @@
         "jsr:@std/path@^1.0.6"
       ]
     },
-    "@std/bytes@1.0.6": {
-      "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
-    },
-    "@std/cli@1.0.12": {
-      "integrity": "e5cfb7814d189da174ecd7a34fbbd63f3513e24a1b307feb2fcd5da47a070d90"
-    },
     "@std/cli@1.0.19": {
       "integrity": "b3601a54891f89f3f738023af11960c4e6f7a45dc76cde39a6861124cba79e88"
     },
     "@std/collections@1.1.0": {
       "integrity": "2ee8761c84c3d203f7a4ecd376f9ca88a0c559817a4a54c9150f28c0b948027c"
-    },
-    "@std/collections@1.1.1": {
-      "integrity": "eff6443fbd9d5a6697018fb39c5d13d5f662f0045f21392d640693d0008ab2af"
     },
     "@std/encoding@1.0.10": {
       "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
@@ -81,7 +57,7 @@
     "@std/http@1.0.17": {
       "integrity": "98aec8ab4080d95c21f731e3008f69c29c5012d12f1b4e553f85935db601569f",
       "dependencies": [
-        "jsr:@std/cli@^1.0.18",
+        "jsr:@std/cli",
         "jsr:@std/encoding",
         "jsr:@std/fmt@^1.0.8",
         "jsr:@std/html",
@@ -105,9 +81,6 @@
     },
     "@std/streams@1.0.9": {
       "integrity": "a9d26b1988cdd7aa7b1f4b51e1c36c1557f3f252880fa6cc5b9f37078b1a5035"
-    },
-    "@std/ulid@1.0.0": {
-      "integrity": "d41c3d27a907714413649fee864b7cde8d42ee68437d22b79d5de4f81d808780"
     }
   },
   "npm": {
@@ -147,8 +120,14 @@
         "@discordeno/types"
       ]
     },
-    "@types/luxon@3.6.2": {
-      "integrity": "sha512-R/BdP7OxEMc44l2Ex5lSXHoIXTB2JLNa3y2QISIbr58U/YcsffyQrYW//hZSdrfxrjRZj3GcUoxMPGdO8gSYuw=="
+    "@types/debug@4.1.12": {
+      "integrity": "sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==",
+      "dependencies": [
+        "@types/ms"
+      ]
+    },
+    "@types/ms@2.1.0": {
+      "integrity": "sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA=="
     },
     "@types/node@22.15.15": {
       "integrity": "sha512-R5muMcZob3/Jjchn5LcO8jdKwSCbzqmPB6ruBxMcf9kbxtniZHP327s6C37iOfuw8mbKK3cAQa7sEl7afLrQ8A==",
@@ -156,12 +135,21 @@
         "undici-types"
       ]
     },
-    "cron@4.3.1": {
-      "integrity": "sha512-7x7DoEOxV11t3OPWWMjj1xrL1PGkTV5RV+/54IJTZD7gStiaMploY43EkeBSkDZTLRbUwk+OISbQ0TR133oXyA==",
+    "@types/validator@13.15.2": {
+      "integrity": "sha512-y7pa/oEJJ4iGYBxOpfAKn5b9+xuihvzDVnC/OSvlVnGxVg0pOqmjiMafiJ1KVNQEaPZf9HsEp5icEwGg8uIe5Q=="
+    },
+    "balanced-match@1.0.2": {
+      "integrity": "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw=="
+    },
+    "brace-expansion@1.1.12": {
+      "integrity": "sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==",
       "dependencies": [
-        "@types/luxon",
-        "luxon"
+        "balanced-match",
+        "concat-map"
       ]
+    },
+    "concat-map@0.0.1": {
+      "integrity": "sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg=="
     },
     "dd-cache-proxy@2.6.4_@discordeno+bot@21.0.0-next.2eace55": {
       "integrity": "sha512-QwLhNziqH1pxYFyn8UYBC76rgxRp8Bjgwf0sbqbrLvDDUxbE7mUj7ICzkYUTIBT9/1JGADeai4IGxhNJl2tuOg==",
@@ -169,20 +157,171 @@
         "@discordeno/bot"
       ]
     },
+    "debug@4.4.1": {
+      "integrity": "sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==",
+      "dependencies": [
+        "ms"
+      ]
+    },
+    "denque@2.1.0": {
+      "integrity": "sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw=="
+    },
+    "dottie@2.0.6": {
+      "integrity": "sha512-iGCHkfUc5kFekGiqhe8B/mdaurD+lakO9txNnTvKtA6PISrw86LgqHvRzWYPyoE2Ph5aMIrCw9/uko6XHTKCwA=="
+    },
+    "fs.realpath@1.0.0": {
+      "integrity": "sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw=="
+    },
     "fzstd@0.1.1": {
       "integrity": "sha512-dkuVSOKKwh3eas5VkJy1AW1vFpet8TA/fGmVA5krThl8YcOVE/8ZIoEA1+U1vEn5ckxxhLirSdY837azmbaNHA=="
     },
-    "luxon@3.6.1": {
-      "integrity": "sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ=="
+    "glob@7.2.0": {
+      "integrity": "sha512-lmLf6gtyrPq8tTjSmrO94wBeQbFR3HbLHbuyD69wuyQkImp2hWqMGB47OX65FBkPffO641IP9jWa1z4ivqG26Q==",
+      "dependencies": [
+        "fs.realpath",
+        "inflight",
+        "inherits",
+        "minimatch",
+        "once",
+        "path-is-absolute"
+      ],
+      "deprecated": true
+    },
+    "iconv-lite@0.6.3": {
+      "integrity": "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==",
+      "dependencies": [
+        "safer-buffer"
+      ]
+    },
+    "inflection@1.13.4": {
+      "integrity": "sha512-6I/HUDeYFfuNCVS3td055BaXBwKYuzw7K3ExVMStBowKo9oOAMJIXIHvdyR3iboTCp1b+1i5DSkIZTcwIktuDw=="
+    },
+    "inflight@1.0.6": {
+      "integrity": "sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==",
+      "dependencies": [
+        "once",
+        "wrappy"
+      ],
+      "deprecated": true
+    },
+    "inherits@2.0.4": {
+      "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="
+    },
+    "lodash@4.17.21": {
+      "integrity": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
+    },
+    "lru-cache@10.4.3": {
+      "integrity": "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="
+    },
+    "mariadb@3.4.4": {
+      "integrity": "sha512-feIbZJM8q1ddPAcG9UXcY9/afrpQMxIN3pWQTYBnwCTzQcFkZ6RJHFWB46mDHoLFdQh02lZgyg3uq6Y/74E5bA==",
+      "dependencies": [
+        "denque",
+        "iconv-lite",
+        "lru-cache"
+      ]
+    },
+    "minimatch@3.1.2": {
+      "integrity": "sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==",
+      "dependencies": [
+        "brace-expansion"
+      ]
+    },
+    "moment-timezone@0.5.48": {
+      "integrity": "sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==",
+      "dependencies": [
+        "moment"
+      ]
+    },
+    "moment@2.30.1": {
+      "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how=="
+    },
+    "ms@2.1.3": {
+      "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
+    },
+    "once@1.4.0": {
+      "integrity": "sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==",
+      "dependencies": [
+        "wrappy"
+      ]
+    },
+    "path-is-absolute@1.0.1": {
+      "integrity": "sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg=="
+    },
+    "pg-connection-string@2.9.1": {
+      "integrity": "sha512-nkc6NpDcvPVpZXxrreI/FOtX3XemeLl8E0qFr6F2Lrm/I8WOnaWNhIPK2Z7OHpw7gh5XJThi6j6ppgNoaT1w4w=="
+    },
+    "reflect-metadata@0.2.2": {
+      "integrity": "sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q=="
+    },
+    "retry-as-promised@7.1.1": {
+      "integrity": "sha512-hMD7odLOt3LkTjcif8aRZqi/hybjpLNgSk5oF5FCowfCjok6LukpN2bDX7R5wDmbgBQFn7YoBxSagmtXHaJYJw=="
+    },
+    "safer-buffer@2.1.2": {
+      "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg=="
+    },
+    "semver@7.7.2": {
+      "integrity": "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==",
+      "bin": true
+    },
+    "sequelize-pool@7.1.0": {
+      "integrity": "sha512-G9c0qlIWQSK29pR/5U2JF5dDQeqqHRragoyahj/Nx4KOOQ3CPPfzxnfqFPCSB7x5UgjOgnZ61nSxz+fjDpRlJg=="
+    },
+    "sequelize-typescript@2.1.6_@types+node@22.15.15_@types+validator@13.15.2_reflect-metadata@0.2.2_sequelize@6.37.7": {
+      "integrity": "sha512-Vc2N++3en346RsbGjL3h7tgAl2Y7V+2liYTAOZ8XL0KTw3ahFHsyAUzOwct51n+g70I1TOUDgs06Oh6+XGcFkQ==",
+      "dependencies": [
+        "@types/node",
+        "@types/validator",
+        "glob",
+        "reflect-metadata",
+        "sequelize"
+      ]
+    },
+    "sequelize@6.37.7": {
+      "integrity": "sha512-mCnh83zuz7kQxxJirtFD7q6Huy6liPanI67BSlbzSYgVNl5eXVdE2CN1FuAeZwG1SNpGsNRCV+bJAVVnykZAFA==",
+      "dependencies": [
+        "@types/debug",
+        "@types/validator",
+        "debug",
+        "dottie",
+        "inflection",
+        "lodash",
+        "moment",
+        "moment-timezone",
+        "pg-connection-string",
+        "retry-as-promised",
+        "semver",
+        "sequelize-pool",
+        "toposort-class",
+        "uuid",
+        "validator",
+        "wkx"
+      ]
+    },
+    "toposort-class@1.0.1": {
+      "integrity": "sha512-OsLcGGbYF3rMjPUf8oKktyvCiUxSbqMMS39m33MAjLTC1DVIH6x3WSt63/M77ihI09+Sdfk1AXvfhCEeUmC7mg=="
     },
     "undici-types@6.21.0": {
       "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
     },
+    "uuid@8.3.2": {
+      "integrity": "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==",
+      "bin": true
+    },
+    "validator@13.15.15": {
+      "integrity": "sha512-BgWVbCI72aIQy937xbawcs+hrVaN/CZ2UwutgaJ36hGqRrLNM+f5LUT/YPRbo8IV/ASeFzXszezV+y2+rq3l8A=="
+    },
+    "wkx@0.5.0": {
+      "integrity": "sha512-Xng/d4Ichh8uN4l0FToV/258EjMGU9MGcA0HV2d9B/ZpZB3lqQm7nkOdZdm5GhKtLLhAE7PiVQwN4eN+2YJJUg==",
+      "dependencies": [
+        "@types/node"
+      ]
+    },
+    "wrappy@1.0.2": {
+      "integrity": "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="
+    },
     "ws@8.18.2": {
       "integrity": "sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ=="
-    },
-    "zod@3.25.23": {
-      "integrity": "sha512-Od2bdMosahjSrSgJtakrwjMDb1zM1A3VIHCPGveZt/3/wlrTWBya2lmEh2OYe4OIu8mPTmmr0gnLHIWQXdtWBg=="
     }
   },
   "redirects": {
@@ -196,13 +335,12 @@
   "workspace": {
     "dependencies": [
       "jsr:@amethyst/discord-emoji@*",
-      "jsr:@olli/kvdex@3.4.0",
       "jsr:@onjara/optic@2.0.3",
-      "jsr:@std/fs@1.0.18",
-      "jsr:@std/ulid@1.0.0",
       "npm:@discordeno/bot@next",
-      "npm:cron@^4.3.1",
-      "npm:dd-cache-proxy@latest"
+      "npm:dd-cache-proxy@latest",
+      "npm:mariadb@*",
+      "npm:sequelize-typescript@*",
+      "npm:sequelize@*"
     ]
   }
 }

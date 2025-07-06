@@ -1,4 +1,3 @@
-import { walk } from '@fs/walk';
 import { AsyncInitializable } from '../generic/initializable.ts';
 import { Optic } from './optic.ts';
 
@@ -15,8 +14,8 @@ export class DynamicModuleLoader extends AsyncInitializable {
     };
     for (
       const ent of [
-        ...(await Array.fromAsync(walk(new URL('../../module', import.meta.url), opts))),
-        ...(await Array.fromAsync(walk(new URL('../task', import.meta.url), opts))),
+        // ...(await Array.fromAsync(walk(new URL('../../module', import.meta.url), opts))),
+        // ...(await Array.fromAsync(walk(new URL('../task', import.meta.url), opts))),
       ]
     ) {
       const imported = await import(ent.path).catch((e: Error) => e) as {

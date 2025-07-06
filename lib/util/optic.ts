@@ -4,7 +4,6 @@ import { every, FileStream, of } from '@optic/fileStream';
 import { JsonFormatter, TokenReplacer } from '@optic/formatters';
 import { Level, Logger } from '@optic/logger';
 import { Bootstrap } from '../../mod.ts';
-import { Webhook } from './check/webhook.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()
@@ -68,11 +67,11 @@ export class Optic {
       this.f.warn('Alert Webhook threadId is not configured. Please create a tenant.');
     }
 
-    const alertWebhookValid = await Webhook.check(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!);
-    if (!alertWebhookValid) {
-      this.f.warn('Alert Webhook does not exist. Unable to fetch from API. Please investigate.');
-      return;
-    }
+    // const alertWebhookValid = await Webhook.check(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!);
+    // if (!alertWebhookValid) {
+    //   this.f.warn('Alert Webhook does not exist. Unable to fetch from API. Please investigate.');
+    //   return;
+    // }
 
     if (chunk.dispatch !== false) {
       Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {

@@ -7,13 +7,13 @@
     "@discordeno": "npm:@discordeno/bot@next",
     "@discordeno-cache": "npm:dd-cache-proxy@latest",
     // Standard
-    "@fs": "jsr:@std/fs@1.0.18",
-    "@ulid": "jsr:@std/ulid@1.0.0",
+    "@std": "jsr:@std",
     // Libraries
+    "sequelize-typescript": "npm:sequelize-typescript",
+    "sequelize": "npm:sequelize",
+    "mariadb": "npm:mariadb",
     "@optic": "jsr:@onjara/optic@2.0.3",
-    "@kvdex": "jsr:@olli/kvdex@3.4.0",
     "@discord-emoji": "jsr:@amethyst/discord-emoji",
-    "@cron": "npm:cron@^4.3.1"
   },
   "exports": {},
   "nodeModulesDir": "none",
