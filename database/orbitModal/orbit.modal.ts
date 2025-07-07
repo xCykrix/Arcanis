@@ -1,11 +1,16 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  Sequelize,
+  DataTypes,
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+} from '@sequelize/core'
+import { Attribute, PrimaryKey, AutoIncrement, NotNull } from '@sequelize/core/decorators-legacy';
 
-@Table
-export class Orbit extends Model {
-  @Column({
-    type: DataType.STRING,
-    primaryKey: true,
-    unique: true,
-  })
-  public applicationId!: string;
+
+export class Orbit extends Model<InferAttributes<Orbit>, InferCreationAttributes<Orbit>> {
+  @Attribute(DataTypes.STRING)
+  @PrimaryKey
+  declare applicationId: string;
 }

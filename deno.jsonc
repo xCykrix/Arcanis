@@ -9,9 +9,8 @@
     // Standard
     "@std": "jsr:@std",
     // Libraries
-    "sequelize-typescript": "npm:sequelize-typescript",
-    "sequelize": "npm:sequelize",
-    "mariadb": "npm:mariadb",
+    "@sequelize/core": "npm:@sequelize/core@alpha",
+    "@sequelize/mariadb": "npm:@sequelize/mariadb",
     "@optic": "jsr:@onjara/optic@2.0.3",
     "@discord-emoji": "jsr:@amethyst/discord-emoji",
   },

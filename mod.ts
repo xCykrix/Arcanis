@@ -1,7 +1,7 @@
 import type { CreateSlashApplicationCommand } from '@discordeno';
+import { sequelizeOrbit, sequelizeTenant } from './database/sequelize.ts';
 import { type CacheBotType } from './lib/bot.ts';
 import { EventManager } from './lib/manager/event.ts';
-import { sequelizeOrbit, sequelizeTenant } from './database/sequelize.ts';
 
 /** Boostrap Class */
 export class Bootstrap {
@@ -22,32 +22,12 @@ export class Bootstrap {
   private static async boot(): Promise<void> {
     // Connect Database
     await sequelizeOrbit.authenticate();
+    console.info('authenticated?');
+
+
+
+    
     await sequelizeTenant.authenticate();
-
-    // // Fetch Data from Remote Configuration Server
-    // if (Deno.env.get('APPLICATION_ID') === undefined) throw new Deno.errors.NotFound(`Environment Variable 'APPLICATION_ID' is undefined.`);
-    // this.application = (await KVC.rconf.application.findByPrimaryIndex('applicationId', Deno.env.get('APPLICATION_ID')!))?.value ?? null;
-
-    // // Check Remote Configuration Server Response
-    // if (this.application === null) throw new Deno.errors.InvalidData(`Application ID '${Deno.env.get('APPLICATION_ID')}' Not Found via Remote Configuration. Please validate.`);
-
-    // // Post Status
-    // Optic.f.info(`Application ID: ${this.application?.applicationId} / ${this.application.publicKey}`);
-    // Optic.f.info(this.application);
-
-    // // Initialize Bot Application
-    // this.bot = createBotWithToken(this.application.token);
-    // this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
-
-    // // Setup Event Manager and Load Default Events
-    // this.event = new EventManager(this.bot);
-    // await (new Defaults()).initialize();
-
-    // // Trigger Dynamic Module Loader
-    // await (new DynamicModuleLoader()).initialize();
-
-    // // Connect to Discord Gateway.
-    // // await this.bot.start();
   }
 }
 
