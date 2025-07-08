@@ -1,4 +1,3 @@
 .env
 !.env.template
 optical
-conf.ts

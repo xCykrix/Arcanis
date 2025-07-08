@@ -6,11 +6,13 @@
     // Core Library
     "@discordeno": "npm:@discordeno/bot@next",
     "@discordeno-cache": "npm:dd-cache-proxy@latest",
+    // Critical Dependencies
+    "typeorm": "npm:typeorm",
+    "reflect-metadata": "npm:reflect-metadata",
+    "mysql2": "npm:mysql2",
     // Standard
     "@std": "jsr:@std",
     // Libraries
-    "@sequelize/core": "npm:@sequelize/core@alpha",
-    "@sequelize/mariadb": "npm:@sequelize/mariadb",
     "@optic": "jsr:@onjara/optic@2.0.3",
     "@discord-emoji": "jsr:@amethyst/discord-emoji",
   },
