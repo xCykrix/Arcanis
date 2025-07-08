@@ -43,7 +43,9 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "strictNullChecks": true,
-    "useUnknownInCatchVariables": true
+    "useUnknownInCatchVariables": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
   },
   // Linting Options
   "lint": {

@@ -1,5 +1,5 @@
 import type { CreateSlashApplicationCommand } from '@discordeno';
-import { sequelizeOrbit, sequelizeTenant } from './database/sequelize.ts';
+import { sequelizeOrbit } from './database/sequelize.ts';
 import { type CacheBotType } from './lib/bot.ts';
 import { EventManager } from './lib/manager/event.ts';
 
@@ -24,10 +24,16 @@ export class Bootstrap {
     await sequelizeOrbit.authenticate();
     console.info('authenticated?');
 
+    console.info(await sequelizeOrbit.query('SHOW TABLES;'));
+    // await Orbit.sync();
+    // await Orbit.create({
+    //   applicationId: '123',
+    //   clientSecret: '123',
+    //   publicKey: '123',
+    //   token: '123',
+    // });
 
-
-    
-    await sequelizeTenant.authenticate();
+    // await sequelizeTenant.authenticate();
   }
 }
 

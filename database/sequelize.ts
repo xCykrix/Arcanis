@@ -11,6 +11,9 @@ export const sequelizeOrbit = new Sequelize({
   database: Deno.env.get('DB_ORBIT_DATABASE'),
   showWarnings: true,
   connectTimeout: 15000,
+  // models: [
+  //   Orbit,
+  // ],
 });
 
 export const sequelizeTenant = new Sequelize({
