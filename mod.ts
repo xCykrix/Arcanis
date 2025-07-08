@@ -1,14 +1,18 @@
-import { DataSource } from 'typeorm';
-import { OrbitalSource } from './database/data-source.ts';
+import 'reflect-metadata';
+import type { DataSource } from 'typeorm';
+import { OrbitalSource } from './database/data-source/orbital.ts';
+import { TenantSource } from './database/data-source/tenant.ts';
 import { Orbiter } from './database/entity/orbit/orbiter.entity.ts';
-import { type CacheBotType } from './lib/bot.ts';
+import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
+import { Defaults } from './lib/defaults.ts';
 import { EventManager } from './lib/manager/event.ts';
 import { Optic } from './lib/util/optic.ts';
 
 /** Boostrap Class */
 export class Bootstrap {
   /** The Internal Database Connections. */
-  public static orbital: DataSource;
+  public static orbital: DataSource | null;
+  public static tenant: DataSource | null;
 
   /** The Internal Stateful Controls. */
   public static orbiter: Orbiter | null;
@@ -22,22 +26,75 @@ export class Bootstrap {
   /** Main Boostrap Entrypoint. */
   private static async sequence(): Promise<void> {
     // Connect to Global Orbit Table
-    this.orbital = await OrbitalSource.initialize();
+    this.orbital = await OrbitalSource.initialize().catch((e) => {
+      Optic.incident({
+        moduleId: 'Boostrap.startup.sequence',
+        message: 'Failed to connect to Orbital Database. Please check your environment variables. Manual intervention is required.',
+        err: e,
+        dispatch: false,
+      });
+      return null;
+    });
+    if (this.orbital === null) return;
 
+    // Migrate Orbital Database
+    await OrbitalSource.runMigrations({
+      transaction: 'each',
+    }).catch((e) => {
+      Optic.incident({
+        moduleId: 'Boostrap.startup.sequence',
+        message: 'Failed to run migrations on Orbital Database. Manual intervention is required. Critical Outage.',
+        err: e,
+        dispatch: false,
+      });
+    });
+
+    // Fetch the Orbiter from the Orbital Database
     this.orbiter = await this.orbital.manager.findOneBy(Orbiter, {
       applicationId: Deno.env.get('APPLICATION_ID') ?? 'UNCONFIGURED',
     });
 
     // Check Orbiter Exists
     if (this.orbiter === null) {
-      throw new Error('Orbiter does not exist. Please create and configure this tenant in ORBIT_1.');
+      Optic.incident({
+        moduleId: 'Boostrap.startup.sequence',
+        message: 'Orbiter does not exist. Please create and configure this tenant in ORBIT_1. Manual intervention is required.',
+        dispatch: false,
+      });
+      return;
     }
-    Optic.f.info(`Bootstrap Sequence Called Orbital with Application ID: ${this.orbiter.applicationId} / ${this.orbiter.publicKey}`);
+    Optic.f.info(`Bootstrapping Orbital with Application ID: ${this.orbiter.applicationId} / ${this.orbiter.publicKey}`);
 
-    // ... Initialize Bot Application? this.orbiter is application.
-  }
+    // Connect to Tenant Database
+    this.tenant = await TenantSource.initialize().catch((e) => {
+      Optic.incident({
+        moduleId: 'Boostrap.startup.sequence',
+        message: 'Failed to connect to Tenant Database. Please check your environment variables. Manual intervention is required.',
+        err: e,
+        dispatch: false,
+      });
+      return null;
+    });
+    if (this.tenant === null) return;
 
-  private static async connect(): Promise<void> {
+    // Migrate Tenant Database
+
+    // Setup Tenant Database Connection
+    // this.tenant.manager.getRepository(Orbiter).query('')
+
+    // Initialize CacheBot Application
+    this.bot = createBotWithToken(this.orbiter.token);
+    this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
+
+    // Setup Event Manager and Load Default Events
+    this.event = new EventManager(this.bot);
+    await (new Defaults()).initialize();
+
+    // Trigger Dynamic Module Loader
+    // await (new DynamicModuleLoader()).initialize();
+
+    // Connect to Discord API
+    await this.bot.start();
   }
 }
 
@@ -45,10 +102,6 @@ export class Bootstrap {
 if (import.meta.main) {
   await Bootstrap['sequence']().catch((e) => {
     console.error('Failed to initialize Internal Connection(s):', e);
-    Deno.exit(1);
-  });
-  await Bootstrap['connect']().catch((e) => {
-    console.error('Failed to initialize Discord API Connection:', e);
     Deno.exit(1);
   });
 }

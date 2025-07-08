@@ -1,7 +1,7 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
-export class Orbiter {
+@Entity({ database: Deno.env.get('DB_ORBIT_DATABASE') })
+export class Orbiter extends BaseEntity {
   @PrimaryColumn()
   declare applicationId: string;
 
