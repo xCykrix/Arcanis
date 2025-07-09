@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import type { DataSource } from 'typeorm';
 import { OrbitalSource } from './database/data-source/orbital.ts';
 import { TenantSource } from './database/data-source/tenant.ts';
-import { Orbiter } from './database/entity/orbit/orbiter.entity.ts';
+import { Orbiter } from './database/entity/orbital/orbiter.entity.ts';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
 import { Defaults } from './lib/defaults.ts';
 import { EventManager } from './lib/manager/event.ts';
@@ -47,6 +47,7 @@ export class Bootstrap {
         err: e,
         dispatch: false,
       });
+      return;
     });
 
     // Fetch the Orbiter from the Orbital Database
@@ -78,9 +79,17 @@ export class Bootstrap {
     if (this.tenant === null) return;
 
     // Migrate Tenant Database
-
-    // Setup Tenant Database Connection
-    // this.tenant.manager.getRepository(Orbiter).query('')
+    await TenantSource.runMigrations({
+      transaction: 'each',
+    }).catch((e) => {
+      Optic.incident({
+        moduleId: 'Boostrap.startup.sequence',
+        message: 'Failed to run migrations on Tenant Database. Manual intervention is required. Critical Outage.',
+        err: e,
+        dispatch: false,
+      });
+      return;
+    });
 
     // Initialize CacheBot Application
     this.bot = createBotWithToken(this.orbiter.token);

@@ -1,5 +1,4 @@
 import { DataSource } from 'typeorm';
-import { TenantOptions } from '../entity/tenant/options.entity.ts';
 
 export const TenantSource = new DataSource({
   type: 'mariadb',
@@ -8,11 +7,12 @@ export const TenantSource = new DataSource({
   username: Deno.env.get('DB_USERNAME'),
   password: Deno.env.get('DB_PASSWORD'),
   database: Deno.env.get('DB_TENANT_DATABASE'),
-
-  // migrationsRun: true,
+  migrationsRun: true,
   logging: false,
   entities: [
-    TenantOptions,
+    import.meta.dirname + '/../entity/tenant/**/*.ts',
   ],
-  // migrations: [],
+  migrations: [
+    import.meta.dirname + '/../migration/tenant/**/*.ts',
+  ],
 });
