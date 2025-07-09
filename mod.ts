@@ -51,7 +51,7 @@ export class Bootstrap {
     });
 
     // Fetch the Orbiter from the Orbital Database
-    this.orbiter = await this.orbital.manager.findOneBy(Orbiter, {
+    this.orbiter = await Orbiter.findOneBy({
       applicationId: Deno.env.get('APPLICATION_ID') ?? 'UNCONFIGURED',
     });
 

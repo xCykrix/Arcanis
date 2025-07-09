@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { TenantOptions } from '../entity/tenant/options.entity.ts';
 
 export const TenantSource = new DataSource({
   type: 'mariadb',
@@ -10,7 +11,7 @@ export const TenantSource = new DataSource({
   migrationsRun: true,
   logging: false,
   entities: [
-    import.meta.dirname + '/../entity/tenant/**/*.ts',
+    TenantOptions,
   ],
   migrations: [
     import.meta.dirname + '/../migration/tenant/**/*.ts',

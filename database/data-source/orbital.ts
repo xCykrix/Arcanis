@@ -1,4 +1,6 @@
 import { DataSource } from 'typeorm';
+import { DispatchedAlert, DispatchedAlertConsume } from '../entity/orbital/alert.entity.ts';
+import { Orbiter } from '../entity/orbital/orbiter.entity.ts';
 
 export const OrbitalSource = new DataSource({
   type: 'mariadb',
@@ -10,7 +12,9 @@ export const OrbitalSource = new DataSource({
   migrationsRun: true,
   logging: false,
   entities: [
-    import.meta.dirname + '/../entity/orbital/**/*.ts',
+    Orbiter,
+    DispatchedAlert,
+    DispatchedAlertConsume,
   ],
   migrations: [
     import.meta.dirname + '/../migration/orbital/**/*.ts',
