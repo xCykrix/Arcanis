@@ -10,6 +10,6 @@ export default class extends AsyncInitializable {
       },
       waitForCompletion: true,
     });
-    setTimeout(job.start, 60000);
+    // setTimeout(job.start, 60000);
   }
 }
