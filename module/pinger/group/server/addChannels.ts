@@ -59,14 +59,14 @@ export default class extends AsyncInitializable {
 
           // Index Channels
           const set = new Set<string>();
-          const added: string[] = [];
           const kvFindChannels = await KVC.appd.pingerChannelMap.findBySecondaryIndex('guidOfPinger', guid);
           for (const mapped of kvFindChannels.result) {
             set.add(mapped.value.channelId);
           }
 
           // Verify Internal Cache
-          const provided = await args.channels.split(' ').map(async (v) => {
+          const added: string[] = [];
+          const provided = args.channels.split(' ').map(async (v) => {
             return await Bootstrap.bot.cache.channels.get(BigInt(v.replace(/<|#|>/g, '')));
           });
           for await (const provision of provided) {

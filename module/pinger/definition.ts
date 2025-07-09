@@ -248,9 +248,9 @@ const definition = {
               autocomplete: true,
             },
             {
-              name: 'role',
-              description: 'A role to add to the pinger alert.',
-              type: ApplicationCommandOptionTypes.Role,
+              name: 'roles',
+              description: 'A list of roles to add to the pinger.',
+              type: ApplicationCommandOptionTypes.String,
               required: true,
             },
           ],

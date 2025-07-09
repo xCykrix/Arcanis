@@ -139,13 +139,14 @@ export const lang = {
       'result': 'The channel(s) specified have been added to **{{0}}**, if not already present.',
     },
     'server.remove-channel': {
-      'result': 'The channel specified has been removed from **{{0}}**, if it was already present.',
+      'result': 'The channel specified has been removed from **{{0}}**, if it was present.',
     },
-    'server.add-alert-role': {
-      'result': 'The role specified has been added to **{{0}}**, if not already present.',
+    'server.add-alert-roles': {
+      'invalid-role': 'The specified role is not valid. The specified role could not be verified.',
+      'result': 'The role(s) specified have been added to **{{0}}**, if not already present.',
     },
     'server.remove-alert-role': {
-      'result': 'The role specified has been removed from **{{0}}**, if it was already present.',
+      'result': 'The role specified has been removed from **{{0}}**, if it was present.',
     },
 
     'server.keywords': {
