@@ -88,7 +88,7 @@ export function SlashCommand(name: string, description: string): (Ctor: new () =
       const sc = meta.subCommands?.find((x) => x.name === raw?.name);
       if (!sc) return;
 
-      const args = commandOptionsParser(ctx.interaction as typeof Bootstrap.bot.transformers.$inferredTypes));
+      const args = commandOptionsParser(ctx.interaction as Interaction));
       return instance[sc.methodName]({ ...ctx, args });
     };
 
