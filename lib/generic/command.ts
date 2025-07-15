@@ -45,12 +45,7 @@ function getMeta(target: Function): ClassMeta {
   return metaStore.get(target)!;
 }
 
-export function SubCommand(props: {
-  name: string;
-  description: string;
-  options?: ApplicationCommandOption[];
-  guildOnly?: boolean;
-}): (target: any, methodName: string, _desc: PropertyDescriptor) => void {
+export function SubCommand(props: Omit<CommandSchema, 'execute'>): (target: any, methodName: string, _desc: PropertyDescriptor) => void {
   return (
     target: any,
     methodName: string,
@@ -88,7 +83,7 @@ export function SlashCommand(name: string, description: string): (Ctor: new () =
       const sc = meta.subCommands?.find((x) => x.name === raw?.name);
       if (!sc) return;
 
-      const args = commandOptionsParser(ctx.interaction as Interaction));
+      const args = commandOptionsParser(ctx.interaction as Interaction);
       return instance[sc.methodName]({ ...ctx, args });
     };
 
