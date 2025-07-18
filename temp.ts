@@ -1,3 +1,10 @@
+import { ChatInputCommandJSON } from './lib/generic/leafs.ts';
+
+export const schema = {
+  name: 'dev',
+  description: ''
+} as const satisfies ChatInputCommandJSON;
+
 // import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
 // import { type CommandSchema, pick } from './lib/generic/schema.ts';
 
