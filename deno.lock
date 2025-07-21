@@ -2,9 +2,14 @@
   "version": "5",
   "specifiers": {
     "jsr:@amethyst/discord-emoji@*": "2.5.3",
+    "jsr:@cross/deepmerge@*": "1.0.0",
     "jsr:@onjara/optic@2.0.3": "2.0.3",
+    "jsr:@std/collections@*": "1.1.2",
     "jsr:@std/fmt@^1.0.2": "1.0.8",
+    "jsr:@std/fs@*": "1.0.19",
+    "jsr:@std/internal@^1.0.9": "1.0.9",
     "jsr:@std/path@^1.0.6": "1.1.1",
+    "jsr:@std/path@^1.1.1": "1.1.1",
     "npm:@discordeno/bot@next": "21.0.0-next.07a094e",
     "npm:@types/node@*": "22.15.15",
     "npm:dd-cache-proxy@latest": "2.6.5_@discordeno+bot@21.0.0-next.07a094e",
@@ -16,18 +21,37 @@
     "@amethyst/discord-emoji@2.5.3": {
       "integrity": "f3f8c07efb5c9e014bf65cd6afaef436aa8492c61c66d975fd1318c652fce6be"
     },
+    "@cross/deepmerge@1.0.0": {
+      "integrity": "1e1318a74e31ba1959b9aa0acae8bd417b806f74ffd25ac07c90e12f83ad6b1d"
+    },
     "@onjara/optic@2.0.3": {
       "integrity": "b4bf8cae0820a3c3f362ba4d78939237fcfa23e3087bbd3f9fd3c883839820f1",
       "dependencies": [
         "jsr:@std/fmt",
-        "jsr:@std/path"
+        "jsr:@std/path@^1.0.6"
       ]
+    },
+    "@std/collections@1.1.2": {
+      "integrity": "f1685dd45c3ec27c39d0e8a642ccf810f391ec8a6cb5e7355926e6dacc64c43e"
     },
     "@std/fmt@1.0.8": {
       "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
     },
+    "@std/fs@1.0.19": {
+      "integrity": "051968c2b1eae4d2ea9f79a08a3845740ef6af10356aff43d3e2ef11ed09fb06",
+      "dependencies": [
+        "jsr:@std/internal",
+        "jsr:@std/path@^1.1.1"
+      ]
+    },
+    "@std/internal@1.0.9": {
+      "integrity": "bdfb97f83e4db7a13e8faab26fb1958d1b80cc64366501af78a0aee151696eb8"
+    },
     "@std/path@1.1.1": {
-      "integrity": "fe00026bd3a7e6a27f73709b83c607798be40e20c81dde655ce34052fd82ec76"
+      "integrity": "fe00026bd3a7e6a27f73709b83c607798be40e20c81dde655ce34052fd82ec76",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
     }
   },
   "npm": {
@@ -630,6 +654,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@amethyst/discord-emoji@*",
+      "jsr:@cross/deepmerge@*",
       "jsr:@onjara/optic@2.0.3",
       "npm:@discordeno/bot@next",
       "npm:dd-cache-proxy@latest",

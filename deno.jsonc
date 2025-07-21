@@ -10,6 +10,7 @@
     "typeorm": "npm:typeorm",
     "reflect-metadata": "npm:reflect-metadata",
     "mysql2": "npm:mysql2",
+    "deep-merge": "jsr:@cross/deepmerge",
     // Standard
     "@std": "jsr:@std",
     // Libraries

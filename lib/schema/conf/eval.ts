@@ -1,0 +1,34 @@
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
+import type { ChatInputArgs, ChatInputCommandJSON } from '../../generic/leafs.ts';
+
+export const schema = {
+  name: 'conf',
+  description: 'Update guild or system configuration options.',
+  type: ApplicationCommandTypes.ChatInput,
+  options: [
+    {
+      name: 'eval',
+      description: 'Execute TS/JS code at runtime.  This is restricted to the developers.',
+      type: ApplicationCommandOptionTypes.SubCommand,
+      options: [
+        {
+          name: 'code',
+          description: 'The code to execute.',
+          type: ApplicationCommandOptionTypes.String,
+          required: true,
+        },
+      ],
+    },
+  ],
+} as const satisfies ChatInputCommandJSON;
+export type SchemaConf = ChatInputArgs<typeof schema>;
+
+async function handler(_passthrough: {
+  args: SchemaConf;
+}): Promise<void> {
+}
+
+export default {
+  schema,
+  handler,
+};

@@ -1,25 +1,21 @@
-import type { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
+import type { ApplicationCommandOption, ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
 
-/** Base shape for any option */
-interface BaseOption<T extends ApplicationCommandOptionTypes> {
+/** Base Shape for any Option */
+interface BaseOption<T extends ApplicationCommandOptionTypes> extends Omit<ApplicationCommandOption, 'nameLocalizations' | 'descriptionLocalizations'> {
   type: T;
-  name: string;
-  description: string;
-  required?: boolean;
-  choices?: Array<{ name: string; value: string | number }>;
 }
 
-/** Subcommand (1) */
+/** SubCommand */
 export interface SubCommandOption extends BaseOption<ApplicationCommandOptionTypes.SubCommand> {
   options?: Option[];
 }
 
-/** Subcommand Group (2) */
+/** SubCommand Group */
 export interface SubCommandGroupOption extends BaseOption<ApplicationCommandOptionTypes.SubCommandGroup> {
   options: SubCommandOption[];
 }
 
-/** Leaf option types */
+/** Leaf Option Types */
 export interface StringOption extends BaseOption<ApplicationCommandOptionTypes.String> {}
 export interface IntegerOption extends BaseOption<ApplicationCommandOptionTypes.Integer> {}
 export interface NumberOption extends BaseOption<ApplicationCommandOptionTypes.Number> {}
@@ -47,10 +43,10 @@ export type LeafTypeMap = {
   [ApplicationCommandOptionTypes.String]: string;
   [ApplicationCommandOptionTypes.Integer]: number;
   [ApplicationCommandOptionTypes.Boolean]: boolean;
-  [ApplicationCommandOptionTypes.User]: string; // user ID
-  [ApplicationCommandOptionTypes.Channel]: string; // channel ID
-  [ApplicationCommandOptionTypes.Role]: string; // role ID
-  [ApplicationCommandOptionTypes.Mentionable]: string; // user or role ID
+  [ApplicationCommandOptionTypes.User]: string;
+  [ApplicationCommandOptionTypes.Channel]: string;
+  [ApplicationCommandOptionTypes.Role]: string;
+  [ApplicationCommandOptionTypes.Mentionable]: string;
   [ApplicationCommandOptionTypes.Number]: number;
 };
 
@@ -79,3 +75,10 @@ export interface ChatInputCommandJSON {
 
 /** Final argument type for a given command definition */
 export type ChatInputArgs<C extends ChatInputCommandJSON> = ExtractArgsFromOptions<C['options']>;
+
+/** Dynamic handler type for processing. */
+export type DynamicInjectedHander<V extends ChatInputCommandJSON> = {
+  callback<T extends ChatInputArgs<V>>(passthrough: {
+    args: T;
+  }): Promise<void>;
+};
