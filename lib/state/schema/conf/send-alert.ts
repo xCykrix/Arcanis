@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
-import type { ChatInputArgs, ChatInputCommandJSON } from '../../../generic/leafs.ts';
+import type { ChatInputArgs, ChatInputCommandJSON, HandlerOptions, HandlerPassthrough } from '../../../generic/leafs.ts';
 
 export const schema = {
   name: 'conf',
@@ -15,12 +15,16 @@ export const schema = {
 } as const satisfies ChatInputCommandJSON;
 export type SchemaConf = ChatInputArgs<typeof schema>;
 
-async function handler(_passthrough: {
-  args: SchemaConf;
-}): Promise<void> {
+/** */
+export const options: HandlerOptions = {};
+
+/** */
+async function handler({ interaction, args }: HandlerPassthrough<typeof schema>): Promise<void> {
+  // console.info(args?.eval?.code);
 }
 
 export default {
   schema,
+  options,
   handler,
 };

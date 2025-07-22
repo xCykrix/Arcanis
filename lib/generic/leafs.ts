@@ -1,4 +1,4 @@
-import type { ApplicationCommandOption, ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
+import type { ApplicationCommandOption, ApplicationCommandOptionTypes, ApplicationCommandTypes, ChannelTypes, PermissionStrings } from '@discordeno';
 import { Bootstrap } from '../../mod.ts';
 
 /** Base Shape for any Option */
@@ -84,7 +84,25 @@ export type DynamicInjectedHander<V extends ChatInputCommandJSON> = {
   }): Promise<void>;
 };
 
+export type HandlerOptions = {
+  // Access Control
+  guildRequired: boolean;
+  developerRequired: boolean;
+  channelTypesRequired: (ChannelTypes.GuildAnnouncement | ChannelTypes.GuildText | ChannelTypes.GuildForum | ChannelTypes.GuildMedia | ChannelTypes.DM | ChannelTypes.GroupDm)[];
+
+  // State Control
+  callbackAuthorMatchRequired: boolean;
+
+  // Bot Permissions
+  botRequiredGuildPermissions: PermissionStrings[];
+  botRequiredChannelPermissions: PermissionStrings[];
+
+  // User Permissions
+  userRequiredGuildPermissions: PermissionStrings[];
+  userRequiredChannelPermissions: PermissionStrings[];
+};
+
 export type HandlerPassthrough<Z extends ChatInputCommandJSON, T = ChatInputArgs<Z>> = {
   interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
   args: T;
-}
+};

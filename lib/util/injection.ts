@@ -1,7 +1,8 @@
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
 import { walk } from '@std/fs';
 import { deepMerge } from 'deep-merge';
 import { AsyncInitializable } from '../generic/initializable.ts';
-import type { ChatInputCommandJSON, DynamicInjectedHander, Option } from '../generic/leafs.ts';
+import type { ChatInputCommandJSON, DynamicInjectedHander, HandlerOptions } from '../generic/leafs.ts';
 import { Optic } from './optic.ts';
 
 /**
@@ -9,20 +10,28 @@ import { Optic } from './optic.ts';
  */
 export class InjectionManager extends AsyncInitializable {
   public schema: Map<string, ChatInputCommandJSON> = new Map();
+  public options: Map<string, HandlerOptions> = new Map();
   public handlers: Map<string, DynamicInjectedHander<ChatInputCommandJSON>> = new Map();
 
-  public inject(schema: ChatInputCommandJSON, handler: DynamicInjectedHander<ChatInputCommandJSON>): void {
+  public inject(schema: ChatInputCommandJSON, options: HandlerOptions, handler: DynamicInjectedHander<ChatInputCommandJSON>): void {
     function getOptionPaths(
       base: string,
-      options?: readonly { name: string; options?: unknown[] }[],
+      options?: readonly { name: string; type?: number; options?: unknown[] }[],
     ): string[] {
       if (!options) return [];
       const paths: string[] = [];
       for (const option of options) {
-        const currentPath = `${base}.${option.name}`;
-        paths.push(currentPath);
-        if ('options' in option && Array.isArray(option.options)) {
-          paths.push(...getOptionPaths(currentPath, option.options as Option[]));
+        // Only include if type is ChatInput, SubCommand, or SubCommandGroup
+        if (
+          option.type === ApplicationCommandTypes.ChatInput ||
+          option.type === ApplicationCommandOptionTypes.SubCommand ||
+          option.type === ApplicationCommandOptionTypes.SubCommandGroup
+        ) {
+          const currentPath = `${base}.${option.name}`;
+          paths.push(currentPath);
+          if ('options' in option && Array.isArray(option.options)) {
+            paths.push(...getOptionPaths(currentPath, option.options as typeof options));
+          }
         }
       }
       return paths;
@@ -31,6 +40,7 @@ export class InjectionManager extends AsyncInitializable {
     const allPaths = [...getOptionPaths(schema.name, schema.options)];
     for (const path of allPaths) {
       this.handlers.set(path, handler);
+      this.options.set(path, options);
     }
 
     if (!this.schema.has(schema.name)) {
@@ -113,6 +123,7 @@ export class InjectionManager extends AsyncInitializable {
       const imported = await import(ent.path).catch((e: Error) => e) as {
         default: {
           schema: ChatInputCommandJSON;
+          options: HandlerOptions;
           handler: DynamicInjectedHander<ChatInputCommandJSON>;
         };
       } | Error;
@@ -127,7 +138,7 @@ export class InjectionManager extends AsyncInitializable {
       }
 
       if (imported.default?.schema?.type === undefined) throw new Deno.errors.InvalidData(`Invalid Schema: ${ent.path} does not have a type defined.`);
-      this.inject(imported.default.schema, imported.default.handler);
+      this.inject(imported.default.schema, imported.default.options, imported.default.handler);
     }
   }
 }

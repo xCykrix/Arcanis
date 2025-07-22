@@ -1,6 +1,7 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
-import type { ChatInputArgs, ChatInputCommandJSON, HandlerPassthrough } from '../../../generic/leafs.ts';
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ChannelTypes } from '@discordeno';
+import type { ChatInputArgs, ChatInputCommandJSON, HandlerOptions, HandlerPassthrough } from '../../../generic/leafs.ts';
 
+/** */
 export const schema = {
   name: 'conf',
   description: 'Update guild or system configuration options.',
@@ -23,11 +24,25 @@ export const schema = {
 } as const satisfies ChatInputCommandJSON;
 export type SchemaConf = ChatInputArgs<typeof schema>;
 
+/** */
+export const options: HandlerOptions = {
+  guildRequired: false,
+  developerRequired: true,
+  callbackAuthorMatchRequired: true,
+  channelTypesRequired: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText, ChannelTypes.DM],
+  botRequiredGuildPermissions: [],
+  botRequiredChannelPermissions: [],
+  userRequiredGuildPermissions: [],
+  userRequiredChannelPermissions: [],
+};
+
+/** */
 async function handler({ interaction, args }: HandlerPassthrough<typeof schema>): Promise<void> {
-  console.info(args?.eval?.co);
+  // console.info(args?.eval?.code);
 }
 
 export default {
   schema,
+  options,
   handler,
 };

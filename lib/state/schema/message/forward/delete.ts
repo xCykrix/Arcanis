@@ -1,23 +1,29 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ChannelTypes } from '@discordeno';
-import type { ChatInputArgs, ChatInputCommandJSON, HandlerOptions, HandlerPassthrough } from '../../../generic/leafs.ts';
+import type { ChatInputArgs, ChatInputCommandJSON, HandlerOptions, HandlerPassthrough } from '../../../../generic/leafs.ts';
 
-/** */
 export const schema = {
-  name: 'conf',
+  name: 'message',
   description: 'Update guild or system configuration options.',
   type: ApplicationCommandTypes.ChatInput,
   options: [
     {
-      name: 'set-alert',
-      description: 'Set the channel used to receive developer alerts.',
+      name: 'forward',
+      description: 'Manage message forwarding from one channel to another.',
       type: ApplicationCommandOptionTypes.SubCommand,
       options: [
         {
-          name: 'channel',
-          description: 'The channel to recieve messages or alerts.',
-          type: ApplicationCommandOptionTypes.Channel,
-          channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
-          required: true,
+          name: 'delete',
+          description: 'abc',
+          type: ApplicationCommandOptionTypes.SubCommand,
+          options: [
+            {
+              name: 'destination',
+              description: 'The channel to forward messages to.',
+              type: ApplicationCommandOptionTypes.Channel,
+              channelTypes: [ChannelTypes.GuildAnnouncement, ChannelTypes.GuildText],
+              required: true,
+            },
+          ],
         },
       ],
     },
