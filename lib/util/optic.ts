@@ -49,6 +49,7 @@ export class Optic {
     this.f.fatal = this.f.error;
   }
 
+  // deno-lint-ignore require-await
   public static async incident(chunk: {
     moduleId: string;
     message: string;

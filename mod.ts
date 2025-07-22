@@ -5,7 +5,7 @@ import { TenantSource } from './database/data-source/tenant.ts';
 import { Orbiter } from './database/entity/orbital/orbiter.entity.ts';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
 import { EventManager } from './lib/manager/event.ts';
-import { DynamicInjectionModule } from './lib/util/injection.ts';
+import { Plane } from './lib/plane.ts';
 import { Optic } from './lib/util/optic.ts';
 
 /** Boostrap Class */
@@ -19,10 +19,6 @@ export class Bootstrap {
 
   /** The Internal CacheBot Application. */
   public static bot: CacheBotType;
-
-  /** The Event Manager Registration Module. */
-  public static event: EventManager;
-  public static dynamicInjection: DynamicInjectionModule;
 
   /** Main Boostrap Entrypoint. */
   private static async sequence(): Promise<void> {
@@ -97,12 +93,10 @@ export class Bootstrap {
     this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
 
     // Initialize Event Manager
-    this.event = new EventManager(this.bot);
+    Plane.event = new EventManager(this.bot);
 
     // Trigger Dynamic Module Loader
-    this.dynamicInjection = new DynamicInjectionModule();
-    await this.dynamicInjection.initialize();
-    console.info('Injected');
+    Plane.injection.initialize();
 
     // Connect to Discord API
     await this.bot.start();

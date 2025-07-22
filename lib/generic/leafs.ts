@@ -1,4 +1,5 @@
 import type { ApplicationCommandOption, ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
+import { Bootstrap } from '../../mod.ts';
 
 /** Base Shape for any Option */
 export interface BaseOption<T extends ApplicationCommandOptionTypes> extends Omit<ApplicationCommandOption, 'nameLocalizations' | 'descriptionLocalizations'> {
@@ -63,7 +64,7 @@ export type ExtractArgsFromOptions<
         : never
       : never;
   }
-  : {};
+  : Record<PropertyKey, never>;
 
 /** Full ChatInput Command JSON shape */
 export interface ChatInputCommandJSON {
@@ -82,3 +83,8 @@ export type DynamicInjectedHander<V extends ChatInputCommandJSON> = {
     args: T;
   }): Promise<void>;
 };
+
+export type HandlerPassthrough<Z extends ChatInputCommandJSON, T = ChatInputArgs<Z>> = {
+  interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
+  args: T;
+}

@@ -1,25 +1,28 @@
 import { walk } from '@std/fs';
 import { deepMerge } from 'deep-merge';
 import { AsyncInitializable } from '../generic/initializable.ts';
-import type { ChatInputCommandJSON, DynamicInjectedHander } from '../generic/leafs.ts';
+import type { ChatInputCommandJSON, DynamicInjectedHander, Option } from '../generic/leafs.ts';
 import { Optic } from './optic.ts';
 
 /**
  * Dynamic Runtime Loader
  */
-export class DynamicInjectionModule extends AsyncInitializable {
+export class InjectionManager extends AsyncInitializable {
   public schema: Map<string, ChatInputCommandJSON> = new Map();
   public handlers: Map<string, DynamicInjectedHander<ChatInputCommandJSON>> = new Map();
 
   public inject(schema: ChatInputCommandJSON, handler: DynamicInjectedHander<ChatInputCommandJSON>): void {
-    function getOptionPaths(base: string, options?: readonly any[]): string[] {
+    function getOptionPaths(
+      base: string,
+      options?: readonly { name: string; options?: unknown[] }[],
+    ): string[] {
       if (!options) return [];
       const paths: string[] = [];
       for (const option of options) {
         const currentPath = `${base}.${option.name}`;
         paths.push(currentPath);
         if ('options' in option && Array.isArray(option.options)) {
-          paths.push(...getOptionPaths(currentPath, option.options));
+          paths.push(...getOptionPaths(currentPath, option.options as Option[]));
         }
       }
       return paths;
@@ -68,7 +71,6 @@ export class DynamicInjectionModule extends AsyncInitializable {
       const imported = await import(ent.path).catch((e: Error) => e) as {
         default: new () => AsyncInitializable;
       } | Error;
-      console.info(imported);
       if (imported instanceof Error) {
         await Optic.incident({
           moduleId: 'DynamicModuleLoader',
@@ -78,7 +80,6 @@ export class DynamicInjectionModule extends AsyncInitializable {
         });
         continue;
       }
-      Optic.f.info(`Imported Module: ${ent.path}`);
 
       try {
         await (new imported.default()).initialize().catch((e: Error) => {
@@ -100,7 +101,6 @@ export class DynamicInjectionModule extends AsyncInitializable {
         continue;
       }
     }
-    Optic.f.info('Injection of Modules Done.');
 
     // Inject Schemas to Master Registration
     for (
@@ -108,6 +108,8 @@ export class DynamicInjectionModule extends AsyncInitializable {
         ...(await Array.fromAsync(walk(new URL('../state/schema', import.meta.url), opts))),
       ]
     ) {
+      Optic.f.info(`Loading Schema: ${ent.path}`);
+
       const imported = await import(ent.path).catch((e: Error) => e) as {
         default: {
           schema: ChatInputCommandJSON;
@@ -127,6 +129,5 @@ export class DynamicInjectionModule extends AsyncInitializable {
       if (imported.default?.schema?.type === undefined) throw new Deno.errors.InvalidData(`Invalid Schema: ${ent.path} does not have a type defined.`);
       this.inject(imported.default.schema, imported.default.handler);
     }
-    Optic.f.info('Injection of Schema Done.');
   }
 }
