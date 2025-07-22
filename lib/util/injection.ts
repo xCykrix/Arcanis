@@ -1,25 +1,17 @@
 import { walk } from '@std/fs';
-import { deepMerge, type DeepMergeOptions } from 'deep-merge';
+import { deepMerge } from 'deep-merge';
 import { AsyncInitializable } from '../generic/initializable.ts';
 import type { ChatInputCommandJSON, DynamicInjectedHander } from '../generic/leafs.ts';
-
 import { Optic } from './optic.ts';
 
 /**
  * Dynamic Runtime Loader
  */
 export class DynamicInjectionModule extends AsyncInitializable {
-  public static schema: Map<string, ChatInputCommandJSON> = new Map();
-  public static handlers: Map<string, DynamicInjectedHander<ChatInputCommandJSON>> = new Map();
+  public schema: Map<string, ChatInputCommandJSON> = new Map();
+  public handlers: Map<string, DynamicInjectedHander<ChatInputCommandJSON>> = new Map();
 
-  private static options: DeepMergeOptions = {
-    arrayMergeStrategy: 'combine',
-    setMergeStrategy: 'combine',
-    mapMergeStrategy: 'combine',
-  };
-
-  public static inject(schema: ChatInputCommandJSON, handler: DynamicInjectedHander<ChatInputCommandJSON>): void {
-    // Recursively generate all option paths (e.g., conf.set-alert, conf.set-alert.channel)
+  public inject(schema: ChatInputCommandJSON, handler: DynamicInjectedHander<ChatInputCommandJSON>): void {
     function getOptionPaths(base: string, options?: readonly any[]): string[] {
       if (!options) return [];
       const paths: string[] = [];
@@ -42,7 +34,18 @@ export class DynamicInjectionModule extends AsyncInitializable {
       this.schema.set(schema.name, schema);
       return;
     }
-    this.schema.set(schema.name, deepMerge.withOptions<ChatInputCommandJSON>(this.options, this.schema.get(schema.name)!, schema));
+    this.schema.set(
+      schema.name,
+      deepMerge.withOptions<ChatInputCommandJSON>(
+        {
+          arrayMergeStrategy: 'combine',
+          setMergeStrategy: 'combine',
+          mapMergeStrategy: 'combine',
+        },
+        this.schema.get(schema.name)!,
+        schema,
+      ),
+    );
   }
 
   public override async initialize(): Promise<void> {
@@ -52,9 +55,57 @@ export class DynamicInjectionModule extends AsyncInitializable {
         /\/logic\//g,
       ],
     };
+
+    // Load AsyncInitializable Modules in Directories by default export.
     for (
       const ent of [
-        ...(await Array.fromAsync(walk(new URL('../schema', import.meta.url), opts))),
+        ...(await Array.fromAsync(walk(new URL('../state/event', import.meta.url), opts))),
+        ...(await Array.fromAsync(walk(new URL('../state/task', import.meta.url), opts))),
+      ]
+    ) {
+      Optic.f.info(`Loading Module: ${ent.path}`);
+
+      const imported = await import(ent.path).catch((e: Error) => e) as {
+        default: new () => AsyncInitializable;
+      } | Error;
+      console.info(imported);
+      if (imported instanceof Error) {
+        await Optic.incident({
+          moduleId: 'DynamicModuleLoader',
+          message: `Failed to Import Module: ${ent.path}`,
+          err: imported,
+          dispatch: false,
+        });
+        continue;
+      }
+      Optic.f.info(`Imported Module: ${ent.path}`);
+
+      try {
+        await (new imported.default()).initialize().catch((e: Error) => {
+          Optic.incident({
+            moduleId: 'DynamicModuleLoader',
+            message: `Failed to Initialize Module: ${ent.path}`,
+            err: e,
+            dispatch: false,
+          });
+          return;
+        });
+      } catch (e: unknown) {
+        await Optic.incident({
+          moduleId: 'DynamicModuleLoader',
+          message: `Failed to Construct Module: ${ent.path}`,
+          err: e as Error,
+          dispatch: false,
+        });
+        continue;
+      }
+    }
+    Optic.f.info('Injection of Modules Done.');
+
+    // Inject Schemas to Master Registration
+    for (
+      const ent of [
+        ...(await Array.fromAsync(walk(new URL('../state/schema', import.meta.url), opts))),
       ]
     ) {
       const imported = await import(ent.path).catch((e: Error) => e) as {
@@ -66,24 +117,16 @@ export class DynamicInjectionModule extends AsyncInitializable {
       if (imported instanceof Error) {
         await Optic.incident({
           moduleId: 'DynamicModuleLoader',
-          message: `Failed to Import Module: ${ent.path}`,
+          message: `Failed to Import Schema: ${ent.path}`,
           err: imported,
           dispatch: false,
         });
-      } else {
-        if (imported.default?.schema?.type === undefined) throw new Deno.errors.InvalidData(`Invalid Schema: ${ent.path} does not have a type defined.`);
-        DynamicInjectionModule.inject(imported.default.schema, imported.default.handler);
+        continue;
       }
+
+      if (imported.default?.schema?.type === undefined) throw new Deno.errors.InvalidData(`Invalid Schema: ${ent.path} does not have a type defined.`);
+      this.inject(imported.default.schema, imported.default.handler);
     }
+    Optic.f.info('Injection of Schema Done.');
   }
 }
-
-// setTimeout(() => {
-//   new DynamicInjectionModule().initialize().catch((e) => {
-//     console.error('Failed to initialize DynamicInjectionModule:', e);
-//   });
-//   setTimeout(() => {
-//     console.info(`DynamicInjectionModule loaded ${DynamicInjectionModule.schema.size} schemas.`);
-//     // console.info(JSON.stringify(DynamicInjectionModule.schema.values().toArray(), null, 2));
-//   }, 2000);
-// }, 1);

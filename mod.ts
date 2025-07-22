@@ -4,8 +4,8 @@ import { OrbitalSource } from './database/data-source/orbital.ts';
 import { TenantSource } from './database/data-source/tenant.ts';
 import { Orbiter } from './database/entity/orbital/orbiter.entity.ts';
 import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
-import { Defaults } from './lib/defaults.ts';
 import { EventManager } from './lib/manager/event.ts';
+import { DynamicInjectionModule } from './lib/util/injection.ts';
 import { Optic } from './lib/util/optic.ts';
 
 /** Boostrap Class */
@@ -22,6 +22,7 @@ export class Bootstrap {
 
   /** The Event Manager Registration Module. */
   public static event: EventManager;
+  public static dynamicInjection: DynamicInjectionModule;
 
   /** Main Boostrap Entrypoint. */
   private static async sequence(): Promise<void> {
@@ -95,12 +96,13 @@ export class Bootstrap {
     this.bot = createBotWithToken(this.orbiter.token);
     this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
 
-    // Setup Event Manager and Load Default Events
+    // Initialize Event Manager
     this.event = new EventManager(this.bot);
-    await (new Defaults()).initialize();
 
     // Trigger Dynamic Module Loader
-    // await (new DynamicModuleLoader()).initialize();
+    this.dynamicInjection = new DynamicInjectionModule();
+    await this.dynamicInjection.initialize();
+    console.info('Injected');
 
     // Connect to Discord API
     await this.bot.start();

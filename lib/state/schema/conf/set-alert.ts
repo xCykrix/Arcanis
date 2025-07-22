@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ChannelTypes } from '@discordeno';
-import type { ChatInputArgs, ChatInputCommandJSON } from '../../generic/leafs.ts';
+import type { ChatInputArgs, ChatInputCommandJSON } from '../../../generic/leafs.ts';
 
 export const schema = {
   name: 'conf',

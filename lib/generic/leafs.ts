@@ -1,7 +1,7 @@
 import type { ApplicationCommandOption, ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discordeno';
 
 /** Base Shape for any Option */
-interface BaseOption<T extends ApplicationCommandOptionTypes> extends Omit<ApplicationCommandOption, 'nameLocalizations' | 'descriptionLocalizations'> {
+export interface BaseOption<T extends ApplicationCommandOptionTypes> extends Omit<ApplicationCommandOption, 'nameLocalizations' | 'descriptionLocalizations'> {
   type: T;
 }
 
