@@ -42,9 +42,6 @@ const handler: DynamicInjectedHandler<typeof schema> = {
     await interaction.respond({ content: 'pong!' });
   },
 };
-// async function handler({ interaction, args }: HandlerPassthrough<typeof schema>): Promise<void> {
-//   // console.info(args?.eval?.code);
-// }
 
 export default {
   schema,

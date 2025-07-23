@@ -187,7 +187,8 @@ export default class extends AsyncInitializable {
         // Run Handler
         await handler.callback({
           interaction,
-          args,
+          // deno-lint-ignore no-explicit-any
+          args: args as any,
         });
       }
     });

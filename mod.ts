@@ -96,10 +96,12 @@ export class Bootstrap {
     Plane.event = new EventManager(this.bot);
 
     // Trigger Dynamic Module Loader
-    Plane.injection.initialize();
+    await Plane.injection.initialize();
 
     // Connect to Discord API
-    await this.bot.start();
+    setTimeout(async () => {
+      await this.bot.start();
+    }, 5000);
   }
 }
 
