@@ -2,7 +2,7 @@ import { ApplicationCommandOptionTypes, ApplicationCommandTypes } from '@discord
 import { walk } from '@std/fs';
 import { deepMerge } from 'deep-merge';
 import { AsyncInitializable } from '../generic/initializable.ts';
-import type { ChatInputCommandJSON, DynamicInjectedHander, HandlerOptions } from '../generic/leafs.ts';
+import type { ChatInputCommandJSON, DynamicInjectedHandler, HandlerOptions } from '../generic/leafs.ts';
 import { Optic } from './optic.ts';
 
 /**
@@ -11,9 +11,9 @@ import { Optic } from './optic.ts';
 export class InjectionManager extends AsyncInitializable {
   public schema: Map<string, ChatInputCommandJSON> = new Map();
   public options: Map<string, HandlerOptions> = new Map();
-  public handlers: Map<string, DynamicInjectedHander<ChatInputCommandJSON>> = new Map();
+  public handlers: Map<string, DynamicInjectedHandler<ChatInputCommandJSON>> = new Map();
 
-  public inject(schema: ChatInputCommandJSON, options: HandlerOptions, handler: DynamicInjectedHander<ChatInputCommandJSON>): void {
+  public inject(schema: ChatInputCommandJSON, options: HandlerOptions, handler: DynamicInjectedHandler<ChatInputCommandJSON>): void {
     function getOptionPaths(
       base: string,
       options?: readonly { name: string; type?: number; options?: unknown[] }[],
@@ -124,7 +124,7 @@ export class InjectionManager extends AsyncInitializable {
         default: {
           schema: ChatInputCommandJSON;
           options: HandlerOptions;
-          handler: DynamicInjectedHander<ChatInputCommandJSON>;
+          handler: DynamicInjectedHandler<ChatInputCommandJSON>;
         };
       } | Error;
       if (imported instanceof Error) {

@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ChannelTypes } from '@discordeno';
-import type { ChatInputArgs, ChatInputCommandJSON, HandlerOptions, HandlerPassthrough } from '../../../generic/leafs.ts';
+import type { ChatInputArgs, ChatInputCommandJSON, DynamicInjectedHandler, HandlerOptions, HandlerPassthrough } from '../../../generic/leafs.ts';
 
 /** */
 export const schema = {
@@ -37,9 +37,14 @@ export const options: HandlerOptions = {
 };
 
 /** */
-async function handler({ interaction, args }: HandlerPassthrough<typeof schema>): Promise<void> {
-  // console.info(args?.eval?.code);
-}
+const handler: DynamicInjectedHandler<typeof schema> = {
+  callback: async ({ interaction, args }: HandlerPassthrough<typeof schema>): Promise<void> => {
+    await interaction.respond({ content: 'pong!' });
+  },
+};
+// async function handler({ interaction, args }: HandlerPassthrough<typeof schema>): Promise<void> {
+//   // console.info(args?.eval?.code);
+// }
 
 export default {
   schema,

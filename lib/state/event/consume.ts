@@ -32,7 +32,6 @@ export default class extends AsyncInitializable {
 
   // deno-lint-ignore require-await
   public override async initialize(): Promise<void> {
-    // deno-lint-ignore require-await
     Plane.event.add('interactionCreate', async (interaction) => {
       // Validate State
       if (interaction.type !== InteractionTypes.ApplicationCommand) return;
@@ -115,7 +114,12 @@ export default class extends AsyncInitializable {
             embeds: [{
               title: 'Insufficient Permissions',
               description: 'You do not have the required permissions to use this interaction in the guild.',
-              
+              fields: [
+                {
+                  name: 'Required Guild Permissions',
+                  value: options.userRequiredGuildPermissions.map((perm) => `\`${perm}\``).join(', ') || 'None',
+                },
+              ],
             }],
           }, {
             isPrivate: true,
@@ -125,15 +129,66 @@ export default class extends AsyncInitializable {
 
         // User Channel Permissions
         if (options.userRequiredChannelPermissions.length > 0 && !Permissions.hasChannelPermissions(guild, interaction.channelId!, interaction.member, options.userRequiredChannelPermissions)) {
+          await interaction.respond({
+            embeds: [{
+              title: 'Insufficient Channel Permissions',
+              description: 'You do not have the required permissions to use this interaction in the channel.',
+              fields: [
+                {
+                  name: 'Required Channel Permissions',
+                  value: options.userRequiredChannelPermissions.map((perm) => `\`${perm}\``).join(', ') || 'None',
+                },
+              ],
+            }],
+          }, {
+            isPrivate: true,
+          });
+          return;
         }
 
         // Bot Guild Permissions
         if (options.botRequiredGuildPermissions.length > 0 && !Permissions.hasGuildPermissions(guild, member, options.botRequiredGuildPermissions)) {
+          await interaction.respond({
+            embeds: [{
+              title: 'Bot Insufficient Permissions',
+              description: 'The bot does not have the required permissions to use this interaction in the guild.',
+              fields: [
+                {
+                  name: 'Required Guild Permissions',
+                  value: options.botRequiredGuildPermissions.map((perm) => `\`${perm}\``).join(', ') || 'None',
+                },
+              ],
+            }],
+          }, {
+            isPrivate: true,
+          });
+          return;
         }
 
         // Bot Channel Permissions
         if (options.botRequiredChannelPermissions.length > 0 && !Permissions.hasChannelPermissions(guild, interaction.channelId!, member, options.botRequiredChannelPermissions)) {
+          await interaction.respond({
+            embeds: [{
+              title: 'Bot Insufficient Channel Permissions',
+              description: 'The bot does not have the required permissions to use this interaction in the channel.',
+              fields: [
+                {
+                  name: 'Required Channel Permissions',
+                  value: options.botRequiredChannelPermissions.map((perm) => `\`${perm}\``).join(', ') || 'None',
+                },
+              ],
+            }],
+          }, {
+            isPrivate: true,
+          });
+          return;
         }
+
+        // Run Handler
+        await handler.callback({
+          interaction,
+          args,
+        });
       }
     });
   }

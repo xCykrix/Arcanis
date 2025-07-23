@@ -78,8 +78,9 @@ export interface ChatInputCommandJSON {
 export type ChatInputArgs<C extends ChatInputCommandJSON> = ExtractArgsFromOptions<C['options']>;
 
 /** Dynamic handler type for processing. */
-export type DynamicInjectedHander<V extends ChatInputCommandJSON> = {
+export type DynamicInjectedHandler<V extends ChatInputCommandJSON> = {
   callback<T extends ChatInputArgs<V>>(passthrough: {
+    interaction: typeof Bootstrap.bot.transformers.$inferredTypes.interaction;
     args: T;
   }): Promise<void>;
 };
