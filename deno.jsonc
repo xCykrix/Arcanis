@@ -1,21 +1,20 @@
 {
   "name": "@arcanis/arcanis",
-  "version": "0.0.1",
+  "version": "1.0.0",
   // Imports
   "imports": {
     // Core Library
     "@discordeno": "npm:@discordeno/bot@next",
     "@discordeno-cache": "npm:dd-cache-proxy@latest",
-    // Critical Dependencies
-    "typeorm": "npm:typeorm",
-    "reflect-metadata": "npm:reflect-metadata",
+    "@types/node": "npm:@types/node@^24.1.0",
+    // Database
+    "kysely": "npm:kysely@latest",
     "mysql2": "npm:mysql2",
+    // Libraries
+    "@optic": "jsr:@onjara/optic@2.0.3",
     "deep-merge": "jsr:@cross/deepmerge",
     // Standard
     "@std": "jsr:@std",
-    // Libraries
-    "@optic": "jsr:@onjara/optic@2.0.3",
-    "@discord-emoji": "jsr:@amethyst/discord-emoji",
   },
   "exports": {},
   "nodeModulesDir": "none",
@@ -47,8 +46,6 @@
     "strictPropertyInitialization": true,
     "strictNullChecks": true,
     "useUnknownInCatchVariables": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
   },
   // Linting Options
   "lint": {

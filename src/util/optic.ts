@@ -1,9 +1,7 @@
-import { EmbedsBuilder } from '@discordeno';
 import { ConsoleStream } from '@optic/consoleStream';
 import { every, FileStream, of } from '@optic/fileStream';
 import { JsonFormatter, TokenReplacer } from '@optic/formatters';
 import { Level, Logger } from '@optic/logger';
-import { Bootstrap } from '../../mod.ts';
 
 /** Console Streaming */
 const consoleStream = new ConsoleStream()
@@ -74,20 +72,20 @@ export class Optic {
     //   return;
     // }
 
-    if (chunk.dispatch !== false) {
-      Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {
-        threadId: Deno.env.get('ALERT_THREAD_ID')!,
-        embeds: new EmbedsBuilder()
-          .setTitle('Incident Report')
-          .addField('Application', `${Bootstrap.bot.applicationId.toString()}`)
-          .addField('Module', chunk.moduleId)
-          .addField('ID', incidentId, true)
-          .addField('Message', chunk.message)
-          .addField('Error', chunk.err?.message ?? 'Refer to Service Log'),
-      }).catch((e: Error) => {
-        this.f.warn(`Failed to dispatch createIncidentEvent Webhook.\n`, e);
-      });
-    }
+    // if (chunk.dispatch !== false) {
+    //   Bootstrap.bot.helpers.executeWebhook(Deno.env.get('ALERT_WEBHOOK_ID')!, Deno.env.get('ALERT_WEBHOOK_TOKEN')!, {
+    //     threadId: Deno.env.get('ALERT_THREAD_ID')!,
+    //     embeds: new EmbedsBuilder()
+    //       .setTitle('Incident Report')
+    //       .addField('Application', `${Bootstrap.bot.applicationId.toString()}`)
+    //       .addField('Module', chunk.moduleId)
+    //       .addField('ID', incidentId, true)
+    //       .addField('Message', chunk.message)
+    //       .addField('Error', chunk.err?.message ?? 'Refer to Service Log'),
+    //   }).catch((e: Error) => {
+    //     this.f.warn(`Failed to dispatch createIncidentEvent Webhook.\n`, e);
+    //   });
+    // }
   }
 
   public static interceptAsync(id: string, callback: (...args: unknown[]) => Promise<void> | void, ...args: unknown[]): void {

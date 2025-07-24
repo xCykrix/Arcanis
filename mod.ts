@@ -1,114 +1,47 @@
-import 'reflect-metadata';
-import type { DataSource } from 'typeorm';
-import { OrbitalSource } from './database/data-source/orbital.ts';
-import { TenantSource } from './database/data-source/tenant.ts';
-import { Orbiter } from './database/entity/orbital/orbiter.entity.ts';
-import { type CacheBotType, createBotWithToken } from './lib/bot.ts';
-import { EventManager } from './lib/manager/event.ts';
-import { Plane } from './lib/plane.ts';
-import { Optic } from './lib/util/optic.ts';
+import { Migrator } from 'kysely';
+import { orbit } from './src/database/database.ts';
+import { Optic } from './src/util/optic.ts';
 
-/** Boostrap Class */
-export class Bootstrap {
-  /** The Internal Database Connections. */
-  public static orbital: DataSource | null;
-  public static tenant: DataSource | null;
+import { DenoMigrationProvider } from './src/database/util/provider.ts';
 
-  /** The Internal Stateful Controls. */
-  public static orbiter: Orbiter | null;
-
-  /** The Internal CacheBot Application. */
-  public static bot: CacheBotType;
-
-  /** Main Boostrap Entrypoint. */
-  private static async sequence(): Promise<void> {
-    // Connect to Global Orbit Table
-    this.orbital = await OrbitalSource.initialize().catch((e) => {
-      Optic.incident({
-        moduleId: 'Boostrap.startup.sequence',
-        message: 'Failed to connect to Orbital Database. Please check your environment variables. Manual intervention is required.',
-        err: e,
-        dispatch: false,
-      });
-      return null;
-    });
-    if (this.orbital === null) return;
-
-    // Migrate Orbital Database
-    await OrbitalSource.runMigrations({
-      transaction: 'each',
-    }).catch((e) => {
-      Optic.incident({
-        moduleId: 'Boostrap.startup.sequence',
-        message: 'Failed to run migrations on Orbital Database. Manual intervention is required. Critical Outage.',
-        err: e,
-        dispatch: false,
-      });
-      return;
-    });
-
-    // Fetch the Orbiter from the Orbital Database
-    this.orbiter = await Orbiter.findOneBy({
-      applicationId: Deno.env.get('APPLICATION_ID') ?? 'UNCONFIGURED',
-    });
-
-    // Check Orbiter Exists
-    if (this.orbiter === null) {
-      Optic.incident({
-        moduleId: 'Boostrap.startup.sequence',
-        message: 'Orbiter does not exist. Please create and configure this tenant in ORBIT_1. Manual intervention is required.',
-        dispatch: false,
-      });
-      return;
-    }
-    Optic.f.info(`Bootstrapping Orbital with Application ID: ${this.orbiter.applicationId} / ${this.orbiter.publicKey}`);
-
-    // Connect to Tenant Database
-    this.tenant = await TenantSource.initialize().catch((e) => {
-      Optic.incident({
-        moduleId: 'Boostrap.startup.sequence',
-        message: 'Failed to connect to Tenant Database. Please check your environment variables. Manual intervention is required.',
-        err: e,
-        dispatch: false,
-      });
-      return null;
-    });
-    if (this.tenant === null) return;
-
-    // Migrate Tenant Database
-    await TenantSource.runMigrations({
-      transaction: 'each',
-    }).catch((e) => {
-      Optic.incident({
-        moduleId: 'Boostrap.startup.sequence',
-        message: 'Failed to run migrations on Tenant Database. Manual intervention is required. Critical Outage.',
-        err: e,
-        dispatch: false,
-      });
-      return;
-    });
-
-    // Initialize CacheBot Application
-    this.bot = createBotWithToken(this.orbiter.token);
-    this.bot.logger = Optic.f as Pick<typeof Bootstrap.bot.logger, 'debug' | 'info' | 'warn' | 'error' | 'fatal'>;
-
-    // Initialize Event Manager
-    Plane.event = new EventManager(this.bot);
-
-    // Trigger Dynamic Module Loader
-    await Plane.injection.initialize();
-
-    // Connect to Discord API
-    setTimeout(async () => {
-      await this.bot.start();
-    }, 5000);
-  }
-}
-
-// Initialize Application on Primary Entrypoint Interaction.
-if (import.meta.main) {
-  await Bootstrap['sequence']().catch((e) => {
-    console.error('Failed to initialize Internal Connection(s):', e);
-    Deno.exit(1);
+async function mod(): Promise<void> {
+  // Perform Application Migrations
+  const migratorForOrbit = new Migrator({
+    db: orbit,
+    provider: new DenoMigrationProvider({
+      migrationFolder: new URL('./src/database/migration/orbit', import.meta.url).pathname,
+    }),
   });
+
+  // Perform Migration to Latest for Orbit
+  Optic.f.info('Starting Migration', new URL('./src/database/migration/orbit', import.meta.url).pathname);
+  // TODO: Remove after development. This is for development only to rollback database preparation.
+  await migratorForOrbit.migrateDown();
+  await migratorForOrbit.migrateDown();
+  await migratorForOrbit.migrateDown();
+  const migratorForOrbitResultSet = await migratorForOrbit.migrateToLatest();
+  Optic.f.info('Migration Result - Counted:', (migratorForOrbitResultSet.results ?? []).length);
+
+  // Check Migrations
+  for (const migration of migratorForOrbitResultSet.results ?? []) {
+    Optic.f.info('Result: ', migration);
+    if (migration.status === 'Error') {
+      await Optic.incident({
+        moduleId: 'mod.ts#mod()',
+        message: 'Failed to handle Orbit Migration. Immediate attention required.',
+      });
+      Optic.f.error('Migration Critical Errors', migratorForOrbitResultSet.error);
+    }
+  }
+
+  // Application logic goes here
 }
+
+// Initialize the Application
+await mod().catch((e) => {
+  Optic.incident({
+    moduleId: 'mod.ts#mod()',
+    message: 'Failed to handle Bootstrap mod() request.',
+    err: e,
+  });
+});
